@@ -6,6 +6,7 @@
 <title>Ders Takip</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
 :root{
   --bg:#080c14;--s1:#0d1420;--s2:#111927;--bd:#1c2a3a;--bd2:#243347;
@@ -29,12 +30,11 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 [data-theme="light"] body::before{
   background:radial-gradient(ellipse 80% 50% at 20% -10%,rgba(0,158,122,.05),transparent),
              radial-gradient(ellipse 60% 40% at 80% 110%,rgba(42,120,240,.04),transparent)}
-
 .wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 16px 64px}
 
 /* HEADER */
-.header{display:flex;align-items:center;gap:10px;padding:20px 0 0;flex-wrap:wrap;border-bottom:1px solid var(--bd);margin-bottom:28px;padding-bottom:16px}
-.logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--t1);display:flex;align-items:center;gap:8px;white-space:nowrap;text-decoration:none}
+.header{display:flex;align-items:center;gap:10px;padding:20px 0 16px;flex-wrap:wrap;border-bottom:1px solid var(--bd);margin-bottom:28px}
+.logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--t1);display:flex;align-items:center;gap:8px;white-space:nowrap}
 .logo span{color:var(--gr)}
 .logo-dot{width:7px;height:7px;border-radius:50%;background:var(--gr);animation:pulse 2s infinite}
 .nav{display:flex;gap:2px;flex:1;overflow-x:auto;scrollbar-width:none}
@@ -49,7 +49,6 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:none}}
 
-/* PAGE */
 .page{animation:fadeIn .3s ease}
 .hidden{display:none!important}
 
@@ -59,13 +58,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .stat-card{background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:20px;box-shadow:var(--sh)}
 .stat-label{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
 .stat-val{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;color:var(--t1);line-height:1}
-.stat-val.green{color:var(--gr)}
-.stat-val.red{color:var(--re)}
-.stat-val.yellow{color:var(--ye)}
-.stat-val.blue{color:var(--bl)}
+.stat-val.green{color:var(--gr)}.stat-val.red{color:var(--re)}.stat-val.yellow{color:var(--ye)}.stat-val.blue{color:var(--bl)}
 .stat-sub{font-size:11px;color:var(--t3);margin-top:6px}
-
-/* SECTION HEADER */
 .sec-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
 .sec-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;flex:1}
 .badge{display:inline-flex;align-items:center;justify-content:center;background:var(--s2);border:1px solid var(--bd);border-radius:99px;padding:2px 10px;font-size:11px;font-weight:700;color:var(--t3);font-family:'DM Mono',monospace}
@@ -99,12 +93,14 @@ tr:hover td{background:rgba(255,255,255,.015)}
 [data-theme="light"] tr:hover td{background:rgba(0,0,0,.02)}
 td.mono{font-family:'DM Mono',monospace;font-size:13px;color:var(--t1)}
 td.name{color:var(--t1);font-weight:600}
+td.note-cell{font-size:12px;color:var(--t3);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .empty-row td{text-align:center;padding:40px;color:var(--t3);font-size:13px}
 
-/* FORM INPUTS */
+/* FORM */
 .inp{width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--bd2);border-radius:11px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
 .inp:focus{border-color:var(--gr)}
 .inp::placeholder{color:var(--t3)}
+textarea.inp{resize:vertical;min-height:60px;line-height:1.5}
 select.inp option{background:var(--s1);color:var(--t1)}
 .field{margin-bottom:14px}
 .field-label{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;display:block}
@@ -112,15 +108,18 @@ select.inp option{background:var(--s1);color:var(--t1)}
 .inp-hint{font-size:11px;color:var(--t3);margin-top:4px}
 
 /* FILTER BAR */
-.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
 .filter-bar .inp{width:auto;flex:1;min-width:120px;padding:9px 13px;font-size:13px}
 .filter-btn{padding:8px 14px;border-radius:10px;border:1px solid var(--bd2);background:var(--s2);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
 .filter-btn.active{background:rgba(0,229,176,.1);border-color:rgba(0,229,176,.3);color:var(--gr)}
+.reset-btn{padding:7px 12px;border-radius:10px;border:1px solid var(--bd2);background:none;color:var(--t3);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.reset-btn:hover{color:var(--re);border-color:rgba(255,71,87,.3)}
 
 /* MODAL */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn .2s ease}
-.modal{background:var(--s1);border:1px solid var(--bd);border-radius:20px;padding:28px;width:100%;max-width:460px;box-shadow:0 32px 80px rgba(0,0,0,.5);animation:scaleIn .2s ease}
-.modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between}
+.modal{background:var(--s1);border:1px solid var(--bd);border-radius:20px;padding:28px;width:100%;max-width:480px;box-shadow:0 32px 80px rgba(0,0,0,.5);animation:scaleIn .2s ease;max-height:90vh;overflow-y:auto}
+.modal-wide{max-width:680px}
+.modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--s1);padding-bottom:12px;border-bottom:1px solid var(--bd);margin-top:-4px}
 .modal-close{background:none;border:none;cursor:pointer;font-size:18px;color:var(--t3);transition:color .2s;padding:2px 6px}
 .modal-close:hover{color:var(--t1)}
 .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
@@ -138,11 +137,10 @@ select.inp option{background:var(--s1);color:var(--t1)}
 .student-card-actions{display:flex;gap:6px;margin-top:12px;justify-content:flex-end}
 
 /* SEARCH */
-.search-wrap{margin-bottom:16px}
+.search-wrap{margin-bottom:16px;position:relative}
 .search-inp{width:100%;padding:11px 14px 11px 40px;background:var(--s1);border:1px solid var(--bd);border-radius:12px;color:var(--t1);font-size:14px;outline:none;transition:border-color .2s}
 .search-inp:focus{border-color:var(--gr)}
 .search-inp::placeholder{color:var(--t3)}
-.search-wrap{position:relative}
 .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:14px;pointer-events:none}
 
 /* REPORT */
@@ -151,7 +149,7 @@ select.inp option{background:var(--s1);color:var(--t1)}
 .chart-title{font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px}
 .bar-chart{display:flex;align-items:flex-end;gap:8px;height:120px}
 .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%}
-.bar{width:100%;border-radius:6px 6px 0 0;background:linear-gradient(180deg,var(--gr),var(--gr2));min-height:4px;transition:height .5s ease;position:relative}
+.bar{width:100%;border-radius:6px 6px 0 0;background:linear-gradient(180deg,var(--gr),var(--gr2));min-height:4px;transition:height .5s ease}
 .bar-label{font-size:9px;color:var(--t3);white-space:nowrap;text-align:center}
 .bar-val{font-size:9px;font-family:'DM Mono',monospace;color:var(--gr);white-space:nowrap}
 
@@ -162,7 +160,26 @@ select.inp option{background:var(--s1);color:var(--t1)}
 .recent-info{flex:1;min-width:0}
 .recent-name{font-size:13px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .recent-date{font-size:11px;color:var(--t3);margin-top:1px}
-.recent-amount{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--t1)}
+.recent-amount{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--t1);flex-shrink:0}
+
+/* EXPORT RECEIPT */
+.receipt{background:#fff;color:#111;border-radius:12px;padding:28px;font-family:'DM Sans',Arial,sans-serif;min-width:480px}
+.receipt-header{border-bottom:2px solid #00b88c;padding-bottom:16px;margin-bottom:20px}
+.receipt-logo{font-size:20px;font-weight:800;color:#00b88c;margin-bottom:4px;letter-spacing:-0.5px}
+.receipt-title{font-size:14px;color:#555;margin-bottom:2px}
+.receipt-student{font-size:22px;font-weight:700;color:#111;margin:8px 0 2px}
+.receipt-date{font-size:12px;color:#888}
+.receipt table{width:100%;border-collapse:collapse;margin-bottom:20px}
+.receipt th{padding:8px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#777;border-bottom:1px solid #e0e0e0}
+.receipt td{padding:8px 10px;font-size:13px;color:#333;border-bottom:1px solid #f0f0f0}
+.receipt tr:last-child td{border-bottom:none}
+.receipt .paid-yes{color:#00a882;font-weight:600;font-size:11px}
+.receipt .paid-no{color:#d42f3f;font-weight:600;font-size:11px}
+.receipt-totals{background:#f8f8f8;border-radius:10px;padding:16px;margin-top:4px}
+.receipt-total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:13px;color:#444}
+.receipt-total-row:last-child{margin-bottom:0;font-weight:700;font-size:15px;color:#111;padding-top:8px;border-top:1px solid #ddd;margin-top:6px}
+.receipt-footer{margin-top:20px;font-size:11px;color:#aaa;text-align:center;border-top:1px solid #f0f0f0;padding-top:12px}
+.export-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
 
 /* TOAST */
 .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--s2);border:1px solid var(--bd2);border-radius:12px;padding:10px 20px;font-size:13px;font-weight:500;opacity:0;transition:all .25s;z-index:999;pointer-events:none;white-space:nowrap}
@@ -180,9 +197,9 @@ select.inp option{background:var(--s1);color:var(--t1)}
   .stat-grid{grid-template-columns:1fr 1fr}
   .report-grid{grid-template-columns:1fr}
   .field-row{grid-template-columns:1fr}
+  .receipt{min-width:0}
 }
 @media(max-width:420px){
-  .stat-grid{grid-template-columns:1fr 1fr}
   .stat-val{font-size:20px}
 }
 </style>
@@ -190,9 +207,9 @@ select.inp option{background:var(--s1);color:var(--t1)}
 <body>
 <div id="toast" class="toast"></div>
 
-<!-- MODAL -->
+<!-- MODAL (form + export) -->
 <div id="modalBg" class="modal-bg hidden" onclick="closeModal(event)">
-  <div class="modal" onclick="event.stopPropagation()">
+  <div class="modal" id="modalBox" onclick="event.stopPropagation()">
     <div class="modal-title">
       <span id="modalTitle">Form</span>
       <button class="modal-close" onclick="closeModal()">✕</button>
@@ -202,7 +219,6 @@ select.inp option{background:var(--s1);color:var(--t1)}
 </div>
 
 <div class="wrap">
-  <!-- HEADER -->
   <header class="header">
     <div class="logo">
       <div class="logo-dot"></div>
@@ -217,7 +233,6 @@ select.inp option{background:var(--s1);color:var(--t1)}
     <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
   </header>
 
-  <!-- PAGE CONTENT -->
   <div id="pageContent">
     <div class="loading"><div class="spin"></div> Yükleniyor...</div>
   </div>
@@ -228,22 +243,22 @@ const SB_URL="https://bqvlgodtfbeqtvxmvtdp.supabase.co";
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxdmxnb2R0ZmJlcXR2eG12dGRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNjcsImV4cCI6MjA5NTM0NzI2N30.BJ_A8bEyqgRA3xdN7GPtx3wMnJPwn0kVWKWdbXYDOFo";
 const sb=supabase.createClient(SB_URL,SB_KEY);
 
-let students=[], sessions=[], currentPage='dashboard';
+let students=[],sessions=[],currentPage='dashboard';
 let sessionFilters={student_id:'',paid:'',month:thisMonth()};
 
-/* ---- UTILS ---- */
+/* UTILS */
 function $(id){return document.getElementById(id);}
 function esc(s){var d=document.createElement('div');d.textContent=String(s||'');return d.innerHTML;}
 function thisMonth(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 function fmt(n){return Number(n||0).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})+' ₺';}
-function fmtShort(n){var v=Number(n||0);if(v>=1000)return (v/1000).toLocaleString('tr-TR',{maximumFractionDigits:1})+'K ₺';return v.toLocaleString('tr-TR',{maximumFractionDigits:0})+' ₺';}
+function fmtShort(n){var v=Number(n||0);if(v>=1000)return(v/1000).toLocaleString('tr-TR',{maximumFractionDigits:1})+'K ₺';return v.toLocaleString('tr-TR',{maximumFractionDigits:0})+' ₺';}
 function fmtDur(n){var h=Math.floor(n),m=Math.round((n-h)*60);return m?h+'sa '+m+'dk':h+' sa';}
-function fmtDate(s){if(!s)return'';var [y,m,d]=s.split('-');return d+'.'+m+'.'+y;}
-function monthLabel(ym){var [y,m]=ym.split('-');var months=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];return months[parseInt(m)-1]+' '+y.slice(2);}
+function fmtDate(s){if(!s)return'';var[y,mo,d]=s.split('-');return d+'.'+mo+'.'+y;}
+function monthLabel(ym){var[y,m]=ym.split('-');return['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'][parseInt(m)-1]+' '+y.slice(2);}
 function studentName(id){var s=students.find(x=>x.id===id);return s?s.name:'?';}
 function toast(msg,type){var t=$('toast');t.textContent=msg;t.className='toast on '+(type||'');setTimeout(()=>{t.className='toast';},2800);}
 
-/* ---- THEME ---- */
+/* THEME */
 function toggleTheme(){
   var l=document.documentElement.getAttribute('data-theme')==='light';
   l?document.documentElement.removeAttribute('data-theme'):document.documentElement.setAttribute('data-theme','light');
@@ -256,180 +271,144 @@ function updateThemeBtn(){
   b.textContent=dark?'🌙':'☀️';b.title=dark?'Açık temaya geç':'Koyu temaya geç';
 }
 
-/* ---- DATA ---- */
+/* DATA */
 async function loadStudents(){
-  var {data,error}=await sb.from('students').select('*').order('name');
-  if(error){toast('Öğrenciler yüklenemedi: '+error.message,'error');return;}
+  var{data,error}=await sb.from('students').select('*').order('name');
+  if(error){toast('Öğrenciler yüklenemedi','error');return;}
   students=data||[];
 }
-
 async function loadSessions(){
   var q=sb.from('sessions').select('*').order('date',{ascending:false});
-  if(sessionFilters.student_id) q=q.eq('student_id',sessionFilters.student_id);
-  if(sessionFilters.paid!=='') q=q.eq('paid',sessionFilters.paid==='true');
+  if(sessionFilters.student_id)q=q.eq('student_id',sessionFilters.student_id);
+  if(sessionFilters.paid!=='')q=q.eq('paid',sessionFilters.paid==='true');
   if(sessionFilters.month){
-    var [y,m]=sessionFilters.month.split('-');
-    var next=parseInt(m)+1;
-    var nextY=y,nextM=String(next>12?1:next).padStart(2,'0');
-    if(next>12)nextY=String(parseInt(y)+1);
-    q=q.gte('date',y+'-'+m+'-01').lt('date',nextY+'-'+nextM+'-01');
+    var[y,m]=sessionFilters.month.split('-');
+    var nx=parseInt(m)+1,nxY=y,nxM=String(nx>12?1:nx).padStart(2,'0');
+    if(nx>12)nxY=String(parseInt(y)+1);
+    q=q.gte('date',y+'-'+m+'-01').lt('date',nxY+'-'+nxM+'-01');
   }
-  var {data,error}=await q;
-  if(error){toast('Dersler yüklenemedi: '+error.message,'error');return;}
+  var{data,error}=await q;
+  if(error){toast('Dersler yüklenemedi','error');return;}
   sessions=data||[];
 }
+async function loadAll(){await Promise.all([loadStudents(),loadSessions()]);}
 
-async function loadAll(){
-  await Promise.all([loadStudents(),loadSessions()]);
-}
-
-/* ---- NAVIGATION ---- */
+/* NAV */
 function setPage(page){
   currentPage=page;
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
   renderPage();
 }
-
 async function renderPage(){
   var pc=$('pageContent');
   pc.innerHTML='<div class="loading"><div class="spin"></div> Yükleniyor...</div>';
   await loadAll();
   switch(currentPage){
-    case 'dashboard': pc.innerHTML=renderDashboard();break;
-    case 'students':  pc.innerHTML=renderStudents();break;
-    case 'sessions':  pc.innerHTML=renderSessions();break;
-    case 'reports':   pc.innerHTML=renderReports();break;
+    case 'dashboard':pc.innerHTML=renderDashboard();break;
+    case 'students': pc.innerHTML=renderStudents();break;
+    case 'sessions': pc.innerHTML=renderSessions();break;
+    case 'reports':  pc.innerHTML=renderReports();break;
   }
 }
 
-/* ---- DASHBOARD ---- */
+/* DASHBOARD */
 function renderDashboard(){
-  // Stats
-  var allSessions=sessions; // already filtered by month
-  var totalEarned=allSessions.reduce((s,x)=>s+Number(x.amount||0),0);
-  var unpaid=sessions.filter(x=>!x.paid);
-  // For unpaid total, ignore month filter
-  var totalUnpaid=0,totalUnpaidCount=0;
-  // We loaded sessions with month filter, so recalc from unfiltered – we'll use a separate note
-  var unpaidInMonth=unpaid.reduce((s,x)=>s+Number(x.amount||0),0);
-
+  var total=sessions.reduce((s,x)=>s+Number(x.amount||0),0);
+  var unpaidList=sessions.filter(x=>!x.paid);
+  var unpaid=unpaidList.reduce((s,x)=>s+Number(x.amount||0),0);
   var html='<div class="page">';
-
-  // Stat cards
   html+='<div class="stat-grid">';
   html+=statCard('Öğrenci','👤',students.length,'kişi','blue');
-  html+=statCard('Bu Ay Gelir','💰',fmtShort(totalEarned),allSessions.length+' ders','green');
-  html+=statCard('Ödenmedi','⚠️',fmtShort(unpaidInMonth),unpaid.length+' ders bekliyor','red');
-  html+=statCard('Bu Ay Ders','📅',allSessions.length,'toplam '+fmtDur(allSessions.reduce((s,x)=>s+Number(x.duration||0),0)),'yellow');
+  html+=statCard('Bu Ay Gelir','💰',fmtShort(total),sessions.length+' ders','green');
+  html+=statCard('Bu Ay Ödenmedi','⚠️',fmtShort(unpaid),unpaidList.length+' ders bekliyor','red');
+  html+=statCard('Bu Ay Ders','📅',sessions.length,'toplam '+fmtDur(sessions.reduce((s,x)=>s+Number(x.duration||0),0)),'yellow');
   html+='</div>';
-
-  // Recent sessions
   html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
-
-  // Last 5 sessions
-  html+='<div class="card">';
-  html+='<div class="sec-header"><span class="sec-title">Son Dersler</span>';
+  // Son dersler
+  html+='<div class="card"><div class="sec-header"><span class="sec-title">Son Dersler</span>';
   html+='<button class="btn btn-primary btn-sm" onclick="openAddSession()">+ Ders Ekle</button></div>';
   var recent=sessions.slice(0,5);
   if(!recent.length){html+='<div style="text-align:center;padding:24px;color:var(--t3);font-size:13px">Henüz ders yok</div>';}
   else{
     html+='<div class="recent-list">';
     recent.forEach(s=>{
-      html+='<div class="recent-item">';
-      html+='<span class="recent-icon">'+(s.paid?'✅':'⏳')+'</span>';
+      html+='<div class="recent-item"><span class="recent-icon">'+(s.paid?'✅':'⏳')+'</span>';
       html+='<div class="recent-info"><div class="recent-name">'+esc(studentName(s.student_id))+'</div>';
-      html+='<div class="recent-date">'+fmtDate(s.date)+' · '+fmtDur(s.duration)+'</div></div>';
-      html+='<span class="recent-amount">'+fmt(s.amount)+'</span>';
-      html+='</div>';
+      html+='<div class="recent-date">'+fmtDate(s.date)+' · '+fmtDur(s.duration)+(s.notes?' · '+esc(s.notes.slice(0,30)):'')+'</div></div>';
+      html+='<span class="recent-amount">'+fmt(s.amount)+'</span></div>';
     });
     html+='</div>';
   }
   html+='</div>';
-
-  // Students unpaid
-  html+='<div class="card">';
-  html+='<div class="sec-header"><span class="sec-title">Öğrenciler</span>';
+  // Öğrenciler
+  html+='<div class="card"><div class="sec-header"><span class="sec-title">Öğrenciler</span>';
   html+='<button class="btn btn-primary btn-sm" onclick="openAddStudent()">+ Ekle</button></div>';
   if(!students.length){html+='<div style="text-align:center;padding:24px;color:var(--t3);font-size:13px">Henüz öğrenci yok</div>';}
   else{
     html+='<div class="recent-list">';
     students.forEach(st=>{
-      var stSessions=sessions.filter(s=>s.student_id===st.id);
-      var stUnpaid=stSessions.filter(s=>!s.paid).reduce((a,s)=>a+Number(s.amount||0),0);
-      html+='<div class="recent-item">';
-      html+='<span class="recent-icon">👤</span>';
+      var stU=sessions.filter(s=>s.student_id===st.id&&!s.paid).reduce((a,s)=>a+Number(s.amount||0),0);
+      html+='<div class="recent-item"><span class="recent-icon">👤</span>';
       html+='<div class="recent-info"><div class="recent-name">'+esc(st.name)+'</div>';
       html+='<div class="recent-date">'+fmt(st.hourly_rate)+'/saat</div></div>';
-      html+=(stUnpaid>0?'<span class="recent-amount" style="color:var(--re)">'+fmt(stUnpaid)+'</span>':'<span class="recent-amount" style="color:var(--gr)">✓</span>');
+      html+=(stU>0?'<span class="recent-amount" style="color:var(--re)">'+fmt(stU)+'</span>':'<span class="recent-amount" style="color:var(--gr)">✓</span>');
       html+='</div>';
     });
     html+='</div>';
   }
-  html+='</div>';
-
-  html+='</div></div>';
+  html+='</div></div></div>';
   return html;
 }
-
 function statCard(label,icon,val,sub,color){
-  return '<div class="stat-card">'
-    +'<div class="stat-label">'+icon+' '+esc(label)+'</div>'
+  return'<div class="stat-card"><div class="stat-label">'+icon+' '+esc(label)+'</div>'
     +'<div class="stat-val '+color+'">'+esc(String(val))+'</div>'
-    +'<div class="stat-sub">'+esc(String(sub))+'</div>'
-    +'</div>';
+    +'<div class="stat-sub">'+esc(String(sub))+'</div></div>';
 }
 
-/* ---- STUDENTS ---- */
+/* STUDENTS */
 function renderStudents(){
-  var html='<div class="page">';
-  html+='<div class="sec-header"><span class="sec-title">Öğrenciler <span class="badge">'+students.length+'</span></span>';
+  var html='<div class="page"><div class="sec-header"><span class="sec-title">Öğrenciler <span class="badge">'+students.length+'</span></span>';
   html+='<button class="btn btn-primary" onclick="openAddStudent()">+ Öğrenci Ekle</button></div>';
-
-  html+='<div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" id="studentSearch" placeholder="Öğrenci ara..." oninput="filterStudentCards(this.value)"/></div>';
-
+  html+='<div class="search-wrap"><span class="search-icon">🔍</span>';
+  html+='<input class="search-inp" id="studentSearch" placeholder="Öğrenci ara..." oninput="filterStudentCards(this.value)"/></div>';
   html+='<div class="student-grid" id="studentGrid">';
-  if(!students.length){
-    html+='<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--t3)">Henüz öğrenci eklenmemiş</div>';
-  }else{
+  if(!students.length){html+='<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--t3)">Henüz öğrenci eklenmemiş</div>';}
+  else{
     students.forEach(st=>{
       var stS=sessions.filter(s=>s.student_id===st.id);
-      var paid=stS.filter(s=>s.paid).reduce((a,s)=>a+Number(s.amount||0),0);
       var unpaid=stS.filter(s=>!s.paid).reduce((a,s)=>a+Number(s.amount||0),0);
-      html+=studentCard(st,stS.length,paid,unpaid);
+      html+=studentCard(st,stS.length,unpaid);
     });
   }
   html+='</div></div>';
   return html;
 }
-
-function studentCard(st,count,paid,unpaid){
-  return '<div class="student-card" data-name="'+esc(st.name.toLowerCase())+'">'
+function studentCard(st,count,unpaid){
+  return'<div class="student-card" data-name="'+esc(st.name.toLowerCase())+'">'
     +'<div class="student-card-name">'+esc(st.name)+'</div>'
     +'<div class="student-card-rate">'+fmt(st.hourly_rate)+' / saat</div>'
     +'<div class="student-card-stats">'
     +'<div class="student-stat"><div class="student-stat-label">Toplam Ders</div><div class="student-stat-val">'+count+'</div></div>'
-    +'<div class="student-stat"><div class="student-stat-label">Ödenmedi</div><div class="student-stat-val" style="color:'+(unpaid>0?'var(--re)':'var(--gr)')+'">'+fmtShort(unpaid)+'</div></div>'
+    +'<div class="student-stat"><div class="student-stat-label">Ödenmedi</div>'
+    +'<div class="student-stat-val" style="color:'+(unpaid>0?'var(--re)':'var(--gr)')+'">'+fmtShort(unpaid)+'</div></div>'
     +'</div>'
     +'<div class="student-card-actions">'
+    +'<button class="btn-icon" onclick="exportStudent(\''+st.id+'\')" title="Veliye gönder">📤</button>'
     +'<button class="btn-icon" onclick="openAddSession(\''+st.id+'\')" title="Ders ekle">📅</button>'
     +'<button class="btn-icon" onclick="openEditStudent(\''+st.id+'\')" title="Düzenle">✏️</button>'
     +'<button class="btn-icon" onclick="deleteStudent(\''+st.id+'\')" title="Sil">🗑</button>'
-    +'</div>'
-    +'</div>';
+    +'</div></div>';
 }
-
 function filterStudentCards(q){
   document.querySelectorAll('.student-card').forEach(c=>{
     c.classList.toggle('hidden',!c.dataset.name.includes(q.toLowerCase()));
   });
 }
 
-/* ---- SESSIONS ---- */
+/* SESSIONS */
 function renderSessions(){
-  var html='<div class="page">';
-  html+='<div class="sec-header"><span class="sec-title">Dersler <span class="badge">'+sessions.length+'</span></span>';
+  var html='<div class="page"><div class="sec-header"><span class="sec-title">Dersler <span class="badge">'+sessions.length+'</span></span>';
   html+='<button class="btn btn-primary" onclick="openAddSession()">+ Ders Ekle</button></div>';
-
   // Filters
   html+='<div class="filter-bar">';
   html+='<select class="inp" onchange="setFilter(\'student_id\',this.value)" style="flex:none;min-width:140px">'
@@ -440,24 +419,23 @@ function renderSessions(){
   html+='<button class="filter-btn'+(sessionFilters.paid===''?' active':'')+'" onclick="setFilter(\'paid\',\'\')">Tümü</button>';
   html+='<button class="filter-btn'+(sessionFilters.paid==='false'?' active':'')+'" onclick="setFilter(\'paid\',\'false\')">Ödenmedi</button>';
   html+='<button class="filter-btn'+(sessionFilters.paid==='true'?' active':'')+'" onclick="setFilter(\'paid\',\'true\')">Ödendi</button>';
+  html+='<button class="reset-btn" onclick="resetFilters()" title="Filtreleri sıfırla">↺ Sıfırla</button>';
   html+='</div>';
-
-  // Summary
+  // Summary chips
   var total=sessions.reduce((s,x)=>s+Number(x.amount||0),0);
   var unpaid=sessions.filter(x=>!x.paid).reduce((s,x)=>s+Number(x.amount||0),0);
   html+='<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">';
   html+='<div style="background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px 16px;font-size:13px">'
-    +'<span style="color:var(--t3)">Toplam: </span><span class="mono" style="color:var(--t1);font-family:\'DM Mono\',monospace">'+fmt(total)+'</span></div>';
+    +'<span style="color:var(--t3)">Toplam: </span><span style="color:var(--t1);font-family:\'DM Mono\',monospace">'+fmt(total)+'</span></div>';
   html+='<div style="background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px 16px;font-size:13px">'
     +'<span style="color:var(--t3)">Ödenmedi: </span><span style="color:var(--re);font-family:\'DM Mono\',monospace">'+fmt(unpaid)+'</span></div>';
   html+='</div>';
-
   // Table
-  html+='<div class="tbl-wrap"><table>';
-  html+='<thead><tr><th>Tarih</th><th>Öğrenci</th><th>Süre</th><th>Tutar</th><th>Durum</th><th></th></tr></thead>';
-  html+='<tbody>';
+  html+='<div class="tbl-wrap"><table><thead><tr>';
+  html+='<th>Tarih</th><th>Öğrenci</th><th>Süre</th><th>Tutar</th><th>Not</th><th>Durum</th><th></th>';
+  html+='</tr></thead><tbody>';
   if(!sessions.length){
-    html+='<tr class="empty-row"><td colspan="6">Bu filtreye uygun ders bulunamadı</td></tr>';
+    html+='<tr class="empty-row"><td colspan="7">Bu filtreye uygun ders bulunamadı</td></tr>';
   }else{
     sessions.forEach(s=>{
       html+='<tr>'
@@ -465,54 +443,31 @@ function renderSessions(){
         +'<td class="name">'+esc(studentName(s.student_id))+'</td>'
         +'<td class="mono">'+fmtDur(s.duration)+'</td>'
         +'<td class="mono">'+fmt(s.amount)+'</td>'
-        +'<td><button class="paid-badge '+(s.paid?'yes':'no')+'" onclick="togglePaid(\''+s.id+'\','+s.paid+')">'
-        +(s.paid?'✓ Ödendi':'✕ Bekliyor')+'</button></td>'
+        +'<td class="note-cell" title="'+(s.notes?esc(s.notes):'')+'">'+esc(s.notes||'—')+'</td>'
+        +'<td><button class="paid-badge '+(s.paid?'yes':'no')+'" onclick="togglePaid(\''+s.id+'\','+s.paid+')">'+(s.paid?'✓ Ödendi':'✕ Bekliyor')+'</button></td>'
         +'<td style="text-align:right">'
         +'<button class="btn-icon" onclick="openEditSession(\''+s.id+'\')" title="Düzenle">✏️</button>'
         +'<button class="btn-icon" onclick="deleteSession(\''+s.id+'\')" title="Sil">🗑</button>'
-        +'</td>'
-        +'</tr>';
+        +'</td></tr>';
     });
   }
   html+='</tbody></table></div></div>';
   return html;
 }
+function setFilter(key,val){sessionFilters[key]=val;renderPage();}
+function resetFilters(){sessionFilters={student_id:'',paid:'',month:thisMonth()};renderPage();}
 
-function setFilter(key,val){
-  sessionFilters[key]=val;
-  renderPage();
-}
-
-/* ---- REPORTS ---- */
+/* REPORTS */
 function renderReports(){
-  // Build last 6 months
   var months=[];
-  for(var i=5;i>=0;i--){
-    var d=new Date();d.setMonth(d.getMonth()-i);
-    months.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));
-  }
-
-  var html='<div class="page">';
-  html+='<div class="report-grid">';
-
-  // Monthly earnings chart
-  html+='<div class="chart-wrap">';
-  html+='<div class="chart-title">Aylık Gelir (Son 6 Ay)</div>';
-
-  // We need all sessions without month filter for chart — use students only
-  // Actually sessions is already filtered. Let me note this limitation.
-  // For the chart, we'll show what we have grouped by month
-  // Better: load all sessions for chart. Since we loaded filtered, show note.
-  html+='<div class="bar-chart" id="barChart">Yükleniyor...</div>';
-  html+='</div>';
-
-  // Per-student summary
-  html+='<div class="chart-wrap">';
-  html+='<div class="chart-title">Öğrenci Bazında Özet</div>';
+  for(var i=5;i>=0;i--){var d=new Date();d.setMonth(d.getMonth()-i);months.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));}
+  var html='<div class="page"><div class="report-grid">';
+  html+='<div class="chart-wrap"><div class="chart-title">Aylık Gelir (Son 6 Ay)</div>';
+  html+='<div class="bar-chart" id="barChart"><div class="loading" style="padding:20px"><div class="spin"></div></div></div></div>';
+  html+='<div class="chart-wrap"><div class="chart-title">Öğrenci Bazında Özet</div>';
   if(!students.length){html+='<div style="color:var(--t3);font-size:13px;text-align:center;padding:20px">Öğrenci yok</div>';}
   else{
-    html+='<table style="width:100%;border-collapse:collapse">';
-    html+='<thead><tr style="border-bottom:1px solid var(--bd)">'
+    html+='<table style="width:100%;border-collapse:collapse"><thead><tr style="border-bottom:1px solid var(--bd)">'
       +'<th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Öğrenci</th>'
       +'<th style="padding:6px 8px;text-align:right;font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Ders</th>'
       +'<th style="padding:6px 8px;text-align:right;font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:1px">Toplam</th>'
@@ -520,72 +475,56 @@ function renderReports(){
       +'</tr></thead><tbody>';
     students.forEach(st=>{
       var stS=sessions.filter(s=>s.student_id===st.id);
-      var total=stS.reduce((a,s)=>a+Number(s.amount||0),0);
-      var unpaid=stS.filter(s=>!s.paid).reduce((a,s)=>a+Number(s.amount||0),0);
+      var tot=stS.reduce((a,s)=>a+Number(s.amount||0),0);
+      var unp=stS.filter(s=>!s.paid).reduce((a,s)=>a+Number(s.amount||0),0);
       html+='<tr style="border-bottom:1px solid var(--bd)">'
         +'<td style="padding:8px;font-size:13px;color:var(--t1);font-weight:600">'+esc(st.name)+'</td>'
         +'<td style="padding:8px;font-size:12px;text-align:right;color:var(--t2);font-family:\'DM Mono\',monospace">'+stS.length+'</td>'
-        +'<td style="padding:8px;font-size:12px;text-align:right;color:var(--gr);font-family:\'DM Mono\',monospace">'+fmt(total)+'</td>'
-        +'<td style="padding:8px;font-size:12px;text-align:right;font-family:\'DM Mono\',monospace;color:'+(unpaid>0?'var(--re)':'var(--t3)')+'">'+fmt(unpaid)+'</td>'
+        +'<td style="padding:8px;font-size:12px;text-align:right;color:var(--gr);font-family:\'DM Mono\',monospace">'+fmt(tot)+'</td>'
+        +'<td style="padding:8px;font-size:12px;text-align:right;font-family:\'DM Mono\',monospace;color:'+(unp>0?'var(--re)':'var(--t3)')+'">'+fmt(unp)+'</td>'
         +'</tr>';
     });
     html+='</tbody></table>';
   }
-  html+='</div>';
-
-  html+='</div></div>';
-
-  // Schedule bar chart after render
+  html+='</div></div></div>';
   setTimeout(()=>renderBarChart(months),50);
   return html;
 }
-
 async function renderBarChart(months){
-  // Load all sessions without filter for chart
-  var {data}=await sb.from('sessions').select('date,amount,paid');
-  var bc=$('barChart');
-  if(!bc||!data)return;
-  var byMonth={};
-  months.forEach(m=>byMonth[m]={earned:0,unpaid:0});
-  data.forEach(s=>{
-    var m=s.date?s.date.slice(0,7):null;
-    if(m&&byMonth[m]){
-      byMonth[m].earned+=Number(s.amount||0);
-      if(!s.paid)byMonth[m].unpaid+=Number(s.amount||0);
-    }
-  });
-  var vals=months.map(m=>byMonth[m].earned);
-  var max=Math.max(...vals,1);
+  var{data}=await sb.from('sessions').select('date,amount');
+  var bc=$('barChart');if(!bc||!data)return;
+  var byMonth={};months.forEach(m=>byMonth[m]=0);
+  data.forEach(s=>{var m=s.date?s.date.slice(0,7):null;if(m&&byMonth[m]!==undefined)byMonth[m]+=Number(s.amount||0);});
+  var vals=months.map(m=>byMonth[m]),max=Math.max(...vals,1);
   bc.innerHTML=months.map(m=>{
-    var h=Math.round((byMonth[m].earned/max)*100);
-    return '<div class="bar-col">'
-      +'<div class="bar-val">'+fmtShort(byMonth[m].earned)+'</div>'
+    var h=Math.max(Math.round((byMonth[m]/max)*100),byMonth[m]>0?4:0);
+    return'<div class="bar-col">'
+      +'<div class="bar-val">'+(byMonth[m]>0?fmtShort(byMonth[m]):'')+'</div>'
       +'<div class="bar" style="height:'+h+'%"></div>'
-      +'<div class="bar-label">'+monthLabel(m)+'</div>'
-      +'</div>';
+      +'<div class="bar-label">'+monthLabel(m)+'</div></div>';
   }).join('');
 }
 
-/* ---- MODAL: STUDENT ---- */
+/* MODAL: STUDENT */
 function openAddStudent(){
   $('modalTitle').textContent='Yeni Öğrenci';
   $('modalBody').innerHTML=studentForm();
+  $('modalBox').classList.remove('modal-wide');
   $('modalBg').classList.remove('hidden');
   $('modalBg').dataset.mode='add-student';
   setTimeout(()=>document.getElementById('sf_name')?.focus(),50);
 }
-
 function openEditStudent(id){
   var st=students.find(x=>x.id===id);if(!st)return;
   $('modalTitle').textContent='Öğrenciyi Düzenle';
   $('modalBody').innerHTML=studentForm(st);
+  $('modalBox').classList.remove('modal-wide');
   $('modalBg').classList.remove('hidden');
   $('modalBg').dataset.mode='edit-student';
   $('modalBg').dataset.id=id;
 }
-
 function studentForm(st){
-  return '<div class="field"><label class="field-label" for="sf_name">Ad Soyad</label>'
+  return'<div class="field"><label class="field-label" for="sf_name">Ad Soyad</label>'
     +'<input class="inp" id="sf_name" placeholder="Öğrenci adı" value="'+esc(st?st.name:'')+'"/></div>'
     +'<div class="field"><label class="field-label" for="sf_rate">Saatlik Ücret (₺)</label>'
     +'<input class="inp" id="sf_rate" type="number" step="0.01" min="0" placeholder="Örn: 500" value="'+(st?st.hourly_rate:'')+'"/></div>'
@@ -594,60 +533,58 @@ function studentForm(st){
     +'<button class="btn btn-primary" onclick="saveStudent()">Kaydet</button>'
     +'</div>';
 }
-
 async function saveStudent(){
   var name=document.getElementById('sf_name')?.value.trim();
   var rate=parseFloat(document.getElementById('sf_rate')?.value);
   if(!name){toast('Ad gerekli','error');return;}
   if(isNaN(rate)||rate<0){toast('Geçerli bir ücret girin','error');return;}
-
-  var mode=$('modalBg').dataset.mode;
-  var id=$('modalBg').dataset.id;
-  var payload={name,hourly_rate:rate};
-
+  var mode=$('modalBg').dataset.mode,id=$('modalBg').dataset.id;
   var res=mode==='edit-student'
-    ?await sb.from('students').update(payload).eq('id',id)
-    :await sb.from('students').insert(payload);
-
+    ?await sb.from('students').update({name,hourly_rate:rate}).eq('id',id)
+    :await sb.from('students').insert({name,hourly_rate:rate});
   if(res.error){toast('Hata: '+res.error.message,'error');return;}
-  toast(mode==='edit-student'?'Öğrenci güncellendi':'Öğrenci eklendi','success');
-  closeModal();
-  await renderPage();
+  toast(mode==='edit-student'?'Güncellendi':'Öğrenci eklendi','success');
+  closeModal();await renderPage();
 }
-
 async function deleteStudent(id){
   var st=students.find(x=>x.id===id);
-  if(!confirm((st?st.name:'Bu öğrenci')+' silinsin mi? Dersleri de silinir!'))return;
-  var res=await sb.from('sessions').delete().eq('student_id',id);
-  if(res.error){toast('Hata: '+res.error.message,'error');return;}
-  var res2=await sb.from('students').delete().eq('id',id);
-  if(res2.error){toast('Hata: '+res2.error.message,'error');return;}
+  if(!confirm((st?st.name:'Bu öğrenci')+' silinsin mi? Tüm dersleri de silinir!'))return;
+  // Delete sessions first, then student — if student delete fails, re-fetch is still clean
+  var r1=await sb.from('sessions').delete().eq('student_id',id);
+  if(r1.error){toast('Dersler silinemedi: '+r1.error.message,'error');return;}
+  var r2=await sb.from('students').delete().eq('id',id);
+  if(r2.error){
+    // Sessions already deleted — log and warn user
+    console.error('Student delete failed after sessions deleted:',r2.error);
+    toast('Öğrenci silinemedi. Destek alın.','error');
+    await renderPage();return;
+  }
   toast('Öğrenci silindi');
   await renderPage();
 }
 
-/* ---- MODAL: SESSION ---- */
+/* MODAL: SESSION */
 function openAddSession(studentId){
   $('modalTitle').textContent='Yeni Ders';
   $('modalBody').innerHTML=sessionForm(null,studentId);
+  $('modalBox').classList.remove('modal-wide');
   $('modalBg').classList.remove('hidden');
   $('modalBg').dataset.mode='add-session';
   delete $('modalBg').dataset.id;
   calcAmount();
 }
-
 function openEditSession(id){
   var s=sessions.find(x=>x.id===id);if(!s)return;
   $('modalTitle').textContent='Dersi Düzenle';
   $('modalBody').innerHTML=sessionForm(s);
+  $('modalBox').classList.remove('modal-wide');
   $('modalBg').classList.remove('hidden');
   $('modalBg').dataset.mode='edit-session';
   $('modalBg').dataset.id=id;
 }
-
 function sessionForm(s,preStudent){
   var today=new Date().toISOString().slice(0,10);
-  return '<div class="field"><label class="field-label">Öğrenci</label>'
+  return'<div class="field"><label class="field-label">Öğrenci</label>'
     +'<select class="inp" id="sf_student" onchange="calcAmount()">'
     +students.map(st=>'<option value="'+st.id+'"'+(s?s.student_id===st.id?' selected':'':preStudent===st.id?' selected':'')+'>'+esc(st.name)+'</option>').join('')
     +'</select></div>'
@@ -660,6 +597,8 @@ function sessionForm(s,preStudent){
     +'<div class="field"><label class="field-label">Tutar (₺)</label>'
     +'<input class="inp" id="sf_amount" type="number" step="0.01" min="0" placeholder="Otomatik hesaplanır" value="'+(s?s.amount:'')+'"/>'
     +'<div class="inp-hint" id="amountHint">Öğrenci ve süre girilince otomatik hesaplanır</div></div>'
+    +'<div class="field"><label class="field-label">Not (opsiyonel)</label>'
+    +'<textarea class="inp" id="sf_notes" placeholder="Konu, hatırlatma...">'+(s&&s.notes?s.notes:'')+'</textarea></div>'
     +'<div class="field"><label style="display:flex;align-items:center;gap:8px;cursor:pointer">'
     +'<input type="checkbox" id="sf_paid"'+(s&&s.paid?' checked':'')+'> <span class="field-label" style="margin-bottom:0">Ödendi</span>'
     +'</label></div>'
@@ -668,7 +607,6 @@ function sessionForm(s,preStudent){
     +'<button class="btn btn-primary" onclick="saveSession()">Kaydet</button>'
     +'</div>';
 }
-
 function calcAmount(){
   var sel=document.getElementById('sf_student');
   var dur=parseFloat(document.getElementById('sf_dur')?.value);
@@ -682,55 +620,148 @@ function calcAmount(){
     if(hint)hint.textContent=fmtDur(dur)+' × '+fmt(st.hourly_rate)+' = '+fmt(calc);
   }
 }
-
 async function saveSession(){
   var student_id=document.getElementById('sf_student')?.value;
   var date=document.getElementById('sf_date')?.value;
   var duration=parseFloat(document.getElementById('sf_dur')?.value);
   var amount=parseFloat(document.getElementById('sf_amount')?.value);
   var paid=document.getElementById('sf_paid')?.checked||false;
-
+  var notes=document.getElementById('sf_notes')?.value.trim()||null;
   if(!student_id){toast('Öğrenci seçin','error');return;}
   if(!date){toast('Tarih girin','error');return;}
   if(isNaN(duration)||duration<=0){toast('Geçerli süre girin','error');return;}
   if(isNaN(amount)||amount<0){toast('Geçerli tutar girin','error');return;}
-
-  var payload={student_id,date,duration,amount,paid};
-  var mode=$('modalBg').dataset.mode;
-  var id=$('modalBg').dataset.id;
-
+  var payload={student_id,date,duration,amount,paid,notes};
+  var mode=$('modalBg').dataset.mode,id=$('modalBg').dataset.id;
   var res=mode==='edit-session'
     ?await sb.from('sessions').update(payload).eq('id',id)
     :await sb.from('sessions').insert(payload);
-
   if(res.error){toast('Hata: '+res.error.message,'error');return;}
   toast(mode==='edit-session'?'Ders güncellendi':'Ders eklendi','success');
-  closeModal();
-  await renderPage();
+  closeModal();await renderPage();
 }
-
 async function togglePaid(id,current){
   var res=await sb.from('sessions').update({paid:!current}).eq('id',id);
   if(res.error){toast('Güncelleme hatası','error');return;}
-  toast(!current?'Ödendi olarak işaretlendi':'Ödenmedi olarak değiştirildi','success');
+  toast(!current?'Ödendi işaretlendi':'Ödenmedi olarak değiştirildi','success');
   await renderPage();
 }
-
 async function deleteSession(id){
   if(!confirm('Bu ders silinsin mi?'))return;
   var res=await sb.from('sessions').delete().eq('id',id);
   if(res.error){toast('Hata: '+res.error.message,'error');return;}
-  toast('Ders silindi');
-  await renderPage();
+  toast('Ders silindi');await renderPage();
 }
 
-/* ---- MODAL CLOSE ---- */
+/* EXPORT */
+async function exportStudent(id){
+  var st=students.find(x=>x.id===id);if(!st)return;
+  toast('Rapor hazırlanıyor...','');
+  var{data,error}=await sb.from('sessions').select('*').eq('student_id',id).order('date',{ascending:true});
+  if(error){toast('Hata: '+error.message,'error');return;}
+  var sData=data||[];
+  showExportModal(st,sData);
+}
+
+function showExportModal(st,sData){
+  var totalAmt=sData.reduce((a,s)=>a+Number(s.amount||0),0);
+  var paidAmt=sData.filter(s=>s.paid).reduce((a,s)=>a+Number(s.amount||0),0);
+  var unpaidAmt=totalAmt-paidAmt;
+  var totalDur=sData.reduce((a,s)=>a+Number(s.duration||0),0);
+  var today=new Date().toLocaleDateString('tr-TR',{day:'2-digit',month:'long',year:'numeric'});
+
+  var rows=sData.map(s=>'<tr>'
+    +'<td>'+fmtDate(s.date)+'</td>'
+    +'<td style="text-align:center">'+fmtDur(s.duration)+'</td>'
+    +'<td style="text-align:right;font-weight:600">'+fmt(s.amount)+'</td>'
+    +'<td style="text-align:center"><span class="'+(s.paid?'paid-yes':'paid-no')+'">'+(s.paid?'✓ Ödendi':'✕ Bekliyor')+'</span></td>'
+    +(s.notes?'<td style="color:#888;font-size:11px">'+esc(s.notes)+'</td>':'<td></td>')
+    +'</tr>').join('');
+
+  var receiptHtml='<div class="receipt" id="receiptCard">'
+    +'<div class="receipt-header">'
+    +'<div class="receipt-logo">DersTakip</div>'
+    +'<div class="receipt-student">'+esc(st.name)+'</div>'
+    +'<div class="receipt-title">Ders Raporu · '+today+'</div>'
+    +'<div class="receipt-date">Saatlik Ücret: '+fmt(st.hourly_rate)+' · Toplam: '+fmtDur(totalDur)+' · '+sData.length+' ders</div>'
+    +'</div>'
+    +'<table>'
+    +'<thead><tr><th>Tarih</th><th style="text-align:center">Süre</th><th style="text-align:right">Tutar</th><th style="text-align:center">Durum</th><th>Not</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody>'
+    +'</table>'
+    +'<div class="receipt-totals">'
+    +'<div class="receipt-total-row"><span>Toplam Tutar</span><span>'+fmt(totalAmt)+'</span></div>'
+    +'<div class="receipt-total-row" style="color:#00a882"><span>Ödenen</span><span>'+fmt(paidAmt)+'</span></div>'
+    +(unpaidAmt>0?'<div class="receipt-total-row" style="color:#d42f3f"><span>Kalan Borç</span><span>'+fmt(unpaidAmt)+'</span></div>':'')
+    +'<div class="receipt-total-row"><span>NET TOPLAM</span><span>'+fmt(totalAmt)+'</span></div>'
+    +'</div>'
+    +'<div class="receipt-footer">Bu rapor DersTakip uygulaması tarafından oluşturulmuştur.</div>'
+    +'</div>';
+
+  $('modalTitle').textContent='📤 Veliye Gönder — '+st.name;
+  $('modalBox').classList.add('modal-wide');
+  $('modalBody').innerHTML=receiptHtml
+    +'<div class="export-btns">'
+    +'<button class="btn btn-secondary" onclick="closeModal()">Kapat</button>'
+    +'<button class="btn btn-secondary" onclick="doExportPng()">🖼 Görüntü (PNG)</button>'
+    +'<button class="btn btn-primary" onclick="doExportPdf(\''+esc(st.name)+'\')">📄 PDF olarak kaydet</button>'
+    +'</div>';
+  $('modalBg').dataset.mode='export';
+  $('modalBg').classList.remove('hidden');
+}
+
+function doExportPng(){
+  var el=document.getElementById('receiptCard');
+  if(!el||typeof html2canvas==='undefined'){toast('PNG export hazır değil','error');return;}
+  toast('PNG oluşturuluyor...','');
+  html2canvas(el,{backgroundColor:'#ffffff',scale:2,useCORS:true}).then(function(canvas){
+    var a=document.createElement('a');
+    a.href=canvas.toDataURL('image/png');
+    a.download='ders-raporu.png';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    toast('PNG indirildi','success');
+  }).catch(function(e){toast('PNG oluşturulamadı','error');console.error(e);});
+}
+
+function doExportPdf(studentName){
+  var el=document.getElementById('receiptCard');
+  if(!el){toast('Rapor bulunamadı','error');return;}
+  var w=window.open('','_blank','width=800,height=900');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    +'<title>Ders Raporu - '+studentName+'</title>'
+    +'<style>'
+    +'body{margin:0;padding:20mm;font-family:Arial,sans-serif;color:#111}'
+    +'.receipt{max-width:680px;margin:0 auto}'
+    +'.receipt-header{border-bottom:2px solid #00b88c;padding-bottom:16px;margin-bottom:20px}'
+    +'.receipt-logo{font-size:20px;font-weight:800;color:#00b88c;margin-bottom:4px}'
+    +'.receipt-student{font-size:22px;font-weight:700;margin:8px 0 2px}'
+    +'.receipt-title{font-size:13px;color:#555;margin-bottom:2px}'
+    +'.receipt-date{font-size:12px;color:#888}'
+    +'table{width:100%;border-collapse:collapse;margin-bottom:20px}'
+    +'th{padding:8px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#777;border-bottom:1px solid #e0e0e0}'
+    +'td{padding:8px 10px;font-size:13px;color:#333;border-bottom:1px solid #f0f0f0}'
+    +'.paid-yes{color:#00a882;font-weight:600;font-size:11px}'
+    +'.paid-no{color:#d42f3f;font-weight:600;font-size:11px}'
+    +'.receipt-totals{background:#f8f8f8;border-radius:10px;padding:16px;margin-top:4px}'
+    +'.receipt-total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:13px;color:#444}'
+    +'.receipt-total-row:last-child{margin-bottom:0;font-weight:700;font-size:15px;color:#111;padding-top:8px;border-top:1px solid #ddd;margin-top:6px}'
+    +'.receipt-footer{margin-top:20px;font-size:11px;color:#aaa;text-align:center;border-top:1px solid #f0f0f0;padding-top:12px}'
+    +'@media print{body{padding:10mm}}'
+    +'</style></head><body>'
+    +el.outerHTML
+    +'<script>window.onload=function(){window.print();}<\/script>'
+    +'</body></html>');
+  w.document.close();
+  toast('PDF penceresi açıldı — Yazdır → PDF Olarak Kaydet','success');
+}
+
+/* MODAL CLOSE */
 function closeModal(e){
   if(e&&e.target!==$('modalBg'))return;
   $('modalBg').classList.add('hidden');
 }
 
-/* ---- INIT ---- */
+/* INIT */
 window.addEventListener('load',async function(){
   if(localStorage.getItem('dt_theme')==='light')document.documentElement.setAttribute('data-theme','light');
   updateThemeBtn();
