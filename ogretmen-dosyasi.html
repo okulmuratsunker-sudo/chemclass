@@ -202,6 +202,23 @@ select.inp{cursor:pointer}
 .empty{text-align:center;padding:36px 20px;color:var(--text2)}
 .empty-ico{font-size:2.5rem;margin-bottom:10px}
 
+/* AUTH SCREEN */
+#authScreen{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:40px;max-width:420px;width:100%;box-shadow:var(--shadow)}
+.auth-title{font-size:1.5rem;font-weight:800;color:var(--accent);text-align:center;margin-bottom:4px}
+.auth-sub{text-align:center;color:var(--text2);font-size:.88rem;margin-bottom:28px}
+.auth-tabs{display:flex;gap:4px;background:var(--surface2);border-radius:9px;padding:4px;margin-bottom:20px}
+.auth-tab{flex:1;padding:8px;border:none;border-radius:7px;cursor:pointer;font-size:.85rem;font-weight:600;font-family:inherit;background:none;color:var(--text2);transition:all .2s}
+.auth-tab.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.auth-msg{border-radius:8px;padding:10px 14px;font-size:.84rem;margin-bottom:14px;display:none}
+.auth-msg.show{display:block}
+.auth-msg.err{background:rgba(224,82,82,.08);border:1px solid rgba(224,82,82,.2);color:var(--danger)}
+.auth-msg.ok{background:rgba(45,181,106,.08);border:1px solid rgba(45,181,106,.2);color:var(--success)}
+.user-chip{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:3px 10px 3px 8px;font-size:.78rem;color:var(--text2)}
+.user-chip span.email{max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-chip button{background:none;border:none;cursor:pointer;color:var(--danger);font-size:.75rem;font-weight:700;padding:2px 6px;border-radius:5px;transition:all .2s}
+.user-chip button:hover{background:rgba(224,82,82,.1)}
+
 /* Soru ekleme satırı */
 .add-q-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--surface2);border-radius:var(--rsm);padding:12px 14px}
 .add-q-row label{font-size:.78rem;color:var(--text2);font-weight:600}
@@ -210,8 +227,35 @@ select.inp{cursor:pointer}
 </style>
 </head>
 <body>
+
+<!-- AUTH SCREEN -->
+<div id="authScreen">
+  <div class="auth-card">
+    <div class="auth-title">📋 Öğretmen Dosyası</div>
+    <p class="auth-sub">Hesabınıza giriş yapın</p>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="authTab('login')">Giriş Yap</button>
+      <button class="auth-tab" onclick="authTab('signup')">Kayıt Ol</button>
+    </div>
+    <div id="authMsg" class="auth-msg"></div>
+    <div class="field">
+      <label class="field-label">E-posta</label>
+      <input class="inp" id="authEmail" type="email" placeholder="ornek@mail.com" autocomplete="email" onkeydown="if(event.key==='Enter')doAuth()"/>
+    </div>
+    <div class="field">
+      <label class="field-label">Şifre</label>
+      <input class="inp" id="authPass" type="password" placeholder="En az 6 karakter" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAuth()"/>
+    </div>
+    <button class="btn" style="width:100%;margin-top:8px" id="authBtn" onclick="doAuth()">Giriş Yap</button>
+  </div>
+</div>
+
 <header>
   <div class="logo">📋 Öğretmen Dosyası</div>
+  <div id="userChip" class="user-chip" style="display:none">
+    <span>👤</span><span class="email" id="userEmail"></span>
+    <button onclick="signOut()">Çıkış</button>
+  </div>
   <button class="theme-btn" onclick="toggleTheme()">🌙 Tema</button>
 </header>
 <nav id="nav">
@@ -273,6 +317,44 @@ select.inp{cursor:pointer}
 const SB_URL='https://yqyrhuednyhirgcghexe.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxeXJodWVkbnloaXJnY2doZXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzQ5MTgsImV4cCI6MjA5NTM1MDkxOH0.bPaF2xWNL4k4eZhhQpzYpaCojqSVIYe4sqM-atpoDJM';
 const sb=supabase.createClient(SB_URL,SB_KEY);
+
+// ── Auth
+let authMode='login';
+function authTab(mode){
+  authMode=mode;
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(mode==='login'?i===0:i===1)));
+  document.getElementById('authBtn').textContent=mode==='login'?'Giriş Yap':'Kayıt Ol';
+  setAuthMsg('','');
+}
+function setAuthMsg(msg,type){
+  const e=document.getElementById('authMsg');
+  e.textContent=msg;e.className='auth-msg'+(msg?' show':'')+(type?' '+type:'');
+}
+async function doAuth(){
+  const email=document.getElementById('authEmail')?.value.trim();
+  const pass=document.getElementById('authPass')?.value;
+  if(!email||!pass){setAuthMsg('E-posta ve şifre gerekli','err');return;}
+  const btn=document.getElementById('authBtn');
+  btn.textContent='...';btn.disabled=true;
+  const res=authMode==='login'
+    ?await sb.auth.signInWithPassword({email,password:pass})
+    :await sb.auth.signUp({email,password:pass});
+  btn.disabled=false;btn.textContent=authMode==='login'?'Giriş Yap':'Kayıt Ol';
+  if(res.error){setAuthMsg(res.error.message,'err');return;}
+  if(authMode==='signup'&&res.data?.user&&!res.data?.session){
+    setAuthMsg('✓ Kayıt başarılı! E-postanızı onaylayın, ardından giriş yapın.','ok');return;
+  }
+  showApp(res.data.user);
+  await loadAll();
+}
+function showApp(user){
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('userEmail').textContent=user.email;
+  document.getElementById('userChip').style.display='flex';
+}
+async function signOut(){
+  await sb.auth.signOut();location.reload();
+}
 
 // ── State
 let students=[],grades=[],scores=[],scoreHistory=[],schedule=[],plans=[],photos=[];
@@ -1009,7 +1091,14 @@ const _s=document.createElement('style');
 _s.textContent=`.exam-btn{padding:6px 14px;border-radius:var(--rsm);border:1.5px solid var(--border);background:none;cursor:pointer;font-size:.82rem;color:var(--text2);font-weight:600;font-family:inherit;transition:all .15s;white-space:nowrap}.exam-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}.exam-btn:hover:not(.active){border-color:var(--accent);color:var(--accent)}`;
 document.head.appendChild(_s);
 
-loadAll();
+// ── Init with auth check
+(async()=>{
+  const{data:{session}}=await sb.auth.getSession();
+  if(session){showApp(session.user);await loadAll();}
+  sb.auth.onAuthStateChange(async(event,session)=>{
+    if(event==='SIGNED_OUT')location.reload();
+  });
+})();
 </script>
 </body>
 </html>
