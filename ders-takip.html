@@ -330,16 +330,17 @@ async function signOut(){
 }
 
 let students=[],sessions=[],currentPage='dashboard';
-let sessionFilters={student_id:'',paid:'',month:thisMonth()};
+let sessionFilters={student_id:'',paid:'',month:''};
 
 /* UTILS */
 function $(id){return document.getElementById(id);}
 function esc(s){var d=document.createElement('div');d.textContent=String(s||'');return d.innerHTML;}
 function thisMonth(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+function localDate(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function fmt(n){return Number(n||0).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})+' ₺';}
 function fmtShort(n){var v=Number(n||0);if(v>=1000)return(v/1000).toLocaleString('tr-TR',{maximumFractionDigits:1})+'K ₺';return v.toLocaleString('tr-TR',{maximumFractionDigits:0})+' ₺';}
 function fmtDur(n){var h=Math.floor(n),m=Math.round((n-h)*60);return m?h+'sa '+m+'dk':h+' sa';}
-function fmtDate(s){if(!s)return'';var[y,mo,d]=s.split('-');return d+'.'+mo+'.'+y;}
+function fmtDate(s){if(!s)return'';var p=s.slice(0,10).split('-');return p[2]+'.'+p[1]+'.'+p[0];}
 function monthLabel(ym){var[y,m]=ym.split('-');return['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'][parseInt(m)-1]+' '+y.slice(2);}
 function studentName(id){var s=students.find(x=>x.id===id);return s?s.name:'?';}
 function toast(msg,type){var t=$('toast');t.textContent=msg;t.className='toast on '+(type||'');setTimeout(()=>{t.className='toast';},2800);}
@@ -405,9 +406,9 @@ function renderDashboard(){
   var html='<div class="page">';
   html+='<div class="stat-grid">';
   html+=statCard('Öğrenci','👤',students.length,'kişi','blue');
-  html+=statCard('Bu Ay Gelir','💰',fmtShort(total),sessions.length+' ders','green');
-  html+=statCard('Bu Ay Ödenmedi','⚠️',fmtShort(unpaid),unpaidList.length+' ders bekliyor','red');
-  html+=statCard('Bu Ay Ders','📅',sessions.length,'toplam '+fmtDur(sessions.reduce((s,x)=>s+Number(x.duration||0),0)),'yellow');
+  html+=statCard('Toplam Gelir','💰',fmtShort(total),sessions.length+' ders','green');
+  html+=statCard('Ödenmedi','⚠️',fmtShort(unpaid),unpaidList.length+' ders bekliyor','red');
+  html+=statCard('Toplam Ders','📅',sessions.length,'toplam '+fmtDur(sessions.reduce((s,x)=>s+Number(x.duration||0),0)),'yellow');
   html+='</div>';
   html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
   // Son dersler
@@ -504,7 +505,10 @@ function renderSessions(){
     +'<option value="">Tüm öğrenciler</option>'
     +students.map(s=>'<option value="'+s.id+'"'+(sessionFilters.student_id===s.id?' selected':'')+'>'+esc(s.name)+'</option>').join('')
     +'</select>';
-  html+='<input type="month" class="inp" value="'+sessionFilters.month+'" onchange="setFilter(\'month\',this.value)" style="flex:none;width:150px"/>';
+  html+='<input type="month" class="inp" value="'+sessionFilters.month+'" onchange="setFilter(\'month\',this.value)" style="flex:none;width:150px" title="Boş bırakırsanız tüm dersler görünür"/>';
+  html+='<button class="filter-btn'+(sessionFilters.month===''?' active':'')+'" onclick="setFilter(\'month\',\'\')">Tüm Zamanlar</button>';
+  html+='<button class="filter-btn'+(sessionFilters.month===thisMonth()?' active':'')+'" onclick="setFilter(\'month\',thisMonth())">Bu Ay</button>';
+  html+='<span style="color:var(--bd2);padding:0 2px">|</span>';
   html+='<button class="filter-btn'+(sessionFilters.paid===''?' active':'')+'" onclick="setFilter(\'paid\',\'\')">Tümü</button>';
   html+='<button class="filter-btn'+(sessionFilters.paid==='false'?' active':'')+'" onclick="setFilter(\'paid\',\'false\')">Ödenmedi</button>';
   html+='<button class="filter-btn'+(sessionFilters.paid==='true'?' active':'')+'" onclick="setFilter(\'paid\',\'true\')">Ödendi</button>';
@@ -544,7 +548,7 @@ function renderSessions(){
   return html;
 }
 function setFilter(key,val){sessionFilters[key]=val;renderPage();}
-function resetFilters(){sessionFilters={student_id:'',paid:'',month:thisMonth()};renderPage();}
+function resetFilters(){sessionFilters={student_id:'',paid:'',month:''};renderPage();}
 
 /* REPORTS */
 function renderReports(){
@@ -672,7 +676,7 @@ function openEditSession(id){
   $('modalBg').dataset.id=id;
 }
 function sessionForm(s,preStudent){
-  var today=new Date().toISOString().slice(0,10);
+  var today=localDate();
   return'<div class="field"><label class="field-label">Öğrenci</label>'
     +'<select class="inp" id="sf_student" onchange="calcAmount()">'
     +students.map(st=>'<option value="'+st.id+'"'+(s?s.student_id===st.id?' selected':'':preStudent===st.id?' selected':'')+'>'+esc(st.name)+'</option>').join('')
@@ -731,8 +735,8 @@ async function saveSession(){
     return;
   }
   toast(mode==='edit-session'?'Ders güncellendi':'Ders eklendi','success');
-  // Eklenen dersin ayına geç ki listede görünsün
-  if(date)sessionFilters.month=date.slice(0,7);
+  // Filtreyi temizle, tüm dersler görünsün
+  sessionFilters.month='';
   closeModal();
   currentPage='sessions';
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page==='sessions'));
