@@ -96,6 +96,23 @@ td.name{color:var(--t1);font-weight:600}
 td.note-cell{font-size:12px;color:var(--t3);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .empty-row td{text-align:center;padding:40px;color:var(--t3);font-size:13px}
 
+/* AUTH SCREEN */
+#authScreen{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+.auth-card{background:var(--s1);border:1px solid var(--bd);border-radius:20px;padding:40px;max-width:420px;width:100%;box-shadow:var(--sh)}
+.auth-logo{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--t1);text-align:center;margin-bottom:4px}
+.auth-logo span{color:var(--gr)}
+.auth-sub{text-align:center;color:var(--t3);font-size:14px;margin-bottom:28px}
+.auth-tabs{display:flex;gap:4px;background:var(--s2);border-radius:10px;padding:4px;margin-bottom:20px}
+.auth-tab{flex:1;padding:8px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;background:none;color:var(--t2);transition:all .2s}
+.auth-tab.active{background:var(--s1);color:var(--t1);box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.auth-msg{border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
+.auth-msg.show{display:block}
+.auth-msg.err{background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.2);color:var(--re)}
+.auth-msg.ok{background:rgba(0,229,176,.08);border:1px solid rgba(0,229,176,.2);color:var(--gr)}
+.user-chip{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--bd);border-radius:99px;padding:4px 12px 4px 8px;font-size:12px;color:var(--t2)}
+.user-chip button{background:none;border:none;cursor:pointer;color:var(--re);font-size:11px;font-weight:700;padding:2px 6px;border-radius:6px;transition:all .2s}
+.user-chip button:hover{background:rgba(255,71,87,.1)}
+
 /* FORM */
 .inp{width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--bd2);border-radius:11px;color:var(--t1);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
 .inp:focus{border-color:var(--gr)}
@@ -207,6 +224,28 @@ select.inp option{background:var(--s1);color:var(--t1)}
 <body>
 <div id="toast" class="toast"></div>
 
+<!-- AUTH SCREEN -->
+<div id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">Ders<span>Takip</span></div>
+    <p class="auth-sub">Hesabınıza giriş yapın</p>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="authTab('login')">Giriş Yap</button>
+      <button class="auth-tab" onclick="authTab('signup')">Kayıt Ol</button>
+    </div>
+    <div id="authMsg" class="auth-msg"></div>
+    <div class="form-row">
+      <label class="lbl">E-posta</label>
+      <input class="inp" id="authEmail" type="email" placeholder="ornek@mail.com" autocomplete="email" onkeydown="if(event.key==='Enter')doAuth()"/>
+    </div>
+    <div class="form-row">
+      <label class="lbl">Şifre</label>
+      <input class="inp" id="authPass" type="password" placeholder="En az 6 karakter" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAuth()"/>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:8px" id="authBtn" onclick="doAuth()">Giriş Yap</button>
+  </div>
+</div>
+
 <!-- MODAL (form + export) -->
 <div id="modalBg" class="modal-bg hidden" onclick="closeModal(event)">
   <div class="modal" id="modalBox" onclick="event.stopPropagation()">
@@ -230,6 +269,10 @@ select.inp option{background:var(--s1);color:var(--t1)}
       <button class="nav-btn" data-page="sessions" onclick="setPage('sessions')">📅 Dersler</button>
       <button class="nav-btn" data-page="reports" onclick="setPage('reports')">📈 Rapor</button>
     </nav>
+    <div id="userChip" class="user-chip hidden">
+      <span>👤</span><span id="userEmail" style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+      <button onclick="signOut()">Çıkış</button>
+    </div>
     <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
   </header>
 
@@ -242,6 +285,47 @@ select.inp option{background:var(--s1);color:var(--t1)}
 const SB_URL="https://bqvlgodtfbeqtvxmvtdp.supabase.co";
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxdmxnb2R0ZmJlcXR2eG12dGRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzEyNjcsImV4cCI6MjA5NTM0NzI2N30.BJ_A8bEyqgRA3xdN7GPtx3wMnJPwn0kVWKWdbXYDOFo";
 const sb=supabase.createClient(SB_URL,SB_KEY);
+
+/* AUTH */
+let authMode='login';
+function authTab(mode){
+  authMode=mode;
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(mode==='login'?i===0:i===1)));
+  $('authBtn').textContent=mode==='login'?'Giriş Yap':'Kayıt Ol';
+  setAuthMsg('','');
+}
+function setAuthMsg(msg,type){
+  var e=$('authMsg');
+  e.textContent=msg;
+  e.className='auth-msg'+(msg?' show':'')+(type?' '+type:'');
+}
+async function doAuth(){
+  var email=$('authEmail')?.value.trim();
+  var pass=$('authPass')?.value;
+  if(!email||!pass){setAuthMsg('E-posta ve şifre gerekli','err');return;}
+  $('authBtn').textContent='...';$('authBtn').disabled=true;
+  var res=authMode==='login'
+    ?await sb.auth.signInWithPassword({email,password:pass})
+    :await sb.auth.signUp({email,password:pass});
+  $('authBtn').disabled=false;
+  $('authBtn').textContent=authMode==='login'?'Giriş Yap':'Kayıt Ol';
+  if(res.error){setAuthMsg(res.error.message,'err');return;}
+  if(authMode==='signup'&&res.data?.user&&!res.data?.session){
+    setAuthMsg('✓ Kayıt başarılı! E-postanızı onaylayın, ardından giriş yapın.','ok');
+    return;
+  }
+  showApp(res.data.user);
+  await renderPage();
+}
+function showApp(user){
+  $('authScreen').style.display='none';
+  $('userEmail').textContent=user.email;
+  $('userChip').classList.remove('hidden');
+}
+async function signOut(){
+  await sb.auth.signOut();
+  location.reload();
+}
 
 let students=[],sessions=[],currentPage='dashboard';
 let sessionFilters={student_id:'',paid:'',month:thisMonth()};
@@ -765,7 +849,16 @@ function closeModal(e){
 window.addEventListener('load',async function(){
   if(localStorage.getItem('dt_theme')==='light')document.documentElement.setAttribute('data-theme','light');
   updateThemeBtn();
-  await renderPage();
+  var{data:{session}}=await sb.auth.getSession();
+  if(session){
+    showApp(session.user);
+    await renderPage();
+  }
+  // else: auth screen stays visible
+  sb.auth.onAuthStateChange(async(event,session)=>{
+    if(event==='SIGNED_IN'&&session){showApp(session.user);}
+    if(event==='SIGNED_OUT'){location.reload();}
+  });
 });
 </script>
 </body>
