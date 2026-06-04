@@ -1,0 +1,19 @@
+{
+  "name": "chemclass",
+  "version": "1.0.0",
+  "description": "ChemClass - Kimya Sınıfı Yönetim Uygulaması",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'No build step needed'",
+    "sync": "npx cap sync",
+    "open:ios": "npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/ios": "^6.0.0",
+    "@capacitor/cli": "^6.0.0"
+  },
+  "author": "Murat Sünker",
+  "license": "UNLICENSED",
+  "private": true
+}
