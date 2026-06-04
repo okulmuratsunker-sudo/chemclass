@@ -725,9 +725,18 @@ async function saveSession(){
   var res=mode==='edit-session'
     ?await sb.from('sessions').update(payload).eq('id',id)
     :await sb.from('sessions').insert(payload);
-  if(res.error){toast('Hata: '+res.error.message,'error');return;}
+  if(res.error){
+    alert('Ders kaydedilemedi:\n\n'+res.error.message);
+    toast('Kaydetme hatası','error');
+    return;
+  }
   toast(mode==='edit-session'?'Ders güncellendi':'Ders eklendi','success');
-  closeModal();await renderPage();
+  // Eklenen dersin ayına geç ki listede görünsün
+  if(date)sessionFilters.month=date.slice(0,7);
+  closeModal();
+  currentPage='sessions';
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page==='sessions'));
+  await renderPage();
 }
 async function togglePaid(id,current){
   var res=await sb.from('sessions').update({paid:!current}).eq('id',id);
