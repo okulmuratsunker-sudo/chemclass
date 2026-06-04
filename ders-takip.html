@@ -365,18 +365,19 @@ async function loadStudents(){
   students=data||[];
 }
 async function loadSessions(){
-  var q=sb.from('sessions').select('*').order('date',{ascending:false});
-  if(sessionFilters.student_id)q=q.eq('student_id',sessionFilters.student_id);
-  if(sessionFilters.paid!=='')q=q.eq('paid',sessionFilters.paid==='true');
-  if(sessionFilters.month){
-    var[y,m]=sessionFilters.month.split('-');
-    var nx=parseInt(m)+1,nxY=y,nxM=String(nx>12?1:nx).padStart(2,'0');
-    if(nx>12)nxY=String(parseInt(y)+1);
-    q=q.gte('date',y+'-'+m+'-01').lt('date',nxY+'-'+nxM+'-01');
-  }
-  var{data,error}=await q;
+  // Her zaman tüm dersleri yükle — filtreleme client-side yapılıyor
+  var{data,error}=await sb.from('sessions').select('*').order('date',{ascending:false});
   if(error){toast('Dersler yüklenemedi','error');return;}
   sessions=data||[];
+}
+function filteredSessions(){
+  return sessions.filter(s=>{
+    if(sessionFilters.student_id&&s.student_id!==sessionFilters.student_id)return false;
+    if(sessionFilters.paid!==''&&s.paid!==(sessionFilters.paid==='true'))return false;
+    if(sessionFilters.month&&s.date&&s.date.slice(0,7)!==sessionFilters.month)return false;
+    return true;
+  });
+}
 }
 async function loadAll(){await Promise.all([loadStudents(),loadSessions()]);}
 
@@ -497,7 +498,8 @@ function filterStudentCards(q){
 
 /* SESSIONS */
 function renderSessions(){
-  var html='<div class="page"><div class="sec-header"><span class="sec-title">Dersler <span class="badge">'+sessions.length+'</span></span>';
+  var fs=filteredSessions();
+  var html='<div class="page"><div class="sec-header"><span class="sec-title">Dersler <span class="badge">'+fs.length+'</span></span>';
   html+='<button class="btn btn-primary" onclick="openAddSession()">+ Ders Ekle</button></div>';
   // Filters
   html+='<div class="filter-bar">';
@@ -515,8 +517,8 @@ function renderSessions(){
   html+='<button class="reset-btn" onclick="resetFilters()" title="Filtreleri sıfırla">↺ Sıfırla</button>';
   html+='</div>';
   // Summary chips
-  var total=sessions.reduce((s,x)=>s+Number(x.amount||0),0);
-  var unpaid=sessions.filter(x=>!x.paid).reduce((s,x)=>s+Number(x.amount||0),0);
+  var total=fs.reduce((s,x)=>s+Number(x.amount||0),0);
+  var unpaid=fs.filter(x=>!x.paid).reduce((s,x)=>s+Number(x.amount||0),0);
   html+='<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">';
   html+='<div style="background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px 16px;font-size:13px">'
     +'<span style="color:var(--t3)">Toplam: </span><span style="color:var(--t1);font-family:\'DM Mono\',monospace">'+fmt(total)+'</span></div>';
@@ -527,10 +529,10 @@ function renderSessions(){
   html+='<div class="tbl-wrap"><table><thead><tr>';
   html+='<th>Tarih</th><th>Öğrenci</th><th>Süre</th><th>Tutar</th><th>Not</th><th>Durum</th><th></th>';
   html+='</tr></thead><tbody>';
-  if(!sessions.length){
+  if(!fs.length){
     html+='<tr class="empty-row"><td colspan="7">Bu filtreye uygun ders bulunamadı</td></tr>';
   }else{
-    sessions.forEach(s=>{
+    fs.forEach(s=>{
       html+='<tr>'
         +'<td class="mono">'+fmtDate(s.date)+'</td>'
         +'<td class="name">'+esc(studentName(s.student_id))+'</td>'
@@ -547,7 +549,12 @@ function renderSessions(){
   html+='</tbody></table></div></div>';
   return html;
 }
-function setFilter(key,val){sessionFilters[key]=val;renderPage();}
+function setFilter(key,val){
+  sessionFilters[key]=val;
+  // Filtreleme client-side — DB'ye gitmeden sadece yeniden render et
+  var pc=$('pageContent');
+  pc.innerHTML=renderSessions();
+}
 function resetFilters(){sessionFilters={student_id:'',paid:'',month:''};renderPage();}
 
 /* REPORTS */
