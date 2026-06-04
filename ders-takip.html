@@ -761,10 +761,10 @@ async function openStudentDetail(id){
   var totalDur=sData.reduce((a,s)=>a+Number(s.duration||0),0);
 
   var summaryHtml='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">'
-    +detailStat('Toplam Ders',sData.length+' ders','blue')
-    +detailStat('Saatlik Ücret',fmt(st.hourly_rate),'green')
-    +detailStat('Ödendi',fmt(paidAmt),'green')
-    +detailStat('Kalan Borç',fmt(unpaidAmt),unpaidAmt>0?'red':'green')
+    +detailStat('Toplam Ders',sData.length+' ders','bl')
+    +detailStat('Saatlik Ücret',fmt(st.hourly_rate),'gr')
+    +detailStat('Ödendi',fmt(paidAmt),'gr')
+    +detailStat('Kalan Borç',fmt(unpaidAmt),unpaidAmt>0?'re':'gr')
     +'</div>';
 
   var rowsHtml='';
