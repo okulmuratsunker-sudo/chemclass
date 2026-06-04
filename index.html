@@ -1,26 +1,35 @@
 <!DOCTYPE html>
-<html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ChemClass v18</title>
+<html lang="tr" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ChemClass v18</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#0a0e1a;--s1:#111827;--s2:#1a2235;--bd:#1e2d45;--gr:#00d4aa;--or:#ff6b35;--re:#ff4444;--go:#ffd700;--t1:#e8f4f8;--t2:#8ba3b8}
+[data-theme="light"]{--bg:#f0f4f8;--s1:#ffffff;--s2:#e8edf2;--bd:#c9d4de;--t1:#0a1628;--t2:#4a6080}
+[data-theme="light"] .top{background:rgba(240,244,248,.97)!important}
+[data-theme="light"] .hero{background:linear-gradient(135deg,rgba(0,212,170,.10),rgba(255,107,53,.07))!important}
+[data-theme="light"] .stat{background:rgba(255,255,255,.9)!important}
+[data-theme="light"] .homebtn{background:linear-gradient(135deg,var(--s2),#f8fafc)!important}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--t1);font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+body{margin:0;background:var(--bg);color:var(--t1);font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;transition:background .3s,color .3s}
 .wrap{max-width:960px;margin:auto;padding:16px}
-.top{display:flex;gap:10px;align-items:center;position:sticky;top:0;background:rgba(10,14,26,.97);padding:12px 0;z-index:10;flex-wrap:wrap}
+.top{display:flex;gap:10px;align-items:center;position:sticky;top:0;background:rgba(10,14,26,.97);padding:12px 0;z-index:10;flex-wrap:wrap;transition:background .3s}
 .logo{font-weight:900;color:var(--gr);letter-spacing:2px}.logo span{color:var(--or)}
 .pill{background:var(--s2);border:1px solid var(--bd);padding:6px 10px;border-radius:999px;color:var(--t2);font-size:12px}
 button,input,select{font:inherit}
-button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:pointer}
+button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:pointer;transition:opacity .15s,transform .1s}
+button:active{transform:scale(.96)}
 .b{background:var(--gr);color:#071018}.s{background:var(--s2);color:var(--t1);border:1px solid var(--bd)}.r{background:rgba(255,68,68,.15);color:var(--re);border:1px solid rgba(255,68,68,.35)}
 .tabs{display:flex;gap:8px;overflow-x:auto;margin:12px 0;padding-bottom:4px}
-.tabs button{white-space:nowrap}.tabs .on{background:var(--gr);color:#071018}
-.card{background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:14px;margin:12px 0}
+.tabs button{white-space:nowrap;transition:background .2s,color .2s}.tabs .on{background:var(--gr);color:#071018}
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:14px;margin:12px 0;transition:background .3s,border-color .3s}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-.inp{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px;color:var(--t1);margin:5px 0}
+.inp{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px;color:var(--t1);margin:5px 0;transition:background .3s,color .3s}
+.inp:focus{outline:none;border-color:var(--gr)}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.student,.group{background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:10px;margin:8px 0;display:flex;gap:10px;align-items:center}
-.av{width:36px;height:36px;border-radius:9px;background:rgba(0,212,170,.14);color:var(--gr);display:grid;place-items:center;font-weight:800;font-size:15px;flex-shrink:0}
+.student,.group{background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:10px;margin:8px 0;display:flex;gap:10px;align-items:center;animation:fadeIn .22s ease;transition:background .3s,border-color .3s}
+.av{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;font-weight:800;font-size:15px;flex-shrink:0}
 .grow{flex:1;min-width:0}
 .muted{color:var(--t2);font-size:12px}
 .score{font-weight:900;font-size:20px;min-width:44px;text-align:center}
@@ -36,45 +45,85 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
 .good{background:rgba(0,212,170,.16);color:var(--gr);border:1px solid rgba(0,212,170,.35)}
 .warn{background:rgba(255,68,68,.15);color:var(--re);border:1px solid rgba(255,68,68,.35)}
 .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px 18px;display:none;z-index:999;font-weight:600;max-width:90vw;text-align:center}
-.toast.on{display:block}
-/* Hero */
+.toast.on{display:block;animation:slideUp .2s ease}
 .hero{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(0,212,170,.18),rgba(255,107,53,.10));border:1px solid var(--bd);border-radius:22px;padding:20px;margin:12px 0;box-shadow:0 18px 50px rgba(0,0,0,.25)}
 .hero:before{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:rgba(0,212,170,.18);filter:blur(2px)}
 .brand{font-size:34px;font-weight:950;letter-spacing:3px;color:var(--gr);line-height:1}.brand span{color:var(--or)}
 .maker{margin-top:8px;font-size:17px;color:var(--t1);font-weight:800}.maker small{display:block;color:var(--t2);font-size:12px;font-weight:500}
-.stat{background:rgba(26,34,53,.75);border:1px solid var(--bd);border-radius:16px;padding:14px}.stat b{display:block;font-size:26px;color:var(--gr)}
-.homebtn{min-height:86px;text-align:left;border:1px solid var(--bd);background:linear-gradient(135deg,var(--s2),#111827);color:var(--t1);border-radius:18px;padding:14px}
+.stat{background:rgba(26,34,53,.75);border:1px solid var(--bd);border-radius:16px;padding:14px;transition:transform .15s}
+.stat:hover{transform:translateY(-2px)}
+.stat b{display:block;font-size:26px;color:var(--gr)}
+.homebtn{min-height:86px;text-align:left;border:1px solid var(--bd);background:linear-gradient(135deg,var(--s2),#111827);color:var(--t1);border-radius:18px;padding:14px;transition:transform .15s,border-color .2s}
+.homebtn:hover{transform:translateY(-2px);border-color:var(--gr)}
 .homebtn strong{display:block;font-size:18px}
-/* Timer */
 .timerBox{text-align:center;padding:22px}
 .timerDisplay{font-size:54px;font-weight:950;color:var(--gr);letter-spacing:2px}
 .preset{padding:8px 10px;border-radius:999px}
 .dangerGlow{animation:pulse 1s infinite alternate;color:var(--re)!important}
 @keyframes pulse{from{transform:scale(1)}to{transform:scale(1.04)}}
-/* History panel */
 .hist-item{border-left:3px solid var(--bd);padding:5px 10px;margin:5px 0;border-radius:0 8px 8px 0}
 .hist-pos{border-left-color:var(--gr)}.hist-neg{border-left-color:var(--re)}
-/* Attendance */
 .att-btn{width:38px;height:38px;border-radius:50%;font-size:16px;padding:0;flex-shrink:0}
 .att-p{background:rgba(0,212,170,.2);color:var(--gr);border:1px solid var(--gr)}
 .att-a{background:rgba(255,68,68,.2);color:var(--re);border:1px solid var(--re)}
 .att-e{background:rgba(255,215,0,.15);color:var(--go);border:1px solid var(--go)}
 .att-n{background:var(--s2);color:var(--t2);border:1px solid var(--bd)}
-/* Modal */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}
-.modal-bg.open{display:flex}
-.modal{background:var(--s1);border:1px solid var(--bd);border-radius:18px;padding:20px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto}
+.modal-bg.open{display:flex;animation:fadeIn .15s ease}
+.modal{background:var(--s1);border:1px solid var(--bd);border-radius:18px;padding:20px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;animation:scaleIn .18s ease;transition:background .3s}
 .modal h3{margin:0 0 12px}
-/* Custom score buttons */
 .custom-score-btn{padding:8px 14px;border-radius:999px;border:1px solid var(--bd);background:var(--s2);color:var(--t1);font-size:13px;font-weight:700}
-/* Board compare */
 .compare-bar-wrap{display:flex;gap:8px;align-items:center;margin:4px 0}
 .compare-label{width:80px;font-size:12px;color:var(--t2);text-align:right;flex-shrink:0}
 .compare-bar{flex:1;height:10px;background:var(--bd);border-radius:999px;overflow:hidden}
 .compare-bar i{display:block;height:100%;border-radius:999px}
+/* Animations */
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
+@keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes scorePop{0%{transform:scale(1)}40%{transform:scale(1.4)}100%{transform:scale(1)}}
+.score-pop{animation:scorePop .28s ease}
+/* Theme toggle */
+.theme-btn{background:var(--s2);border:1px solid var(--bd);border-radius:999px;padding:7px 13px;color:var(--t1);font-size:12px;font-weight:700;cursor:pointer;transition:border-color .2s}
+.theme-btn:hover{border-color:var(--gr)}
+/* Search */
+.search-inp{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:8px 12px;color:var(--t1);font-size:13px;transition:border-color .2s;min-width:160px;flex:1;max-width:260px}
+.search-inp:focus{outline:none;border-color:var(--gr)}
+/* Sound options */
+.snd-btn{padding:7px 13px;border-radius:999px;border:1px solid var(--bd);background:var(--s2);color:var(--t1);font-size:12px;font-weight:700;cursor:pointer;transition:background .15s}
+.snd-btn.on{background:var(--gr);color:#071018;border-color:var(--gr)}
+/* Board refresh rate */
+.rate-btn{padding:6px 11px;border-radius:999px;border:1px solid var(--bd);background:var(--s2);color:var(--t1);font-size:12px;font-weight:700;cursor:pointer}
+.rate-btn.on{background:var(--gr);color:#071018;border-color:var(--gr)}
+/* Avatar color picker */
+.cp-row{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}
+.cp-dot{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform .12s,border-color .12s}
+.cp-dot.on{border-color:var(--t1);transform:scale(1.18)}
 @media(max-width:600px){
-  .wrap{padding:10px}.bigpick h1{font-size:26px}.brand{font-size:28px}.timerDisplay{font-size:42px}
-  .homebtn{min-height:70px}.score{font-size:17px}
+  .wrap{padding:8px}
+  .bigpick h1{font-size:24px}
+  .brand{font-size:26px}
+  .timerDisplay{font-size:38px}
+  .homebtn{min-height:62px;padding:10px}
+  .homebtn strong{font-size:14px}
+  .score{font-size:16px}
+  .top{gap:6px;padding:8px 0}
+  .top .logo{font-size:13px}
+  .tabs{gap:4px}
+  .tabs button{font-size:11px;padding:7px 9px}
+  .student{flex-wrap:wrap;gap:5px}
+  .student .row{width:100%;justify-content:flex-start}
+  .card{padding:10px;border-radius:12px}
+  .modal{padding:14px;border-radius:14px}
+  .att-btn{width:34px;height:34px;font-size:13px}
+  .grid{grid-template-columns:1fr 1fr}
+  .stat b{font-size:20px}
+  .timerBox{padding:12px}
+  .hero{padding:14px}
+}
+@media(max-width:380px){
+  .grid{grid-template-columns:1fr}
+  .tabs button{font-size:10px;padding:6px 7px}
 }
 </style>
 </head>
@@ -87,6 +136,7 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
     <div class="logo">CHEM<span>CLASS</span> <span style="font-size:11px;color:var(--t2)">v18</span></div>
     <div class="muted"><b>Created by Murat Sünker</b></div>
   </div>
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀️ Açık Tema</button>
   <button class="s small" onclick="goHome()">🏠 Ana Ekran</button>
   <span id="active" class="pill">Ana Ekran</span>
   <span id="cloudStatus" class="pill">Yerel kayıt</span>
@@ -108,7 +158,7 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
   <button data-tab="boardShare" onclick="tab('boardShare',this)">🖥️ Tahta Modu</button>
 </div>
 
-<!-- ===== HOME ===== -->
+<!-- HOME -->
 <section id="home">
   <div class="hero">
     <div class="brand">CHEM<span>CLASS</span></div>
@@ -129,7 +179,7 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
   </div>
 </section>
 
-<!-- ===== TIMER ===== -->
+<!-- TIMER -->
 <section id="timer" class="hide">
   <div class="card timerBox">
     <h2>⏳ Geri Sayım Sayacı</h2>
@@ -150,11 +200,21 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
       <button class="s" onclick="pauseTimer()">⏸ Duraklat</button>
       <button class="r" onclick="resetTimer()">↺ Sıfırla</button>
     </div>
-    <div class="muted" style="margin-top:10px">Süre bitince ekranda uyarı verir ve kısa ses çalar.</div>
+    <div style="margin-top:16px;border-top:1px solid var(--bd);padding-top:12px">
+      <div class="muted" style="margin-bottom:8px;font-weight:700">🔊 Bitiş Sesi</div>
+      <div class="row" style="justify-content:center">
+        <button id="snd-beep" class="snd-btn on" onclick="setSnd('beep',this)">Bip</button>
+        <button id="snd-chime" class="snd-btn" onclick="setSnd('chime',this)">Çan</button>
+        <button id="snd-alarm" class="snd-btn" onclick="setSnd('alarm',this)">Alarm</button>
+        <button id="snd-silent" class="snd-btn" onclick="setSnd('silent',this)">Sessiz</button>
+        <button class="s small" onclick="beep()">▶ Test</button>
+      </div>
+    </div>
+    <div class="muted" style="margin-top:10px">Süre bitince ekranda uyarı verir.</div>
   </div>
 </section>
 
-<!-- ===== PICK ===== -->
+<!-- PICK -->
 <section id="pick" class="hide">
   <div class="card">
     <div class="row">
@@ -164,10 +224,7 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
       <button class="s" onclick="resetPick()">↺ Sıfırla</button>
     </div>
     <div class="bigpick" id="bigpickBox">
-      <div>
-        <h1 id="pickName">?</h1>
-        <div id="pickInfo" class="muted">Önce sınıf seçin</div>
-      </div>
+      <div><h1 id="pickName">?</h1><div id="pickInfo" class="muted">Önce sınıf seçin</div></div>
     </div>
     <div id="quick" class="row hide" style="margin-top:10px">
       <button class="warn act" onclick="changeScore(lastPick,-1,'Uyarı')">−1 Uyarı</button>
@@ -182,7 +239,7 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
   </div>
 </section>
 
-<!-- ===== STUDENTS ===== -->
+<!-- STUDENTS -->
 <section id="students" class="hide">
   <div class="grid">
     <div class="card">
@@ -195,27 +252,30 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
       <select id="impClass" class="inp" onchange="renderAll()"></select>
       <div id="impChips" class="row" style="margin:4px 0"></div>
       <input id="file" class="inp" type="file" accept=".xlsx,.xls,.csv" onchange="readFile(event)">
-      <div class="muted">CSV/XLSX dosyasında Okul Numarası ve Adı Soyadı sütunları aranır. Önce sınıf seç, sonra dosyayı yükle.</div>
+      <div class="muted">CSV/XLSX: Okul Numarası ve Adı Soyadı sütunları aranır. Önce sınıf seç.</div>
       <div id="importStatus" class="muted" style="margin-top:6px">Henüz dosya seçilmedi.</div>
     </div>
     <div class="card">
       <h3>📤 Excel'e Aktar</h3>
       <select id="exportClass" class="inp"></select>
       <button class="b" style="margin-top:6px" onclick="exportToExcel()">Excel İndir (.xlsx)</button>
-      <div class="muted" style="margin-top:4px">Seçili sınıfın puan tablosunu Excel dosyası olarak indirir.</div>
+      <div class="muted" style="margin-top:4px">Seçili sınıfın puan tablosunu indirir.</div>
     </div>
     <div class="card">
       <h3>⚙️ Dönem Sonu İşlemleri</h3>
       <select id="resetClass" class="inp"></select>
       <div id="resetChips" class="row" style="margin:4px 0"></div>
       <button class="r" style="margin-top:6px;width:100%" onclick="resetScores()">Puanları Sıfırla</button>
-      <div class="muted" style="margin-top:4px">Seçili sınıftaki tüm öğrenci puanlarını ve geçmişlerini sıfırlar.</div>
+      <div class="muted" style="margin-top:4px">Tüm puanları ve geçmişleri sıfırlar.</div>
     </div>
+  </div>
+  <div class="row" style="margin:6px 0">
+    <input id="stuSearch" class="search-inp" placeholder="🔍 Öğrenci ara..." oninput="renderClasses()">
   </div>
   <div id="classList"></div>
 </section>
 
-<!-- ===== ATTENDANCE ===== -->
+<!-- ATTENDANCE -->
 <section id="attend" class="hide">
   <div class="card">
     <div class="row">
@@ -234,15 +294,15 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
   <div id="attStatsBox" class="hide"></div>
 </section>
 
-<!-- ===== BEHAVIOUR ===== -->
+<!-- BEHAVIOUR -->
 <section id="beh" class="hide">
   <div class="card">
     <div class="row">
       <select id="behClass" class="inp" style="max-width:220px" onchange="renderAll()"></select>
       <div id="behChips" class="row" style="width:100%;margin:4px 0"></div>
-      <input id="note" class="inp" style="max-width:260px" placeholder="İsteğe bağlı not: derse katkı, uyarı nedeni...">
+      <input id="behSearch" class="search-inp" placeholder="🔍 Öğrenci ara..." oninput="renderBeh()">
+      <input id="note" class="inp" style="max-width:260px" placeholder="İsteğe bağlı not...">
     </div>
-    <!-- Custom score buttons -->
     <div class="card" style="margin:8px 0;padding:10px">
       <div class="row" style="margin-bottom:6px">
         <b style="font-size:13px">⚙️ Özel Puan Butonları</b>
@@ -254,7 +314,7 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
   </div>
 </section>
 
-<!-- ===== GROUPS ===== -->
+<!-- GROUPS -->
 <section id="groups" class="hide">
   <div class="card">
     <div class="row">
@@ -267,17 +327,18 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
       <input id="grpVal" class="inp" style="max-width:100px" type="number" value="4">
       <button class="b" onclick="makeGroups()">👥 Grupları Oluştur</button>
     </div>
-    <div class="muted" style="margin-top:4px">Grup puanları kaydedilir ve yeniden oluşturulana kadar korunur.</div>
+    <div class="muted" style="margin-top:4px">Grup puanları yeniden oluşturulana kadar korunur.</div>
     <div id="groupList"></div>
   </div>
 </section>
 
-<!-- ===== BOARD ===== -->
+<!-- BOARD -->
 <section id="board" class="hide">
   <div class="card">
     <div class="row">
       <select id="boardClass" class="inp" style="max-width:220px" onchange="renderAll()"></select>
       <div id="boardChips" class="row" style="width:100%;margin:4px 0"></div>
+      <input id="boardSearch" class="search-inp" placeholder="🔍 Öğrenci ara..." oninput="renderBoard()">
       <button class="s small" onclick="toggleCompare()">📊 Sınıf Karşılaştır</button>
     </div>
     <div id="boardList"></div>
@@ -288,7 +349,7 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
   </div>
 </section>
 
-<!-- ===== BOARD SHARE ===== -->
+<!-- BOARD SHARE -->
 <section id="boardShare" class="hide">
   <div class="card">
     <h2>🖥️ PIN'li Tahta Modu</h2>
@@ -301,10 +362,8 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
       <div>
         <label class="muted">Kod geçerlilik süresi</label>
         <select id="shareHours" class="inp">
-          <option value="2">2 saat</option>
-          <option value="4">4 saat</option>
-          <option value="8" selected>8 saat</option>
-          <option value="12">12 saat</option>
+          <option value="2">2 saat</option><option value="4">4 saat</option>
+          <option value="8" selected>8 saat</option><option value="12">12 saat</option>
         </select>
       </div>
     </div>
@@ -331,7 +390,7 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
   </div>
 </section>
 
-<!-- ===== BOARD VIEW (PIN mode) ===== -->
+<!-- BOARD VIEW -->
 <section id="boardView" class="hide">
   <div class="hero">
     <div class="brand">CHEM<span>CLASS</span></div>
@@ -347,6 +406,13 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
       <div class="stat"><span class="muted">Toplam Puan</span><b id="bvTotal">0</b></div>
       <div class="stat"><span class="muted">Kod</span><b id="bvCode">----</b></div>
     </div>
+    <div style="margin-top:10px">
+      <span class="muted">Otomatik yenileme: </span>
+      <button class="rate-btn on" onclick="setBoardRate(3000,this)">3sn</button>
+      <button class="rate-btn" onclick="setBoardRate(5000,this)">5sn</button>
+      <button class="rate-btn" onclick="setBoardRate(10000,this)">10sn</button>
+      <button class="rate-btn" onclick="setBoardRate(30000,this)">30sn</button>
+    </div>
   </div>
   <div class="card">
     <h2>📊 Liderlik Tablosu</h2>
@@ -358,7 +424,7 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
   </div>
 </section>
 
-<!-- ===== CLOUD ===== -->
+<!-- CLOUD -->
 <section id="cloud" class="hide">
   <div class="card">
     <h2>☁️ Bulut Senkronizasyonu</h2>
@@ -397,12 +463,10 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
   </div>
 </section>
 
-</div><!-- /wrap -->
-
-<!-- TOAST -->
+</div>
 <div id="toast" class="toast"></div>
 
-<!-- MODAL: Student History -->
+<!-- MODAL: History -->
 <div id="histModal" class="modal-bg" onclick="if(event.target===this)closeModal('histModal')">
   <div class="modal">
     <div class="row" style="margin-bottom:10px">
@@ -424,6 +488,8 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
     <input id="editName" class="inp" placeholder="Ad Soyad">
     <label class="muted">Okul Numarası</label>
     <input id="editNo" class="inp" placeholder="No">
+    <label class="muted">Avatar Rengi</label>
+    <div class="cp-row" id="colorPicker"></div>
     <input type="hidden" id="editId">
     <div class="row" style="margin-top:10px">
       <button class="b" onclick="saveEditStudent()">Kaydet</button>
@@ -432,14 +498,32 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
   </div>
 </div>
 
-<!-- MODAL: Custom Score Buttons -->
+<!-- MODAL: Transfer Student -->
+<div id="transferModal" class="modal-bg" onclick="if(event.target===this)closeModal('transferModal')">
+  <div class="modal">
+    <div class="row" style="margin-bottom:10px">
+      <h3 class="grow">↔️ Öğrenci Taşı</h3>
+      <button class="r small" onclick="closeModal('transferModal')">✕</button>
+    </div>
+    <p id="transferInfo" class="muted"></p>
+    <label class="muted">Hedef Sınıf</label>
+    <select id="transferTarget" class="inp" style="margin:8px 0"></select>
+    <input type="hidden" id="transferId">
+    <div class="row" style="margin-top:12px">
+      <button class="b" onclick="doTransfer()">Taşı</button>
+      <button class="s" onclick="closeModal('transferModal')">İptal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Custom Buttons -->
 <div id="customBtnModal" class="modal-bg" onclick="if(event.target===this)closeModal('customBtnModal')">
   <div class="modal">
     <div class="row" style="margin-bottom:10px">
       <h3 class="grow">⚙️ Özel Puan Butonları</h3>
       <button class="r small" onclick="closeModal('customBtnModal')">✕</button>
     </div>
-    <p class="muted">Kendi puan butonlarını ekle (örn: +5 Proje, −2 Devamsızlık). Davranış ve Seçici ekranlarında görünür.</p>
+    <p class="muted">Kendi puan butonlarını ekle (örn: +5 Proje, −2 Devamsızlık).</p>
     <div id="customBtnEditor"></div>
     <button class="s" style="margin-top:8px;width:100%" onclick="addCustomBtn()">+ Yeni Buton Ekle</button>
     <div class="row" style="margin-top:12px">
@@ -461,107 +545,114 @@ button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:poin
 </div>
 
 <script>
-// ─── CONSTANTS & STATE ───────────────────────────────────────────────────────
-const KEY='chemclass_v18_data', CLOUDKEY='chemclass_v15_cloud_settings';
+const KEY='chemclass_v18_data',CLOUDKEY='chemclass_v15_cloud_settings';
 let data={classes:[],students:[],attendance:{},customBtns:[]};
 let picked=[],lastPick=null,groups=[];
 let timerTotal=300,timerLeft=300,timerRun=null;
 let sb=null,sbUser=null,syncTimer=null;
 let activeBoardCode='',activeBoardClass='',boardPoll=null,boardViewData=null;
 let tempCustomBtns=[];
+let sndType='beep';
+let boardRate=3000;
+let editColor=0;
 
-// ─── UTILITIES ────────────────────────────────────────────────────────────────
+// 8 avatar rengi
+const AV_BG=['rgba(0,212,170,.18)','rgba(255,107,53,.18)','rgba(255,215,0,.18)','rgba(167,139,250,.18)','rgba(244,114,182,.18)','rgba(56,189,248,.18)','rgba(52,211,153,.18)','rgba(251,146,60,.18)'];
+const AV_FG=['#00d4aa','#ff6b35','#ffd700','#a78bfa','#f472b6','#38bdf8','#34d399','#fb923c'];
+
+function avSt(s){let c=s.color||0;return `background:${AV_BG[c]||AV_BG[0]};color:${AV_FG[c]||AV_FG[0]}`}
+
+// ─── THEME ────────────────────────────────────────────────────────────────────
+function toggleTheme(){
+  let html=document.documentElement;
+  let dark=html.getAttribute('data-theme')==='dark';
+  html.setAttribute('data-theme',dark?'light':'dark');
+  themeBtn.textContent=dark?'🌙 Koyu Tema':'☀️ Açık Tema';
+  localStorage.setItem('cc_theme',dark?'light':'dark');
+}
+function loadTheme(){
+  let t=localStorage.getItem('cc_theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  themeBtn.textContent=t==='dark'?'☀️ Açık Tema':'🌙 Koyu Tema';
+}
+
+// ─── UTILS ────────────────────────────────────────────────────────────────────
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function msg(t,dur=1800){toast.textContent=t;toast.classList.add('on');clearTimeout(window._toastTimer);window._toastTimer=setTimeout(()=>toast.classList.remove('on'),dur)}
+function msg(t,dur=1800){toast.textContent=t;toast.classList.add('on');clearTimeout(window._tt);window._tt=setTimeout(()=>toast.classList.remove('on'),dur)}
 function closeModal(id){document.getElementById(id).classList.remove('open')}
 function openModal(id){document.getElementById(id).classList.add('open')}
 
 function save(){
-  if(!data.customBtns) data.customBtns=[];
-  if(!data.attendance) data.attendance={};
+  if(!data.customBtns)data.customBtns=[];
+  if(!data.attendance)data.attendance={};
   localStorage.setItem(KEY,JSON.stringify(data));
-  renderAll();
-  scheduleCloudSave();
-  scheduleBoardUpdate();
+  renderAll();scheduleCloudSave();scheduleBoardUpdate();
 }
 
 function tab(id,btn){
   document.querySelectorAll('section').forEach(s=>s.classList.add('hide'));
   document.getElementById(id).classList.remove('hide');
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  renderAll();
+  btn.classList.add('on');renderAll();
 }
 function tabById(id){
   document.querySelectorAll('section').forEach(s=>s.classList.add('hide'));
   document.getElementById(id)?.classList.remove('hide');
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('on'));
   let btn=document.querySelector(`.tabs button[data-tab="${id}"]`);
-  if(btn) btn.classList.add('on');
+  if(btn)btn.classList.add('on');
   renderAll();
   active.textContent=id==='home'?'Ana Ekran':id;
 }
 function goHome(){tab('home',document.querySelector('.tabs button'));window.scrollTo({top:0,behavior:'smooth'})}
 
-// ─── CLASS SELECTS ────────────────────────────────────────────────────────────
+// ─── SELECTS & CHIPS ──────────────────────────────────────────────────────────
 function opts(sel,all=false){
-  if(!sel) return;
+  if(!sel)return;
   let old=sel.value;
   sel.innerHTML=(all?'<option value="">Tüm Öğrenciler</option>':'')+data.classes.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
-  if(old===''||data.classes.includes(old)) sel.value=old;
+  if(old===''||data.classes.includes(old))sel.value=old;
 }
 function setFilter(which,val){
   const map={pick:pickClass,beh:behClass,board:boardClass,grp:grpClass,imp:impClass,att:attClass,reset:resetClass,exp:exportClass};
   if(map[which]){map[which].value=val;if(which==='pick')resetPick();renderAll();}
 }
-function chips(containerId,which,allowAll=false){
-  let el=document.getElementById(containerId); if(!el) return;
+function chips(cid,which,allowAll=false){
+  let el=document.getElementById(cid);if(!el)return;
   const map={pick:pickClass,beh:behClass,board:boardClass,grp:grpClass,imp:impClass,att:attClass,reset:resetClass,exp:exportClass};
-  let sel=map[which]; if(!sel) return;
-  let arr=(allowAll?[['','Tüm Öğrenciler']]:[]).concat(data.classes.map(c=>[c,c]));
+  let sel=map[which];if(!sel)return;
+  let arr=(allowAll?[['','Tüm']]:[]).concat(data.classes.map(c=>[c,c]));
   el.innerHTML=arr.map(([v,t])=>`<button class="${sel.value===v?'b':'s'} small" onclick="setFilter('${which}','${esc(v)}')">${esc(t)}</button>`).join('');
 }
 
 function renderAll(){
-  let vals={
-    pick:pickClass?.value, imp:impClass?.value, beh:behClass?.value,
-    grp:grpClass?.value, board:boardClass?.value,
-    att:attClass?.value, reset:resetClass?.value, exp:exportClass?.value
-  };
-  // Populate all selects
-  [pickClass,impClass,behClass,grpClass,boardClass,attClass,resetClass,exportClass].forEach((s,i)=>{
-    if(!s) return;
-    opts(s, i===2||i===4); // beh and board allow "all"
-  });
-  // Restore selections
-  if(vals.pick!==undefined&&pickClass) pickClass.value=vals.pick;
-  if(vals.imp!==undefined&&impClass) impClass.value=vals.imp;
-  if(vals.beh!==undefined&&behClass) behClass.value=vals.beh;
-  if(vals.grp!==undefined&&grpClass) grpClass.value=vals.grp;
-  if(vals.board!==undefined&&boardClass) boardClass.value=vals.board;
-  if(vals.att!==undefined&&attClass) attClass.value=vals.att;
-  if(vals.reset!==undefined&&resetClass) resetClass.value=vals.reset;
-  if(vals.exp!==undefined&&exportClass) exportClass.value=vals.exp;
-
-  // Populate shareClass (not in the standard list)
-  if(shareClass){
-    let old=shareClass.value;
-    shareClass.innerHTML=data.classes.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
-    if(data.classes.includes(old)) shareClass.value=old;
-  }
-
-  chips('pickChips','pick',false);
-  chips('behChips','beh',true);
-  chips('boardChips','board',true);
-  chips('grpChips','grp',false);
-  chips('impChips','imp',false);
-  chips('attChips','att',false);
-  chips('resetChips','reset',false);
-
-  renderClasses();renderBeh();renderBoard();renderHome();renderCloud();
-  renderAttend();renderCustomBtns();renderCompare();
+  let vals={pick:pickClass?.value,imp:impClass?.value,beh:behClass?.value,grp:grpClass?.value,board:boardClass?.value,att:attClass?.value,reset:resetClass?.value,exp:exportClass?.value};
+  [pickClass,impClass,behClass,grpClass,boardClass,attClass,resetClass,exportClass].forEach((s,i)=>{if(!s)return;opts(s,i===2||i===4);});
+  if(vals.pick!==undefined&&pickClass)pickClass.value=vals.pick;
+  if(vals.imp!==undefined&&impClass)impClass.value=vals.imp;
+  if(vals.beh!==undefined&&behClass)behClass.value=vals.beh;
+  if(vals.grp!==undefined&&grpClass)grpClass.value=vals.grp;
+  if(vals.board!==undefined&&boardClass)boardClass.value=vals.board;
+  if(vals.att!==undefined&&attClass)attClass.value=vals.att;
+  if(vals.reset!==undefined&&resetClass)resetClass.value=vals.reset;
+  if(vals.exp!==undefined&&exportClass)exportClass.value=vals.exp;
+  if(shareClass){let old=shareClass.value;shareClass.innerHTML=data.classes.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');if(data.classes.includes(old))shareClass.value=old;}
+  chips('pickChips','pick');chips('behChips','beh',true);chips('boardChips','board',true);
+  chips('grpChips','grp');chips('impChips','imp');chips('attChips','att');chips('resetChips','reset');
+  renderClasses();renderBeh();renderBoard();renderHome();renderCloud();renderAttend();renderCustomBtns();renderCompare();
   active.textContent=document.querySelector('section:not(.hide)')?.id==='home'?'Ana Ekran':(pickClass?.value||'Tüm Öğrenciler');
+}
+
+// ─── AVATAR COLOR PICKER ──────────────────────────────────────────────────────
+function renderColorPicker(cur){
+  let el=document.getElementById('colorPicker');if(!el)return;
+  editColor=cur||0;
+  el.innerHTML=AV_FG.map((c,i)=>`<div class="cp-dot${i===editColor?' on':''}" style="background:${c}" onclick="pickColor(${i})"></div>`).join('');
+}
+function pickColor(i){
+  editColor=i;
+  document.querySelectorAll('#colorPicker .cp-dot').forEach((d,j)=>d.classList.toggle('on',j===i));
 }
 
 // ─── CLASSES & STUDENTS ───────────────────────────────────────────────────────
@@ -572,11 +663,10 @@ function addClass(){
   data.classes.push(c);data.classes.sort();newClass.value='';save();msg('Sınıf eklendi');
 }
 function addStudent(cls){
-  let n=document.getElementById('name_'+cls).value.trim(), no=document.getElementById('no_'+cls).value.trim();
+  let n=document.getElementById('name_'+cls).value.trim(),no=document.getElementById('no_'+cls).value.trim();
   if(!n)return msg('Ad Soyad girin');
-  data.students.push({id:uid(),className:cls,name:n,no:no,score:0,history:[]});
-  document.getElementById('name_'+cls).value='';
-  document.getElementById('no_'+cls).value='';
+  data.students.push({id:uid(),className:cls,name:n,no,score:0,history:[],color:0});
+  document.getElementById('name_'+cls).value='';document.getElementById('no_'+cls).value='';
   save();msg('Öğrenci eklendi');
 }
 function delClass(c){if(!confirm(c+' sınıfı ve tüm öğrencileri silinsin mi?'))return;data.classes=data.classes.filter(x=>x!==c);data.students=data.students.filter(s=>s.className!==c);save()}
@@ -584,37 +674,54 @@ function clearClass(c){if(!confirm(c+' sınıfındaki öğrenciler silinsin mi?'
 function delStudent(id){if(!confirm('Öğrenci silinsin mi?'))return;data.students=data.students.filter(s=>s.id!==id);save()}
 
 function openEditStudent(id){
-  let s=data.students.find(x=>x.id===id); if(!s) return;
-  editId.value=id; editName.value=s.name; editNo.value=s.no||'';
-  openModal('editModal');
+  let s=data.students.find(x=>x.id===id);if(!s)return;
+  editId.value=id;editName.value=s.name;editNo.value=s.no||'';
+  renderColorPicker(s.color||0);openModal('editModal');
 }
 function saveEditStudent(){
-  let id=editId.value, name=editName.value.trim(), no=editNo.value.trim();
+  let id=editId.value,name=editName.value.trim(),no=editNo.value.trim();
   if(!name)return msg('Ad Soyad boş olamaz');
-  let s=data.students.find(x=>x.id===id); if(!s) return;
-  s.name=name; s.no=no; closeModal('editModal'); save(); msg('Öğrenci güncellendi');
+  let s=data.students.find(x=>x.id===id);if(!s)return;
+  s.name=name;s.no=no;s.color=editColor;closeModal('editModal');save();msg('Öğrenci güncellendi');
+}
+
+// ─── TRANSFER ─────────────────────────────────────────────────────────────────
+function openTransfer(id){
+  let s=data.students.find(x=>x.id===id);if(!s)return;
+  let others=data.classes.filter(c=>c!==s.className);
+  if(!others.length)return msg('Taşınacak başka sınıf yok');
+  transferId.value=id;
+  transferInfo.textContent=s.name+' — Şu an: '+s.className;
+  transferTarget.innerHTML=others.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  openModal('transferModal');
+}
+function doTransfer(){
+  let id=transferId.value,target=transferTarget.value;
+  let s=data.students.find(x=>x.id===id);if(!s||!target)return;
+  s.className=target;closeModal('transferModal');save();msg(s.name+' → '+target);
 }
 
 function openHistModal(id){
-  let s=data.students.find(x=>x.id===id); if(!s) return;
+  let s=data.students.find(x=>x.id===id);if(!s)return;
   histModalTitle.textContent=s.name+' — Puan Geçmişi';
   let h=s.history||[];
   if(!h.length){histModalContent.innerHTML='<div class="muted">Henüz puan kaydı yok.</div>';openModal('histModal');return;}
   histModalContent.innerHTML=h.map(item=>{
-    let cls=item.d>0?'hist-pos':'hist-neg';
-    let sign=item.d>0?'+':'';
+    let cls=item.d>0?'hist-pos':'hist-neg',sign=item.d>0?'+':'';
     return `<div class="hist-item ${cls}"><div class="row"><b>${sign}${item.d}</b><span class="grow" style="margin-left:8px">${esc(item.n)}</span><span class="muted">${esc(item.t)}</span></div></div>`;
   }).join('');
   openModal('histModal');
 }
 
 function renderClasses(){
+  let q=(document.getElementById('stuSearch')?.value||'').toLocaleLowerCase('tr-TR');
   classList.innerHTML=data.classes.map(c=>{
-    let ss=data.students.filter(s=>s.className===c);
-    let total=ss.reduce((a,s)=>a+(s.score||0),0);
+    let all=data.students.filter(s=>s.className===c);
+    let ss=q?all.filter(s=>s.name.toLocaleLowerCase('tr-TR').includes(q)||String(s.no||'').includes(q)):all;
+    let total=all.reduce((a,s)=>a+(s.score||0),0);
     return `<div class="card">
       <div class="row">
-        <h3 class="grow">${esc(c)} <span class="muted">${ss.length} öğrenci • Toplam: ${total>0?'+':''}${total}</span></h3>
+        <h3 class="grow">${esc(c)} <span class="muted">${all.length} öğrenci • Toplam: ${total>0?'+':''}${total}</span></h3>
         <button class="s small" onclick="clearClass('${esc(c)}')">Temizle</button>
         <button class="r small" onclick="delClass('${esc(c)}')">Sil</button>
       </div>
@@ -624,15 +731,14 @@ function renderClasses(){
         <button class="b" onclick="addStudent('${esc(c)}')">Ekle</button>
       </div>
       ${ss.map(s=>`<div class="student">
-        <div class="av">${esc((s.name||'?')[0])}</div>
-        <div class="grow">
-          <b>${esc(s.name)}</b>
-          <div class="muted">No: ${esc(s.no||'-')} • Puan: ${s.score>0?'+':''}${s.score||0}</div>
-        </div>
-        <button class="s small" onclick="openHistModal('${s.id}')">📋 Geçmiş</button>
-        <button class="s small" onclick="openEditStudent('${s.id}')">✏️ Düzenle</button>
+        <div class="av" style="${avSt(s)}">${esc((s.name||'?')[0])}</div>
+        <div class="grow"><b>${esc(s.name)}</b><div class="muted">No: ${esc(s.no||'-')} • Puan: ${s.score>0?'+':''}${s.score||0}</div></div>
+        <button class="s small" onclick="openHistModal('${s.id}')">📋</button>
+        <button class="s small" onclick="openEditStudent('${s.id}')">✏️</button>
+        <button class="s small" onclick="openTransfer('${s.id}')">↔️ Taşı</button>
         <button class="r small" onclick="delStudent('${s.id}')">Sil</button>
       </div>`).join('')}
+      ${q&&!ss.length?'<div class="muted" style="padding:8px">Arama sonucu yok.</div>':''}
     </div>`;
   }).join('')||'<div class="card muted">Henüz sınıf yok.</div>';
 }
@@ -641,13 +747,16 @@ function renderClasses(){
 function getByClass(c){return data.students.filter(s=>!c||s.className===c)}
 function pointText(d,label){return label||(d===1?'Katılım':d===2?'Doğru cevap':d===3?'Grup liderliği':d===-1?'Uyarı':(d>0?'Puan eklendi':'Puan düşürüldü'))}
 function changeScore(id,d,label){
-  let s=data.students.find(x=>x.id===id); if(!s) return;
-  s.score=(s.score||0)+d;
-  s.history=s.history||[];
+  let s=data.students.find(x=>x.id===id);if(!s)return;
+  s.score=(s.score||0)+d;s.history=s.history||[];
   let n=(document.getElementById('note')?.value||'').trim();
   s.history.unshift({d,n:n||pointText(d,label),t:new Date().toLocaleString('tr-TR')});
   if(document.getElementById('note'))note.value='';
-  if(document.getElementById('quickScore')&&id===lastPick)quickScore.textContent=s.score;
+  if(document.getElementById('quickScore')&&id===lastPick){
+    let el=document.getElementById('quickScore');
+    el.textContent=s.score;
+    el.classList.remove('score-pop');void el.offsetWidth;el.classList.add('score-pop');
+  }
   save();
 }
 
@@ -656,53 +765,37 @@ function resetPick(){
   picked=[];lastPick=null;
   pickName.textContent='?';
   pickInfo.textContent=pickClass?.value?'Seçim yapılacak':'Önce sınıf seçin';
-  quick.classList.add('hide');
-  recent.textContent='Yok';
-  bigpickBox.classList.remove('spinning');
+  quick.classList.add('hide');recent.textContent='Yok';bigpickBox.classList.remove('spinning');
 }
-
 function pickStudent(){
-  let c=pickClass.value;
-  if(!c)return msg('Önce sınıf seçin');
-  let all=getByClass(c);
-  if(!all.length)return msg('Bu sınıfta öğrenci yok');
-  let recentIds=picked.slice(-5);
-  let rem=all.filter(s=>!recentIds.includes(s.id));
+  let c=pickClass.value;if(!c)return msg('Önce sınıf seçin');
+  let all=getByClass(c);if(!all.length)return msg('Bu sınıfta öğrenci yok');
+  let recentIds=picked.slice(-5),rem=all.filter(s=>!recentIds.includes(s.id));
   if(!rem.length){rem=all;msg('Sınıf küçük — son 5 kuralı gevşetildi');}
-
-  // Spinning animation
   bigpickBox.classList.add('spinning');
-  let spins=0, total=12, chosen=rem[Math.floor(Math.random()*rem.length)];
-  let allNames=rem.map(s=>s.name);
-  let spinInterval=setInterval(()=>{
-    pickName.textContent=allNames[spins%allNames.length];
-    spins++;
+  let spins=0,total=12,chosen=rem[Math.floor(Math.random()*rem.length)],allNames=rem.map(s=>s.name);
+  let iv=setInterval(()=>{
+    pickName.textContent=allNames[spins%allNames.length];spins++;
     if(spins>=total){
-      clearInterval(spinInterval);
-      bigpickBox.classList.remove('spinning');
-      lastPick=chosen.id;
-      picked.push(chosen.id);
-      pickName.textContent=chosen.name;
-      pickInfo.textContent='No: '+(chosen.no||'-');
-      quick.classList.remove('hide');
-      quickScore.textContent=chosen.score||0;
+      clearInterval(iv);bigpickBox.classList.remove('spinning');
+      lastPick=chosen.id;picked.push(chosen.id);
+      pickName.textContent=chosen.name;pickInfo.textContent='No: '+(chosen.no||'-');
+      quick.classList.remove('hide');quickScore.textContent=chosen.score||0;
       renderCustomBtnsQuick();
       recent.textContent=picked.slice(-8).map(id=>data.students.find(s=>s.id===id)?.name).filter(Boolean).reverse().join(', ');
-      scheduleBoardUpdate(); // seçilen öğrenci tahtada görünsün
+      scheduleBoardUpdate();
     }
   },60);
 }
 
 // ─── BEHAVIOUR ────────────────────────────────────────────────────────────────
 function renderBeh(){
-  let ss=getByClass(behClass?.value);
+  let q=(document.getElementById('behSearch')?.value||'').toLocaleLowerCase('tr-TR');
+  let ss=getByClass(behClass?.value).filter(s=>!q||s.name.toLocaleLowerCase('tr-TR').includes(q)||String(s.no||'').includes(q));
   behList.innerHTML=ss.map(s=>`
     <div class="student">
-      <div class="av">${esc((s.name||'?')[0])}</div>
-      <div class="grow">
-        <b>${esc(s.name)}</b>
-        <div class="muted">${esc(s.className)} • No: ${esc(s.no||'-')}</div>
-      </div>
+      <div class="av" style="${avSt(s)}">${esc((s.name||'?')[0])}</div>
+      <div class="grow"><b>${esc(s.name)}</b><div class="muted">${esc(s.className)} • No: ${esc(s.no||'-')}</div></div>
       <div class="row">
         <button class="warn act" onclick="changeScore('${s.id}',-1,'Uyarı')">−1</button>
         <button class="good act" onclick="changeScore('${s.id}',1,'Katılım')">+1</button>
@@ -719,12 +812,14 @@ function renderBeh(){
 
 // ─── BOARD ────────────────────────────────────────────────────────────────────
 function renderBoard(){
+  let q=(document.getElementById('boardSearch')?.value||'').toLocaleLowerCase('tr-TR');
   let ss=getByClass(boardClass?.value).sort((a,b)=>(b.score||0)-(a.score||0));
+  if(q)ss=ss.filter(s=>s.name.toLocaleLowerCase('tr-TR').includes(q)||String(s.no||'').includes(q));
   let mx=Math.max(1,...ss.map(s=>Math.abs(s.score||0)));
   boardList.innerHTML=ss.map((s,i)=>`
     <div class="student">
       <b style="width:34px;flex-shrink:0">#${i+1}</b>
-      <div class="av">${esc((s.name||'?')[0])}</div>
+      <div class="av" style="${avSt(s)}">${esc((s.name||'?')[0])}</div>
       <div class="grow">
         <b>${esc(s.name)}</b>
         <div class="bar"><i style="width:${Math.max(4,Math.abs(s.score||0)/mx*100)}%"></i></div>
@@ -739,15 +834,14 @@ let compareVisible=false;
 function toggleCompare(){
   compareVisible=!compareVisible;
   document.getElementById('compareBox').classList.toggle('hide',!compareVisible);
-  if(compareVisible) renderCompare();
+  if(compareVisible)renderCompare();
 }
 function renderCompare(){
-  if(!compareVisible) return;
+  if(!compareVisible)return;
   let stats=data.classes.map(c=>{
     let ss=data.students.filter(s=>s.className===c);
-    let total=ss.reduce((a,s)=>a+(s.score||0),0);
-    let avg=ss.length?Math.round(total/ss.length*10)/10:0;
-    return {c,total,avg,n:ss.length};
+    let total=ss.reduce((a,s)=>a+(s.score||0),0),avg=ss.length?Math.round(total/ss.length*10)/10:0;
+    return{c,total,avg,n:ss.length};
   });
   let maxTotal=Math.max(1,...stats.map(x=>Math.abs(x.total)));
   let colors=['#00d4aa','#ff6b35','#ffd700','#a78bfa','#f472b6','#38bdf8'];
@@ -763,16 +857,11 @@ function renderCompare(){
 
 // ─── GROUPS ───────────────────────────────────────────────────────────────────
 function makeGroups(){
-  let ss=getByClass(grpClass?.value);
-  if(!ss.length)return msg('Öğrenci yok');
+  let ss=getByClass(grpClass?.value);if(!ss.length)return msg('Öğrenci yok');
   ss=[...ss].sort(()=>Math.random()-.5);
   let v=Math.max(1,parseInt(grpVal.value)||4),arr=[];
-  if(grpMode.value==='count'){
-    for(let i=0;i<Math.min(v,ss.length);i++)arr.push([]);
-    ss.forEach((s,i)=>arr[i%arr.length].push(s));
-  } else {
-    for(let i=0;i<ss.length;i+=v)arr.push(ss.slice(i,i+v));
-  }
+  if(grpMode.value==='count'){for(let i=0;i<Math.min(v,ss.length);i++)arr.push([]);ss.forEach((s,i)=>arr[i%arr.length].push(s));}
+  else{for(let i=0;i<ss.length;i+=v)arr.push(ss.slice(i,i+v));}
   groups=arr.map((m,i)=>({name:'Grup '+(i+1),score:0,m,id:uid()}));
   renderGroups();
 }
@@ -793,15 +882,13 @@ function renderGroups(){
 
 // ─── ATTENDANCE ───────────────────────────────────────────────────────────────
 function todayStr(){return new Date().toISOString().slice(0,10)}
-let attState={}; // {studentId: 'P'|'A'|'E'|''}
-
+let attState={};
 function renderAttend(){
   let cls=attClass?.value;
   if(!cls){attendList.innerHTML='<div class="muted">Önce sınıf seçin.</div>';return;}
   let ss=data.students.filter(s=>s.className===cls);
   if(!ss.length){attendList.innerHTML='<div class="muted">Bu sınıfta öğrenci yok.</div>';return;}
-  if(!attDate.value) attDate.value=todayStr();
-  // Load saved attendance for this date if exists
+  if(!attDate.value)attDate.value=todayStr();
   let key=cls+'_'+attDate.value;
   if(!attState._key||attState._key!==key){
     attState={_key:key};
@@ -811,11 +898,11 @@ function renderAttend(){
   attendList.innerHTML=ss.map(s=>{
     let st=attState[s.id]||'';
     return `<div class="student">
-      <div class="av">${esc((s.name||'?')[0])}</div>
+      <div class="av" style="${avSt(s)}">${esc((s.name||'?')[0])}</div>
       <div class="grow"><b>${esc(s.name)}</b><div class="muted">No: ${esc(s.no||'-')}</div></div>
-      <button class="att-btn ${st==='P'?'att-p':'att-n'}" onclick="setAtt('${s.id}','P')" title="Geldi">✓</button>
-      <button class="att-btn ${st==='A'?'att-a':'att-n'}" onclick="setAtt('${s.id}','A')" title="Gelmedi">✗</button>
-      <button class="att-btn ${st==='E'?'att-e':'att-n'}" onclick="setAtt('${s.id}','E')" title="İzinli/Geç">⚡</button>
+      <button class="att-btn ${st==='P'?'att-p':'att-n'}" onclick="setAtt('${s.id}','P')">✓</button>
+      <button class="att-btn ${st==='A'?'att-a':'att-n'}" onclick="setAtt('${s.id}','A')">✗</button>
+      <button class="att-btn ${st==='E'?'att-e':'att-n'}" onclick="setAtt('${s.id}','E')">⚡</button>
     </div>`;
   }).join('');
   let cnt={P:0,A:0,E:0,x:0};
@@ -823,49 +910,32 @@ function renderAttend(){
   document.getElementById('attStatsBox').innerHTML=`<div class="card"><div class="row">
     <span class="good act">✓ Geldi: ${cnt.P||0}</span>
     <span class="warn act">✗ Gelmedi: ${cnt.A||0}</span>
-    <span style="background:rgba(255,215,0,.15);color:var(--go);border:1px solid rgba(255,215,0,.3)" class="act">⚡ İzinli/Geç: ${cnt.E||0}</span>
+    <span style="background:rgba(255,215,0,.15);color:var(--go);border:1px solid rgba(255,215,0,.3)" class="act">⚡ İzinli: ${cnt.E||0}</span>
     <span class="pill">? İşaretlenmedi: ${cnt.x||0}</span>
   </div></div>`;
   document.getElementById('attStatsBox').classList.remove('hide');
 }
-
-function setAtt(id,val){
-  if(attState[id]===val) attState[id]=''; // toggle off
-  else attState[id]=val;
-  renderAttend();
-}
-function attMarkAll(val){
-  let cls=attClass?.value; if(!cls) return;
-  let ss=data.students.filter(s=>s.className===cls);
-  ss.forEach(s=>attState[s.id]=val);
-  renderAttend();
-}
+function setAtt(id,val){attState[id]===val?attState[id]='':attState[id]=val;renderAttend();}
+function attMarkAll(val){let cls=attClass?.value;if(!cls)return;data.students.filter(s=>s.className===cls).forEach(s=>attState[s.id]=val);renderAttend();}
 function saveAttendance(){
-  let cls=attClass?.value; if(!cls) return msg('Sınıf seçin');
-  let date=attDate.value; if(!date) return msg('Tarih seçin');
-  if(!data.attendance) data.attendance={};
-  let key=cls+'_'+date;
-  let snapshot={};
-  let ss=data.students.filter(s=>s.className===cls);
-  ss.forEach(s=>snapshot[s.id]=attState[s.id]||'');
-  data.attendance[key]=snapshot;
-  save();msg('Yoklama kaydedildi ✓');
+  let cls=attClass?.value;if(!cls)return msg('Sınıf seçin');
+  let date=attDate.value;if(!date)return msg('Tarih seçin');
+  if(!data.attendance)data.attendance={};
+  let key=cls+'_'+date,snap={};
+  data.students.filter(s=>s.className===cls).forEach(s=>snap[s.id]=attState[s.id]||'');
+  data.attendance[key]=snap;save();msg('Yoklama kaydedildi ✓');
 }
-
 function showAttStats(){
-  let cls=attClass?.value; if(!cls) return msg('Sınıf seçin');
-  let ss=data.students.filter(s=>s.className===cls);
-  if(!ss.length) return msg('Bu sınıfta öğrenci yok');
-  // Find all attendance keys for this class
+  let cls=attClass?.value;if(!cls)return msg('Sınıf seçin');
+  let ss=data.students.filter(s=>s.className===cls);if(!ss.length)return msg('Bu sınıfta öğrenci yok');
   let keys=Object.keys(data.attendance||{}).filter(k=>k.startsWith(cls+'_')).sort();
-  if(!keys.length){attStatsContent.innerHTML='<div class="muted">Bu sınıf için henüz yoklama kaydı yok.</div>';openModal('attStatsModal');return;}
-  // Per-student summary
+  if(!keys.length){attStatsContent.innerHTML='<div class="muted">Henüz yoklama kaydı yok.</div>';openModal('attStatsModal');return;}
   let rows=ss.map(s=>{
     let P=0,A=0,E=0,total=keys.length;
     keys.forEach(k=>{let v=(data.attendance[k]||{})[s.id];if(v==='P')P++;else if(v==='A')A++;else if(v==='E')E++;});
-    return {name:s.name,no:s.no,P,A,E,total};
+    return{name:s.name,no:s.no,P,A,E,total};
   });
-  attStatsContent.innerHTML=`<p class="muted">${keys.length} günlük kayıt bulundu (${keys[0].split('_')[1]} – ${keys[keys.length-1].split('_')[1]})</p>`+
+  attStatsContent.innerHTML=`<p class="muted">${keys.length} günlük kayıt (${keys[0].split('_')[1]} – ${keys[keys.length-1].split('_')[1]})</p>`+
     `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
     <tr style="color:var(--t2)"><th style="text-align:left;padding:6px">Öğrenci</th><th>No</th><th style="color:var(--gr)">✓ Geldi</th><th style="color:var(--re)">✗ Gelmedi</th><th style="color:var(--go)">⚡ İzinli</th><th>% Devam</th></tr>
     ${rows.map(r=>`<tr style="border-top:1px solid var(--bd)">
@@ -883,29 +953,59 @@ function showAttStats(){
 // ─── CUSTOM BUTTONS ───────────────────────────────────────────────────────────
 function renderCustomBtns(){
   let btns=data.customBtns||[];
-  customBtnsList.innerHTML=btns.length
-    ? btns.map(b=>`<span class="custom-score-btn">${b.val>0?'+':''}${b.val} ${esc(b.label)}</span>`).join(' ')
-    : '<span class="muted">Henüz özel buton yok. Düzenle\'ye bas.</span>';
+  customBtnsList.innerHTML=btns.length?btns.map(b=>`<span class="custom-score-btn">${b.val>0?'+':''}${b.val} ${esc(b.label)}</span>`).join(' '):'<span class="muted">Henüz özel buton yok. Düzenle\'ye bas.</span>';
 }
 function renderCustomBtnsQuick(){
-  let el=document.getElementById('customBtnsQuick'); if(!el||!lastPick) return;
+  let el=document.getElementById('customBtnsQuick');if(!el||!lastPick)return;
   el.innerHTML=(data.customBtns||[]).map(b=>`<button class="custom-score-btn act" onclick="changeScore('${lastPick}',${b.val},'${esc(b.label)}')">${b.val>0?'+':''}${b.val} ${esc(b.label)}</button>`).join('');
 }
-function showCustomBtnModal(){
-  tempCustomBtns=JSON.parse(JSON.stringify(data.customBtns||[]));
-  renderCustomBtnEditor();
-  openModal('customBtnModal');
-}
+function showCustomBtnModal(){tempCustomBtns=JSON.parse(JSON.stringify(data.customBtns||[]));renderCustomBtnEditor();openModal('customBtnModal');}
 function renderCustomBtnEditor(){
   customBtnEditor.innerHTML=tempCustomBtns.map((b,i)=>`
     <div class="row" style="margin:6px 0">
-      <input class="inp" style="max-width:100px" type="number" value="${b.val}" onchange="tempCustomBtns[${i}].val=parseInt(this.value)||0" placeholder="Puan (+/-)">
+      <input class="inp" style="max-width:100px" type="number" value="${b.val}" onchange="tempCustomBtns[${i}].val=parseInt(this.value)||0" placeholder="Puan">
       <input class="inp" style="max-width:180px" value="${esc(b.label)}" onchange="tempCustomBtns[${i}].label=this.value" placeholder="Buton adı">
       <button class="r small" onclick="tempCustomBtns.splice(${i},1);renderCustomBtnEditor()">✕</button>
     </div>`).join('');
 }
 function addCustomBtn(){tempCustomBtns.push({val:5,label:'Proje'});renderCustomBtnEditor();}
 function saveCustomBtns(){data.customBtns=tempCustomBtns.filter(b=>b.label.trim());closeModal('customBtnModal');save();msg('Butonlar kaydedildi');}
+
+// ─── SOUND ────────────────────────────────────────────────────────────────────
+function setSnd(type,btn){
+  sndType=type;localStorage.setItem('cc_snd',type);
+  document.querySelectorAll('.snd-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+function loadSnd(){
+  sndType=localStorage.getItem('cc_snd')||'beep';
+  let btn=document.getElementById('snd-'+sndType);
+  if(btn){document.querySelectorAll('.snd-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+}
+function beep(){
+  if(sndType==='silent')return;
+  try{
+    let A=window.AudioContext||window.webkitAudioContext,ctx=new A();
+    if(sndType==='beep'){
+      let o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);o.frequency.value=880;g.gain.value=.08;
+      o.start();setTimeout(()=>{o.stop();ctx.close()},350);
+    }else if(sndType==='chime'){
+      [523,659,784,1047].forEach((f,i)=>{
+        let o=ctx.createOscillator(),g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);o.frequency.value=f;g.gain.value=.05;
+        o.start(ctx.currentTime+i*.12);o.stop(ctx.currentTime+i*.12+.18);
+      });
+      setTimeout(()=>ctx.close(),800);
+    }else if(sndType==='alarm'){
+      let o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);o.type='sawtooth';g.gain.value=.06;
+      o.frequency.setValueAtTime(440,ctx.currentTime);o.frequency.setValueAtTime(880,ctx.currentTime+.15);
+      o.frequency.setValueAtTime(440,ctx.currentTime+.3);o.frequency.setValueAtTime(880,ctx.currentTime+.45);
+      o.start();setTimeout(()=>{o.stop();ctx.close()},600);
+    }
+  }catch(e){}
+}
 
 // ─── EXPORT EXCEL ─────────────────────────────────────────────────────────────
 function exportToExcel(){
@@ -914,17 +1014,15 @@ function exportToExcel(){
   if(!ss.length)return msg('Öğrenci yok');
   let wsData=[['Sıra','No','Ad Soyad','Sınıf','Puan']];
   ss.forEach((s,i)=>wsData.push([i+1,s.no||'',s.name,s.className,s.score||0]));
-  let wb=XLSX.utils.book_new();
-  let ws=XLSX.utils.aoa_to_sheet(wsData);
+  let wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(wsData);
   ws['!cols']=[{wch:6},{wch:10},{wch:28},{wch:10},{wch:8}];
   XLSX.utils.book_append_sheet(wb,ws,cls||'Tum Siniflar');
-  XLSX.writeFile(wb,'chemclass-'+(cls||'tum')+'-'+todayStr()+'.xlsx');
-  msg('Excel indirildi');
+  XLSX.writeFile(wb,'chemclass-'+(cls||'tum')+'-'+todayStr()+'.xlsx');msg('Excel indirildi');
 }
 
 // ─── RESET SCORES ─────────────────────────────────────────────────────────────
 function resetScores(){
-  let cls=resetClass?.value; if(!cls)return msg('Sınıf seçin');
+  let cls=resetClass?.value;if(!cls)return msg('Sınıf seçin');
   if(!confirm(cls+' sınıfının TÜM puanları ve geçmişleri sıfırlansın mı? Bu işlem geri alınamaz.'))return;
   data.students.filter(s=>s.className===cls).forEach(s=>{s.score=0;s.history=[];});
   save();msg(cls+' sınıfı sıfırlandı');
@@ -951,7 +1049,6 @@ function startTimer(){
 }
 function pauseTimer(){if(timerRun){clearInterval(timerRun);timerRun=null;}}
 function resetTimer(){pauseTimer();timerTotal=(parseInt(timerMin.value)||0)*60+(parseInt(timerSec.value)||0);timerLeft=timerTotal||300;drawTimer();}
-function beep(){try{let A=window.AudioContext||window.webkitAudioContext,ctx=new A(),o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=880;g.gain.value=.08;o.start();setTimeout(()=>{o.stop();ctx.close()},350);}catch(e){}}
 
 // ─── CSV / EXCEL IMPORT ────────────────────────────────────────────────────────
 function splitCsvLine(line){
@@ -964,49 +1061,39 @@ function splitCsvLine(line){
   }
   out.push(cur);return out;
 }
-function cleanCell(x){return String(x??'').replace(/^\uFEFF/,'').replace(/^"|"$/g,'').trim()}
+function cleanCell(x){return String(x??'').replace(/^﻿/,'').replace(/^"|"$/g,'').trim()}
 function isHeader(vals){let j=vals.join(' ').toLocaleLowerCase('tr-TR');return /adı soyadı|adi soyadi|okul numarası|okul numarasi|sıra no|sira no|ağırlıklı|agirlikli|puanı|puani|muaf|proje|başarılı|basarili|öğrenci sayısı|ogrenci sayisi|müdür|mudur|öğretmeni|ogretmeni|devamsızlık|devamsizlik|y\d/.test(j)}
 function looksName(x){x=cleanCell(x);if(!x||x.length<5)return false;if(/^\d+$/.test(x))return false;if(/başarılı|basarili|başarısız|basarisiz|oranı|orani|müdür|mudur|öğretmen|ogretmen|devamsız|devamsiz|millî eğitim|milli egitim/i.test(x))return false;return /[A-Za-zÇĞİÖŞÜçğıöşü]/.test(x)&&x.replace(/\s+/g,' ').split(' ').length>=2}
 function looksNo(x){x=cleanCell(x);return /^\d{1,6}$/.test(x)}
 function extractStudent(vals){
-  vals=vals.map(cleanCell);
-  if(isHeader(vals))return null;
+  vals=vals.map(cleanCell);if(isHeader(vals))return null;
   let wide=vals.length>4;
   for(let i=0;i<vals.length-1;i++){
     if(looksNo(vals[i])&&looksName(vals[i+1]))return{no:vals[i],name:vals[i+1]};
     if(i<vals.length-2&&looksNo(vals[i])&&looksNo(vals[i+1])&&looksName(vals[i+2]))return{no:vals[i+1],name:vals[i+2]};
   }
-  if(!wide){
-    if(looksName(vals[0]))return{name:vals[0],no:looksNo(vals[1])?vals[1]:''};
-    if(looksNo(vals[0])&&looksName(vals[1]))return{no:vals[0],name:vals[1]};
-  }
+  if(!wide){if(looksName(vals[0]))return{name:vals[0],no:looksNo(vals[1])?vals[1]:''};if(looksNo(vals[0])&&looksName(vals[1]))return{no:vals[0],name:vals[1]};}
   let ni=vals.findIndex(looksName);
   if(ni>=0){let no='';for(let k of[ni-1,ni+1,0,1,2]){if(looksNo(vals[k])){no=vals[k];break;}}if(no||!wide)return{name:vals[ni],no};}
   return null;
 }
 function readFile(e){
-  let f=e.target.files[0],cls=impClass?.value;
-  if(!f)return;
+  let f=e.target.files[0],cls=impClass?.value;if(!f)return;
   if(!cls){msg('Önce sınıf seçin');importStatus.textContent='Aktarım durdu: önce sınıf seçmelisin.';return;}
   importStatus.textContent='Dosya okunuyor: '+f.name;
   let reader=new FileReader();
   reader.onload=ev=>{
     try{
       let rows=[];
-      if(f.name.toLowerCase().endsWith('.csv')){
-        rows=String(ev.target.result||'').split(/\r?\n/).map(splitCsvLine);
-      }else{
-        let wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
-        rows=XLSX.utils.sheet_to_array(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});
-      }
+      if(f.name.toLowerCase().endsWith('.csv')){rows=String(ev.target.result||'').split(/\r?\n/).map(splitCsvLine);}
+      else{let wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});rows=XLSX.utils.sheet_to_array(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});}
       let added=0,skipped=0,dup=0;
       rows.forEach(r=>{
         let st=extractStudent(r);if(!st){skipped++;return;}
-        st.name=st.name.replace(/\s+/g,' ').trim();st.no=String(st.no||'').trim();
-        if(!st.name){skipped++;return;}
+        st.name=st.name.replace(/\s+/g,' ').trim();st.no=String(st.no||'').trim();if(!st.name){skipped++;return;}
         let exists=data.students.some(s=>s.className===cls&&((st.no&&s.no===st.no)||s.name.toLocaleLowerCase('tr-TR')===st.name.toLocaleLowerCase('tr-TR')));
         if(exists){dup++;return;}
-        data.students.push({id:uid(),className:cls,name:st.name,no:st.no,score:0,history:[]});added++;
+        data.students.push({id:uid(),className:cls,name:st.name,no:st.no,score:0,history:[],color:0});added++;
       });
       e.target.value='';save();
       let info=`${added} öğrenci eklendi. ${dup} tekrar, ${skipped} satır atlandı.`;
@@ -1033,7 +1120,7 @@ function importData(e){
 
 // ─── BOARD SHARE / VIEW ───────────────────────────────────────────────────────
 function makeBoardSnapshot(cls){
-  let students=getByClass(cls).map(s=>({id:s.id,name:s.name,no:s.no||'',className:s.className,score:s.score||0})).sort((a,b)=>(b.score||0)-(a.score||0));
+  let students=getByClass(cls).map(s=>({id:s.id,name:s.name,no:s.no||'',className:s.className,score:s.score||0,color:s.color||0})).sort((a,b)=>(b.score||0)-(a.score||0));
   let recentNames=picked.slice(-8).map(id=>data.students.find(s=>s.id===id)).filter(s=>s&&(!cls||s.className===cls)).map(s=>s.name).reverse();
   return{className:cls||'Tüm Öğrenciler',students,recent:recentNames,updatedAt:new Date().toISOString()};
 }
@@ -1042,8 +1129,7 @@ async function createBoardCode(){
   if(!sbUser)await getSession();
   if(!sb||!sbUser)return msg('Tahta kodu için önce buluta giriş yapın');
   let cls=shareClass?.value;if(!cls)return msg('Tahta için sınıf seçin');
-  activeBoardCode=randomBoardCode();
-  activeBoardClass=cls;
+  activeBoardCode=randomBoardCode();activeBoardClass=cls;
   let hours=parseInt(shareHours?.value)||8;
   let row={code:activeBoardCode,user_id:sbUser.id,class_name:cls,app_data:makeBoardSnapshot(cls),active:true,expires_at:new Date(Date.now()+hours*3600000).toISOString(),updated_at:new Date().toISOString()};
   let{error}=await sb.from('chemclass_board_sessions').upsert(row,{onConflict:'code'});
@@ -1051,22 +1137,23 @@ async function createBoardCode(){
   boardCodeText.textContent=activeBoardCode;
   boardCodeInfo.textContent=cls+' sınıfı için '+hours+' saat geçerli.';
   let url=location.origin+location.pathname+'?board='+activeBoardCode;
-  boardUrl.value=url;boardUrlBox.style.display='flex';
-  msg('Tahta kodu oluşturuldu ✓');
+  boardUrl.value=url;boardUrlBox.style.display='flex';msg('Tahta kodu oluşturuldu ✓');
 }
 async function refreshBoardSession(){
   if(!activeBoardCode)return;
   if(!sbUser)await getSession();if(!sb||!sbUser)return;
-  // Aktif tahta sınıfını kullan (shareClass veya kayıtlı sınıf)
   let cls=activeBoardClass||shareClass?.value||'';
-  let{error}=await sb.from('chemclass_board_sessions').update({class_name:cls,app_data:makeBoardSnapshot(cls),updated_at:new Date().toISOString()}).eq('code',activeBoardCode).eq('user_id',sbUser.id);
-  if(error)return;
+  await sb.from('chemclass_board_sessions').update({class_name:cls,app_data:makeBoardSnapshot(cls),updated_at:new Date().toISOString()}).eq('code',activeBoardCode).eq('user_id',sbUser.id);
 }
 async function manualRefreshBoard(){
   if(!activeBoardCode)return msg('Önce tahta kodu oluşturun');
-  await refreshBoardSession();
-  msg('Tahta güncellendi ✓');
-}if(!activeBoardCode||!sbUser||!sb)return;clearTimeout(window.boardUpdateTimer);window.boardUpdateTimer=setTimeout(refreshBoardSession,1200);}
+  await refreshBoardSession();msg('Tahta güncellendi ✓');
+}
+function scheduleBoardUpdate(){
+  if(!activeBoardCode||!sbUser||!sb)return;
+  clearTimeout(window.boardUpdateTimer);
+  window.boardUpdateTimer=setTimeout(refreshBoardSession,1200);
+}
 async function closeBoardSession(){
   if(!activeBoardCode)return msg('Açık tahta kodu yok');
   if(!sbUser)await getSession();if(!sb||!sbUser)return;
@@ -1077,6 +1164,16 @@ async function closeBoardSession(){
 function copyBoardUrl(){boardUrl.select();document.execCommand('copy');msg('Tahta linki kopyalandı');}
 function enterBoardCode(){let c=(boardEnterCode.value||'').trim();if(!/^\d{6}$/.test(c))return msg('6 haneli kod girin');location.href=location.origin+location.pathname+'?board='+c;}
 function boardOnlyUI(){document.querySelector('.top').style.display='none';document.querySelector('.tabs').style.display='none';document.querySelectorAll('section').forEach(s=>s.classList.add('hide'));document.getElementById('boardView').classList.remove('hide');}
+
+function setBoardRate(ms,btn){
+  boardRate=ms;
+  document.querySelectorAll('.rate-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  if(boardPoll){
+    clearInterval(boardPoll);
+    let code=new URLSearchParams(location.search).get('board');
+    if(code)boardPoll=setInterval(()=>loadBoardByCode(code),ms);
+  }
+}
 async function loadBoardByCode(code){
   initSupabase();if(!sb)return;
   let{data:row,error}=await sb.from('chemclass_board_sessions').select('code,class_name,app_data,updated_at,active,expires_at').eq('code',code).eq('active',true).maybeSingle();
@@ -1088,10 +1185,13 @@ function renderBoardView(code,row){
   let d=boardViewData||{},ss=(d.students||[]).slice().sort((a,b)=>(b.score||0)-(a.score||0));
   bvClass.textContent='🖥️ '+(d.className||row.class_name||'Tahta Modu');bvCode.textContent=code;bvCount.textContent=ss.length;bvTotal.textContent=ss.reduce((a,s)=>a+(s.score||0),0);bvUpdated.textContent='Güncel: '+new Date(row.updated_at||Date.now()).toLocaleTimeString('tr-TR');
   let mx=Math.max(1,...ss.map(s=>Math.abs(s.score||0)));
-  bvList.innerHTML=ss.map((s,i)=>`<div class="student"><b style="width:42px;flex-shrink:0">#${i+1}</b><div class="av">${esc((s.name||'?')[0])}</div><div class="grow"><b style="font-size:20px">${esc(s.name)}</b><div class="bar"><i style="width:${Math.max(4,Math.abs(s.score||0)/mx*100)}%"></i></div></div><div class="score ${(s.score||0)<0?'neg':'pos'}" style="font-size:28px">${s.score>0?'+':''}${s.score||0}</div></div>`).join('')||'<div class="muted">Öğrenci yok.</div>';
+  bvList.innerHTML=ss.map((s,i)=>`<div class="student"><b style="width:42px;flex-shrink:0">#${i+1}</b><div class="av" style="${avSt(s)}">${esc((s.name||'?')[0])}</div><div class="grow"><b style="font-size:20px">${esc(s.name)}</b><div class="bar"><i style="width:${Math.max(4,Math.abs(s.score||0)/mx*100)}%"></i></div></div><div class="score ${(s.score||0)<0?'neg':'pos'}" style="font-size:28px">${s.score>0?'+':''}${s.score||0}</div></div>`).join('')||'<div class="muted">Öğrenci yok.</div>';
   bvRecent.innerHTML=(d.recent||[]).map(n=>`<span class="pill" style="font-size:16px;margin:4px">${esc(n)}</span>`).join('')||'Henüz yok.';
 }
-function checkBoardUrl(){let code=new URLSearchParams(location.search).get('board');if(code){boardOnlyUI();loadBoardByCode(code);clearInterval(boardPoll);boardPoll=setInterval(()=>loadBoardByCode(code),3000);}}
+function checkBoardUrl(){
+  let code=new URLSearchParams(location.search).get('board');
+  if(code){boardOnlyUI();loadBoardByCode(code);clearInterval(boardPoll);boardPoll=setInterval(()=>loadBoardByCode(code),boardRate);}
+}
 
 // ─── CLOUD ────────────────────────────────────────────────────────────────────
 function loadCloudSettings(){try{let c=JSON.parse(localStorage.getItem(CLOUDKEY)||'{}');if(sbUrl)sbUrl.value=c.url||sbUrl.value||'';if(sbKey)sbKey.value=c.key||sbKey.value||'';initSupabase();}catch(e){}}
@@ -1104,8 +1204,7 @@ async function signOut(){
   sbUser=null;
   ['chemclass_v18_data','chemclass_v17_data','chemclass_v16_data','chemclass_v15_data','chemclass_v14_data','chemclass_v13_data'].forEach(k=>localStorage.removeItem(k));
   sessionStorage.clear();data={classes:[],students:[],attendance:{},customBtns:[]};
-  msg('Çıkış yapıldı. Veriler temizleniyor...');
-  setTimeout(()=>location.reload(),600);
+  msg('Çıkış yapıldı. Veriler temizleniyor...');setTimeout(()=>location.reload(),600);
 }
 async function getSession(){if(!sb)return null;let{data:res}=await sb.auth.getSession();sbUser=res.session?.user||null;return sbUser;}
 function renderCloud(){
@@ -1121,29 +1220,13 @@ async function loadFromCloud(){if(!sbUser)await getSession();if(!sb||!sbUser)ret
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function loadLocal(){
   let raw=localStorage.getItem(KEY)||localStorage.getItem('chemclass_v17_data')||'{}';
-  try{
-    let d=JSON.parse(raw);
-    data.classes=d.classes||[];
-    data.students=d.students||[];
-    data.attendance=d.attendance||{};
-    data.customBtns=d.customBtns||[];
-  }catch(e){}
+  try{let d=JSON.parse(raw);data.classes=d.classes||[];data.students=d.students||[];data.attendance=d.attendance||{};data.customBtns=d.customBtns||[];}catch(e){}
 }
 
-loadLocal();
-loadCloudSettings();
-try{if(attDate) attDate.value=todayStr();}catch(e){}
-
-// Önce yerel veriyle ekranı hemen çiz
-renderAll();
-drawTimer();
-checkBoardUrl();
-
-// Sonra cloud session'ı arka planda kontrol et
-getSession().then(async()=>{
-  renderCloud();
-  if(sbUser){ await loadFromCloud(); }
-});
+loadLocal();loadTheme();loadSnd();loadCloudSettings();
+try{if(attDate)attDate.value=todayStr();}catch(e){}
+renderAll();drawTimer();checkBoardUrl();
+getSession().then(async()=>{renderCloud();if(sbUser)await loadFromCloud();});
 </script>
 </body>
 </html>
