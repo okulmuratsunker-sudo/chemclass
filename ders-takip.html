@@ -172,7 +172,9 @@ select.inp option{background:var(--s1);color:var(--t1)}
 
 /* RECENT LIST */
 .recent-list{display:flex;flex-direction:column;gap:8px}
-.recent-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--s2);border:1px solid var(--bd);border-radius:12px}
+.recent-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--s2);border:1px solid var(--bd);border-radius:12px;transition:border-color .2s,background .2s}
+.recent-item.clickable{cursor:pointer}
+.recent-item.clickable:hover{border-color:var(--bd2);background:var(--s1)}
 .recent-icon{font-size:20px;flex-shrink:0}
 .recent-info{flex:1;min-width:0}
 .recent-name{font-size:13px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -432,10 +434,13 @@ function renderDashboard(){
     html+='<div class="recent-list">';
     students.forEach(st=>{
       var stU=sessions.filter(s=>s.student_id===st.id&&!s.paid).reduce((a,s)=>a+Number(s.amount||0),0);
-      html+='<div class="recent-item"><span class="recent-icon">👤</span>';
+      var stTotal=sessions.filter(s=>s.student_id===st.id).length;
+      html+='<div class="recent-item clickable" onclick="openStudentDetail(\''+st.id+'\')" title="Ders geçmişini gör / veliye gönder">';
+      html+='<span class="recent-icon">👤</span>';
       html+='<div class="recent-info"><div class="recent-name">'+esc(st.name)+'</div>';
-      html+='<div class="recent-date">'+fmt(st.hourly_rate)+'/saat</div></div>';
+      html+='<div class="recent-date">'+fmt(st.hourly_rate)+'/saat · '+stTotal+' ders</div></div>';
       html+=(stU>0?'<span class="recent-amount" style="color:var(--re)">'+fmt(stU)+'</span>':'<span class="recent-amount" style="color:var(--gr)">✓</span>');
+      html+='<span style="color:var(--t3);font-size:11px;flex-shrink:0">›</span>';
       html+='</div>';
     });
     html+='</div>';
@@ -735,6 +740,78 @@ async function deleteSession(id){
   var res=await sb.from('sessions').delete().eq('id',id);
   if(res.error){toast('Hata: '+res.error.message,'error');return;}
   toast('Ders silindi');await renderPage();
+}
+
+/* STUDENT DETAIL */
+async function openStudentDetail(id){
+  var st=students.find(x=>x.id===id);if(!st)return;
+  $('modalTitle').textContent='👤 '+st.name;
+  $('modalBox').classList.add('modal-wide');
+  $('modalBody').innerHTML='<div class="loading"><div class="spin"></div> Yükleniyor...</div>';
+  $('modalBg').dataset.mode='student-detail';
+  $('modalBg').classList.remove('hidden');
+
+  var{data,error}=await sb.from('sessions').select('*').eq('student_id',id).order('date',{ascending:false});
+  if(error){$('modalBody').innerHTML='<div style="color:var(--re);padding:20px">Hata: '+esc(error.message)+'</div>';return;}
+  var sData=data||[];
+
+  var totalAmt=sData.reduce((a,s)=>a+Number(s.amount||0),0);
+  var paidAmt=sData.filter(s=>s.paid).reduce((a,s)=>a+Number(s.amount||0),0);
+  var unpaidAmt=totalAmt-paidAmt;
+  var totalDur=sData.reduce((a,s)=>a+Number(s.duration||0),0);
+
+  var summaryHtml='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">'
+    +detailStat('Toplam Ders',sData.length+' ders','blue')
+    +detailStat('Saatlik Ücret',fmt(st.hourly_rate),'green')
+    +detailStat('Ödendi',fmt(paidAmt),'green')
+    +detailStat('Kalan Borç',fmt(unpaidAmt),unpaidAmt>0?'red':'green')
+    +'</div>';
+
+  var rowsHtml='';
+  if(!sData.length){
+    rowsHtml='<div style="text-align:center;padding:32px;color:var(--t3)">Henüz ders kaydedilmemiş</div>';
+  } else {
+    rowsHtml='<div class="tbl-wrap"><table><thead><tr>'
+      +'<th>Tarih</th><th>Süre</th><th>Tutar</th><th>Durum</th><th>Not</th>'
+      +'</tr></thead><tbody>';
+    sData.forEach(s=>{
+      rowsHtml+='<tr>'
+        +'<td class="mono">'+fmtDate(s.date)+'</td>'
+        +'<td class="mono">'+fmtDur(s.duration)+'</td>'
+        +'<td class="mono">'+fmt(s.amount)+'</td>'
+        +'<td><span class="paid-badge '+(s.paid?'yes':'no')+'" style="cursor:default">'+(s.paid?'✓ Ödendi':'⏳ Bekliyor')+'</span></td>'
+        +'<td class="note-cell" title="'+(s.notes?esc(s.notes):'')+'">'+esc(s.notes||'—')+'</td>'
+        +'</tr>';
+    });
+    rowsHtml+='</tbody></table></div>';
+  }
+
+  $('modalBody').innerHTML=summaryHtml+rowsHtml
+    +'<div class="modal-footer" style="margin-top:20px;border-top:1px solid var(--bd);padding-top:16px">'
+    +'<button class="btn btn-secondary" onclick="closeModal()">Kapat</button>'
+    +'<button class="btn btn-secondary" onclick="sendDetailAsPng(\''+id+'\')">🖼 PNG Gönder</button>'
+    +'<button class="btn btn-primary" onclick="exportStudent(\''+id+'\')">📤 Veliye Gönder</button>'
+    +'</div>';
+}
+function detailStat(label,val,color){
+  return'<div style="background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:12px">'
+    +'<div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px">'+label+'</div>'
+    +'<div style="font-family:\'DM Mono\',monospace;font-size:14px;font-weight:500;color:var(--'+color+')">'+(typeof val==='number'?val:val)+'</div>'
+    +'</div>';
+}
+function sendDetailAsPng(id){
+  // Capture the modal content as PNG for sharing
+  var el=document.getElementById('modalBox');
+  if(!el||typeof html2canvas==='undefined'){toast('PNG export hazır değil','error');return;}
+  toast('PNG oluşturuluyor...','');
+  html2canvas(el,{backgroundColor:getComputedStyle(document.documentElement).getPropertyValue('--s1').trim()||'#0d1420',scale:2,useCORS:true}).then(function(canvas){
+    var a=document.createElement('a');
+    var st=students.find(x=>x.id===id);
+    a.href=canvas.toDataURL('image/png');
+    a.download='ders-'+(st?st.name.replace(/\s+/g,'-'):'ogrenci')+'.png';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    toast('PNG indirildi — veliye gönderebilirsiniz','success');
+  }).catch(function(e){toast('PNG oluşturulamadı','error');console.error(e);});
 }
 
 /* EXPORT */
