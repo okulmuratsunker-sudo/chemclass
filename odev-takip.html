@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ödev Takip</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <style>
 :root{
   --bg:#f4f6fb;--surface:#fff;--surface2:#eef1f8;--border:#e0e5f0;
@@ -19,226 +20,235 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;font-size:15px}
-a{color:inherit;text-decoration:none}
 
-/* AUTH */
+/* ── AUTH ── */
 #authScreen{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
-.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:40px;max-width:420px;width:100%;box-shadow:var(--shadow)}
-.auth-title{font-size:1.6rem;font-weight:800;color:var(--accent);text-align:center;margin-bottom:4px}
-.auth-sub{text-align:center;color:var(--text2);font-size:.88rem;margin-bottom:28px}
-.auth-tabs{display:flex;gap:4px;background:var(--surface2);border-radius:9px;padding:4px;margin-bottom:20px}
-.auth-tab{flex:1;padding:8px;border:none;border-radius:7px;cursor:pointer;font-size:.85rem;font-weight:600;font-family:inherit;background:none;color:var(--text2);transition:all .2s}
-.auth-tab.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.auth-wrap{width:100%;max-width:440px}
+.auth-logo{font-size:1.8rem;font-weight:800;color:var(--accent);text-align:center;margin-bottom:4px}
+.auth-tagline{text-align:center;color:var(--text2);font-size:.88rem;margin-bottom:28px}
+.auth-type-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.auth-type-btn{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:20px 12px;cursor:pointer;text-align:center;transition:all .2s;font-family:inherit}
+.auth-type-btn:hover,.auth-type-btn.active{border-color:var(--accent);background:var(--accent-soft)}
+.auth-type-icon{font-size:2rem;margin-bottom:6px}
+.auth-type-label{font-size:.9rem;font-weight:700;color:var(--text)}
+.auth-type-sub{font-size:.75rem;color:var(--text2);margin-top:2px}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow)}
+.auth-card-title{font-size:1rem;font-weight:800;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.back-link{background:none;border:none;cursor:pointer;color:var(--text2);font-size:.82rem;font-family:inherit;margin-bottom:14px;display:flex;align-items:center;gap:4px}
+.back-link:hover{color:var(--accent)}
 .auth-msg{border-radius:8px;padding:10px 14px;font-size:.84rem;margin-bottom:14px;display:none}
 .auth-msg.show{display:block}
 .auth-msg.err{background:rgba(224,82,82,.08);border:1px solid rgba(224,82,82,.2);color:var(--danger)}
 .auth-msg.ok{background:rgba(45,181,106,.08);border:1px solid rgba(45,181,106,.2);color:var(--success)}
+.auth-tabs{display:flex;gap:4px;background:var(--surface2);border-radius:9px;padding:4px;margin-bottom:18px}
+.auth-tab{flex:1;padding:8px;border:none;border-radius:7px;cursor:pointer;font-size:.82rem;font-weight:600;font-family:inherit;background:none;color:var(--text2);transition:all .2s}
+.auth-tab.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.12)}
 
-/* LAYOUT */
+/* ── LAYOUT ── */
 header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;height:58px;gap:14px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
-.logo{font-size:1.1rem;font-weight:800;color:var(--accent);flex:1;display:flex;align-items:center;gap:8px}
-.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.logo{font-size:1.05rem;font-weight:800;color:var(--accent);flex:1}
 nav{background:var(--surface);border-bottom:1px solid var(--border);display:flex;gap:2px;padding:0 16px;overflow-x:auto;scrollbar-width:none}
 nav::-webkit-scrollbar{display:none}
-.nav-btn{padding:12px 16px;border:none;background:none;cursor:pointer;font-size:.85rem;font-weight:600;color:var(--text2);border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;font-family:inherit}
+.nav-btn{padding:12px 16px;border:none;background:none;cursor:pointer;font-size:.84rem;font-weight:600;color:var(--text2);border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;font-family:inherit}
 .nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
-.nav-btn:hover{color:var(--text)}
 main{max-width:1100px;margin:0 auto;padding:24px 16px 80px}
 
-/* CARDS */
+/* ── CARDS ── */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
-.stat-label{font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
-.stat-val{font-size:2rem;font-weight:800;color:var(--text);line-height:1}
-.stat-val.accent{color:var(--accent)}
-.stat-val.success{color:var(--success)}
-.stat-val.danger{color:var(--danger)}
-.stat-val.warn{color:var(--warn)}
+.stat-label{font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}
+.stat-val{font-size:1.9rem;font-weight:800;line-height:1}
+.stat-val.a{color:var(--accent)}.stat-val.s{color:var(--success)}.stat-val.d{color:var(--danger)}.stat-val.w{color:var(--warn)}
 
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:var(--rsm);border:none;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{opacity:.88}
-.btn-secondary{background:var(--surface2);border:1px solid var(--border);color:var(--text)}
-.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
-.btn-danger{background:rgba(224,82,82,.1);border:1px solid rgba(224,82,82,.2);color:var(--danger)}
-.btn-danger:hover{background:rgba(224,82,82,.18)}
-.btn-sm{padding:5px 12px;font-size:.8rem;border-radius:7px}
-.btn-icon{background:none;border:none;cursor:pointer;padding:6px 8px;border-radius:8px;font-size:14px;color:var(--text2);transition:all .2s}
-.btn-icon:hover{background:var(--surface2);color:var(--text)}
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:var(--rsm);border:none;font-size:.87rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{opacity:.88}
+.btn-secondary{background:var(--surface2);border:1px solid var(--border);color:var(--text)}.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.btn-success{background:rgba(45,181,106,.12);border:1px solid rgba(45,181,106,.25);color:var(--success)}.btn-success:hover{background:rgba(45,181,106,.2)}
+.btn-danger{background:rgba(224,82,82,.1);border:1px solid rgba(224,82,82,.2);color:var(--danger)}.btn-danger:hover{background:rgba(224,82,82,.18)}
+.btn-warn{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);color:var(--warn)}.btn-warn:hover{background:rgba(245,166,35,.18)}
+.btn-sm{padding:5px 12px;font-size:.78rem;border-radius:7px}
+.btn-icon{background:none;border:none;cursor:pointer;padding:6px 8px;border-radius:8px;font-size:14px;color:var(--text2);transition:all .2s}.btn-icon:hover{background:var(--surface2);color:var(--text)}
 
-/* FORM */
+/* ── FORM ── */
 .field{margin-bottom:14px}
-.field-label{display:block;font-size:.8rem;font-weight:600;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.field-label{display:block;font-size:.78rem;font-weight:700;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
 .inp{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--rsm);font-size:.9rem;background:var(--bg);color:var(--text);font-family:inherit;transition:border-color .2s}
 .inp:focus{outline:none;border-color:var(--accent)}
 select.inp{cursor:pointer}
 textarea.inp{resize:vertical;min-height:80px}
 
-/* SECTION HEADER */
-.sec-hd{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
-.sec-title{font-size:1.1rem;font-weight:800;flex:1}
-.badge{background:var(--accent-soft);color:var(--accent);border-radius:99px;padding:2px 10px;font-size:.75rem;font-weight:700}
+/* ── SECTION HEADER ── */
+.sec-hd{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.sec-title{font-size:1.05rem;font-weight:800;flex:1}
+.badge{background:var(--accent-soft);color:var(--accent);border-radius:99px;padding:2px 10px;font-size:.72rem;font-weight:700}
 
-/* CLASS CARDS */
+/* ── CLASS CARDS ── */
 .class-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
 .class-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
 .class-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--cc,var(--accent))}
-.class-card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(60,80,160,.13)}
-.class-card-name{font-size:1.05rem;font-weight:800;margin-bottom:4px}
-.class-card-desc{font-size:.82rem;color:var(--text2);margin-bottom:14px;min-height:20px}
+.class-card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(60,80,160,.12)}
+.class-card-name{font-size:1.05rem;font-weight:800;margin-bottom:2px}
+.class-card-desc{font-size:.8rem;color:var(--text2);margin-bottom:10px}
+.class-code-box{background:var(--surface2);border:1px dashed var(--border);border-radius:8px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.class-code{font-size:1.3rem;font-weight:800;letter-spacing:3px;color:var(--accent);font-family:monospace}
 .class-card-stats{display:flex;gap:12px}
-.cs-stat{text-align:center}
-.cs-num{font-size:1.2rem;font-weight:800;color:var(--accent)}
-.cs-lbl{font-size:.7rem;color:var(--text2);font-weight:600}
+.cs-stat{text-align:center}.cs-num{font-size:1.1rem;font-weight:800;color:var(--accent)}.cs-lbl{font-size:.68rem;color:var(--text2);font-weight:600}
 .class-card-actions{position:absolute;top:12px;right:12px;display:flex;gap:4px;opacity:0;transition:opacity .2s}
 .class-card:hover .class-card-actions{opacity:1}
 
-/* ASSIGNMENT LIST */
-.assign-list{display:flex;flex-direction:column;gap:10px}
-.assign-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow);transition:all .2s}
+/* ── ASSIGN ── */
+.assign-list{display:flex;flex-direction:column;gap:8px}
+.assign-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);transition:border-color .2s}
 .assign-item:hover{border-color:var(--accent)}
-.assign-type-badge{padding:4px 10px;border-radius:99px;font-size:.72rem;font-weight:700;white-space:nowrap}
+.type-badge{padding:3px 9px;border-radius:99px;font-size:.7rem;font-weight:700;white-space:nowrap}
 .type-odev{background:rgba(79,126,248,.12);color:var(--accent)}
 .type-proje{background:rgba(155,89,182,.12);color:var(--purple)}
 .type-quiz{background:rgba(245,166,35,.12);color:var(--warn)}
 .type-arastirma{background:rgba(45,181,106,.12);color:var(--success)}
-.assign-title{font-weight:700;flex:1}
-.assign-meta{font-size:.8rem;color:var(--text2)}
-.assign-progress{display:flex;align-items:center;gap:8px;min-width:120px}
-.progress-bar{height:6px;border-radius:99px;background:var(--surface2);flex:1;overflow:hidden}
-.progress-fill{height:100%;border-radius:99px;background:var(--success);transition:width .3s}
-.due-chip{font-size:.75rem;padding:3px 9px;border-radius:99px;font-weight:600;white-space:nowrap}
-.due-ok{background:rgba(45,181,106,.1);color:var(--success)}
-.due-soon{background:rgba(245,166,35,.1);color:var(--warn)}
-.due-late{background:rgba(224,82,82,.1);color:var(--danger)}
-.due-none{background:var(--surface2);color:var(--text2)}
+.assign-progress{display:flex;align-items:center;gap:8px;min-width:110px}
+.pbar{height:6px;border-radius:99px;background:var(--surface2);flex:1;overflow:hidden}
+.pfill{height:100%;border-radius:99px;background:var(--success);transition:width .3s}
+.due-chip{font-size:.72rem;padding:3px 9px;border-radius:99px;font-weight:600;white-space:nowrap}
+.due-ok{background:rgba(45,181,106,.1);color:var(--success)}.due-soon{background:rgba(245,166,35,.1);color:var(--warn)}.due-late{background:rgba(224,82,82,.1);color:var(--danger)}.due-none{background:var(--surface2);color:var(--text2)}
 
-/* SUBMISSIONS TABLE */
+/* ── SUBMISSIONS TABLE ── */
 .sub-table{width:100%;border-collapse:collapse}
-.sub-table th{padding:10px 12px;text-align:left;font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1.2px;background:var(--surface2);border-bottom:1px solid var(--border)}
-.sub-table td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:.88rem}
-.sub-table tr:hover td{background:var(--surface2)}
-.status-btn{border:none;border-radius:99px;padding:4px 12px;font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
+.sub-table th{padding:9px 12px;text-align:left;font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1.2px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.sub-table td{padding:9px 12px;border-bottom:1px solid var(--border);font-size:.86rem;vertical-align:middle}
+.sub-table tr:hover td{background:rgba(79,126,248,.03)}
+.status-btn{border:none;border-radius:99px;padding:4px 11px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
 .s-bekliyor{background:var(--surface2);color:var(--text2)}
 .s-teslim{background:rgba(45,181,106,.12);color:var(--success)}
 .s-gec{background:rgba(245,166,35,.12);color:var(--warn)}
 .s-eksik{background:rgba(224,82,82,.12);color:var(--danger)}
-.grade-inp{width:64px;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:.88rem;background:var(--bg);color:var(--text);font-family:inherit;text-align:center}
+.s-incelendi{background:rgba(79,126,248,.12);color:var(--accent)}
+.s-iade{background:rgba(155,89,182,.12);color:var(--purple)}
+.grade-inp{width:60px;padding:4px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:.86rem;background:var(--bg);color:var(--text);font-family:inherit;text-align:center}
 .grade-inp:focus{outline:none;border-color:var(--accent)}
+.file-link{display:inline-flex;align-items:center;gap:4px;color:var(--accent);font-size:.8rem;font-weight:600;text-decoration:none;padding:3px 8px;border-radius:6px;background:var(--accent-soft)}
+.file-link:hover{opacity:.8}
 
-/* MODAL */
+/* ── STUDENT VIEW ── */
+.student-assign-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-bottom:12px}
+.student-assign-status{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;font-size:.78rem;font-weight:700}
+.upload-zone{border:2px dashed var(--border);border-radius:var(--rsm);padding:24px;text-align:center;cursor:pointer;transition:all .2s;margin-top:12px}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:var(--accent-soft)}
+.upload-zone input{display:none}
+.feedback-box{background:rgba(79,126,248,.06);border:1px solid rgba(79,126,248,.2);border-radius:var(--rsm);padding:12px 14px;margin-top:10px;font-size:.85rem}
+.feedback-label{font-size:.72rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+
+/* ── MODAL ── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
 .overlay.open{display:flex}
-.modal{background:var(--surface);border-radius:var(--radius);padding:28px;max-width:500px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
-.modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-.modal-title{font-size:1.05rem;font-weight:800}
-.modal-close{background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--text2);padding:4px 8px;border-radius:6px;transition:all .2s}
-.modal-close:hover{background:var(--surface2)}
-.row-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+.modal{background:var(--surface);border-radius:var(--radius);padding:26px;max-width:520px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.2);max-height:92vh;overflow-y:auto}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.modal-title{font-size:1rem;font-weight:800}
+.modal-close{background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--text2);padding:4px 8px;border-radius:6px}.modal-close:hover{background:var(--surface2)}
+.row-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
 
-/* USER CHIP */
-.user-chip{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:3px 10px 3px 8px;font-size:.78rem;color:var(--text2)}
-.user-chip .email{max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.user-chip button{background:none;border:none;cursor:pointer;color:var(--danger);font-size:.75rem;font-weight:700;padding:2px 6px;border-radius:5px}
-.user-chip button:hover{background:rgba(224,82,82,.1)}
+/* ── USER CHIP ── */
+.user-chip{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:3px 10px 3px 8px;font-size:.76rem;color:var(--text2)}
+.user-chip .uemail{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-chip button{background:none;border:none;cursor:pointer;color:var(--danger);font-size:.74rem;font-weight:700;padding:2px 6px;border-radius:5px}.user-chip button:hover{background:rgba(224,82,82,.1)}
 
-/* TOAST */
-#toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:var(--surface);padding:11px 20px;border-radius:var(--rsm);font-size:.88rem;font-weight:600;z-index:999;opacity:0;transform:translateY(12px);transition:all .28s;pointer-events:none}
+/* ── MISC ── */
+.theme-btn{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rsm);padding:6px 12px;cursor:pointer;font-size:.8rem;font-weight:600;color:var(--text2);font-family:inherit;transition:all .2s}.theme-btn:hover{border-color:var(--accent);color:var(--accent)}
+#toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:var(--surface);padding:10px 20px;border-radius:var(--rsm);font-size:.87rem;font-weight:600;z-index:999;opacity:0;transform:translateY(12px);transition:all .28s;pointer-events:none}
 #toast.show{opacity:1;transform:translateY(0)}
-
-/* THEME BTN */
-.theme-btn{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rsm);padding:6px 12px;cursor:pointer;font-size:.82rem;font-weight:600;color:var(--text2);font-family:inherit;transition:all .2s}
-.theme-btn:hover{border-color:var(--accent);color:var(--accent)}
-
-/* ANNOUNCEMENT */
-.ann-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);margin-bottom:10px}
-.ann-title{font-weight:700;margin-bottom:4px}
-.ann-content{font-size:.88rem;color:var(--text2);margin-bottom:8px}
-.ann-meta{font-size:.75rem;color:var(--text2)}
-
-/* BACK BTN */
-.back-btn{display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-size:.88rem;font-weight:600;color:var(--text2);padding:6px 0;margin-bottom:16px;font-family:inherit;transition:color .2s}
-.back-btn:hover{color:var(--accent)}
-
-/* STUDENT REPORT */
-.report-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
-.report-row:last-child{border-bottom:none}
-
-/* WHATSAPP BOX */
-.wa-box{background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.2);border-radius:var(--rsm);padding:14px;margin-top:12px;font-size:.85rem;line-height:1.7;color:var(--text)}
-.wa-copy-btn{background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.25);color:#1a7a3a;border-radius:var(--rsm);padding:6px 14px;font-size:.82rem;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit}
-
-/* EMPTY STATE */
-.empty{text-align:center;padding:48px 20px;color:var(--text2)}
-.empty-icon{font-size:3rem;margin-bottom:12px}
-.empty p{font-size:.9rem}
-
-/* LOADING */
-.loading{text-align:center;padding:60px;color:var(--text2);font-size:.95rem}
-
-/* COLOR DOTS */
+.empty{text-align:center;padding:48px 20px;color:var(--text2)}.empty-icon{font-size:3rem;margin-bottom:10px}.empty p{font-size:.88rem}
+.loading{text-align:center;padding:60px;color:var(--text2)}
+.back-btn{display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-size:.86rem;font-weight:600;color:var(--text2);padding:6px 0;margin-bottom:14px;font-family:inherit;transition:color .2s}.back-btn:hover{color:var(--accent)}
 .color-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-.color-dot{width:26px;height:26px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .15s}
-.color-dot.selected{border-color:var(--text);transform:scale(1.15)}
-
+.color-dot{width:26px;height:26px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .15s}.color-dot.selected{border-color:var(--text);transform:scale(1.15)}
+.wa-box{background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.2);border-radius:var(--rsm);padding:14px;margin-top:10px;font-size:.84rem;line-height:1.7;white-space:pre-wrap}
+.import-zone{border:2px dashed var(--border);border-radius:var(--rsm);padding:20px;text-align:center;cursor:pointer;transition:all .2s}.import-zone:hover{border-color:var(--accent);background:var(--accent-soft)}
+.ann-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);margin-bottom:8px}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.page{animation:fadeIn .25s ease}
+.page{animation:fadeIn .22s ease}
 </style>
 </head>
 <body>
 
-<!-- AUTH SCREEN -->
+<!-- ══ AUTH SCREEN ══ -->
 <div id="authScreen">
-  <div class="auth-card">
-    <div class="auth-title">📚 Ödev Takip</div>
-    <p class="auth-sub">Hesabınıza giriş yapın</p>
-    <div class="auth-tabs">
-      <button class="auth-tab active" onclick="authTab('login')">Giriş Yap</button>
-      <button class="auth-tab" onclick="authTab('signup')">Kayıt Ol</button>
+  <div class="auth-wrap">
+    <div class="auth-logo">📚 Ödev Takip</div>
+    <p class="auth-tagline">Kimya sınıfı ödev yönetim sistemi</p>
+
+    <!-- Type selection -->
+    <div id="authTypeRow" class="auth-type-row">
+      <button class="auth-type-btn" onclick="showAuthForm('teacher')">
+        <div class="auth-type-icon">👨‍🏫</div>
+        <div class="auth-type-label">Öğretmen</div>
+        <div class="auth-type-sub">E-posta ile giriş</div>
+      </button>
+      <button class="auth-type-btn" onclick="showAuthForm('student')">
+        <div class="auth-type-icon">👨‍🎓</div>
+        <div class="auth-type-label">Öğrenci</div>
+        <div class="auth-type-sub">Sınıf kodu ile giriş</div>
+      </button>
     </div>
-    <div id="authMsg" class="auth-msg"></div>
-    <div class="field">
-      <label class="field-label">E-posta</label>
-      <input class="inp" id="authEmail" type="email" placeholder="ornek@mail.com" autocomplete="email" onkeydown="if(event.key==='Enter')doAuth()"/>
+
+    <!-- Teacher form -->
+    <div id="teacherForm" style="display:none">
+      <button class="back-link" onclick="showAuthType()">← Geri</button>
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tTab0" onclick="authTab('login')">Giriş Yap</button>
+          <button class="auth-tab" id="tTab1" onclick="authTab('signup')">Kayıt Ol</button>
+        </div>
+        <div id="authMsg" class="auth-msg"></div>
+        <div class="field"><label class="field-label">E-posta</label>
+          <input class="inp" id="authEmail" type="email" placeholder="ornek@mail.com" onkeydown="if(event.key==='Enter')doTeacherAuth()"/></div>
+        <div class="field"><label class="field-label">Şifre</label>
+          <input class="inp" id="authPass" type="password" placeholder="En az 6 karakter" onkeydown="if(event.key==='Enter')doTeacherAuth()"/></div>
+        <button class="btn btn-primary" style="width:100%;margin-top:6px" id="authBtn" onclick="doTeacherAuth()">Giriş Yap</button>
+      </div>
     </div>
-    <div class="field">
-      <label class="field-label">Şifre</label>
-      <input class="inp" id="authPass" type="password" placeholder="En az 6 karakter" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAuth()"/>
+
+    <!-- Student form -->
+    <div id="studentForm" style="display:none">
+      <button class="back-link" onclick="showAuthType()">← Geri</button>
+      <div class="auth-card">
+        <div class="auth-card-title">👨‍🎓 Öğrenci Girişi</div>
+        <div id="stuAuthMsg" class="auth-msg"></div>
+        <div class="field"><label class="field-label">Sınıf Kodu</label>
+          <input class="inp" id="stuCode" placeholder="Örn: KIM9A2" style="letter-spacing:3px;font-weight:700;text-transform:uppercase" maxlength="6" onkeydown="if(event.key==='Enter')doStudentAuth()"/></div>
+        <div class="field"><label class="field-label">Okul Numarası</label>
+          <input class="inp" id="stuNum" type="number" placeholder="Okul numaranız" onkeydown="if(event.key==='Enter')doStudentAuth()"/></div>
+        <button class="btn btn-primary" style="width:100%;margin-top:6px" id="stuBtn" onclick="doStudentAuth()">Sınıfa Gir</button>
+        <p style="font-size:.75rem;color:var(--text2);margin-top:10px;text-align:center">Bir kez girdikten sonra tekrar giriş yapmanıza gerek yok.</p>
+      </div>
     </div>
-    <button class="btn btn-primary" style="width:100%;margin-top:8px" id="authBtn" onclick="doAuth()">Giriş Yap</button>
   </div>
 </div>
 
+<!-- ══ MAIN APP ══ -->
 <div id="app" style="display:none">
-<header>
-  <div class="logo"><div class="logo-dot"></div>Ödev<span style="color:var(--text)">Takip</span></div>
-  <div id="userChip" class="user-chip">
-    <span>👤</span><span class="email" id="userEmail"></span>
-    <button onclick="signOut()">Çıkış</button>
-  </div>
-  <button class="theme-btn" onclick="toggleTheme()">🌙 Tema</button>
-</header>
-<nav id="nav">
-  <button class="nav-btn active" data-page="dashboard" onclick="goto('dashboard')">🏠 Özet</button>
-  <button class="nav-btn" data-page="classes" onclick="goto('classes')">📚 Sınıflar</button>
-  <button class="nav-btn" data-page="assignments" onclick="goto('assignments')">📝 Ödevler</button>
-  <button class="nav-btn" data-page="announcements" onclick="goto('announcements')">📢 Duyurular</button>
-</nav>
-<main id="main"><div class="loading">Yükleniyor…</div></main>
+  <header>
+    <div class="logo">📚 Ödev<span style="color:var(--text)">Takip</span></div>
+    <div id="userChip" class="user-chip">
+      <span id="userIcon">👤</span>
+      <span class="uemail" id="userLabel"></span>
+      <button onclick="signOutAll()">Çıkış</button>
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()">🌙 Tema</button>
+  </header>
+  <nav id="nav"></nav>
+  <main id="main"><div class="loading">Yükleniyor…</div></main>
 </div>
 
-<!-- Class Modal -->
+<!-- ══ MODALS ══ -->
+
+<!-- Class modal -->
 <div class="overlay" id="mo-class">
   <div class="modal">
     <div class="modal-hd"><span class="modal-title" id="mo-class-title">Sınıf Ekle</span><button class="modal-close" onclick="closeModal('mo-class')">×</button></div>
     <div class="field"><label class="field-label">Sınıf Adı</label><input class="inp" id="cl-name" placeholder="Örn: 9-A Kimya"/></div>
-    <div class="field"><label class="field-label">Açıklama (opsiyonel)</label><input class="inp" id="cl-desc" placeholder="Örn: 2025-2026 Güz Dönemi"/></div>
-    <div class="field"><label class="field-label">Renk</label>
-      <div class="color-row" id="colorRow"></div>
-    </div>
+    <div class="field"><label class="field-label">Açıklama</label><input class="inp" id="cl-desc" placeholder="Opsiyonel"/></div>
+    <div class="field"><label class="field-label">Renk</label><div class="color-row" id="colorRow"></div></div>
     <div class="row-btns">
       <button class="btn btn-secondary" onclick="closeModal('mo-class')">İptal</button>
       <button class="btn btn-primary" onclick="saveClass()">Kaydet</button>
@@ -246,25 +256,45 @@ textarea.inp{resize:vertical;min-height:80px}
   </div>
 </div>
 
-<!-- Student Modal -->
+<!-- Student modal (single add) -->
 <div class="overlay" id="mo-student">
   <div class="modal">
-    <div class="modal-hd"><span class="modal-title" id="mo-student-title">Öğrenci Ekle</span><button class="modal-close" onclick="closeModal('mo-student')">×</button></div>
+    <div class="modal-hd"><span class="modal-title">Öğrenci Ekle</span><button class="modal-close" onclick="closeModal('mo-student')">×</button></div>
+    <div class="field"><label class="field-label">Okul Numarası</label><input class="inp" id="st-num" type="number" placeholder="Örn: 1234"/></div>
     <div class="field"><label class="field-label">Ad Soyad</label><input class="inp" id="st-name" placeholder="Öğrenci adı"/></div>
-    <div class="field"><label class="field-label">Okul Numarası (opsiyonel)</label><input class="inp" id="st-num" type="number" placeholder="Örn: 1234"/></div>
     <div class="row-btns">
       <button class="btn btn-secondary" onclick="closeModal('mo-student')">İptal</button>
-      <button class="btn btn-primary" onclick="saveStudent()">Kaydet</button>
+      <button class="btn btn-primary" onclick="saveStudent()">Ekle</button>
     </div>
   </div>
 </div>
 
-<!-- Assignment Modal -->
+<!-- Import modal -->
+<div class="overlay" id="mo-import">
+  <div class="modal">
+    <div class="modal-hd"><span class="modal-title">📥 Toplu Öğrenci Yükle</span><button class="modal-close" onclick="closeModal('mo-import')">×</button></div>
+    <p style="font-size:.84rem;color:var(--text2);margin-bottom:14px">e-Okul'dan indirdiğiniz Excel/CSV dosyasını seçin.<br>
+    <b>Gerekli sütunlar:</b> <code>Okul No</code> ve <code>Adı Soyadı</code></p>
+    <div class="import-zone" id="importZone" onclick="document.getElementById('importFile').click()">
+      <input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleImport(event)"/>
+      <div style="font-size:2rem;margin-bottom:6px">📂</div>
+      <div style="font-weight:600;font-size:.9rem">Excel veya CSV dosyası seç</div>
+      <div style="font-size:.78rem;color:var(--text2);margin-top:4px">.xlsx · .xls · .csv</div>
+    </div>
+    <div id="importPreview" style="margin-top:14px"></div>
+    <div class="row-btns">
+      <button class="btn btn-secondary" onclick="closeModal('mo-import')">İptal</button>
+      <button class="btn btn-primary" id="importSaveBtn" style="display:none" onclick="confirmImport()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Assignment modal -->
 <div class="overlay" id="mo-assign">
   <div class="modal">
     <div class="modal-hd"><span class="modal-title" id="mo-assign-title">Ödev Ekle</span><button class="modal-close" onclick="closeModal('mo-assign')">×</button></div>
     <div class="field"><label class="field-label">Başlık</label><input class="inp" id="as-title" placeholder="Ödev başlığı"/></div>
-    <div class="field"><label class="field-label">Açıklama</label><textarea class="inp" id="as-desc" placeholder="Ödev detayları, linkler..."></textarea></div>
+    <div class="field"><label class="field-label">Açıklama</label><textarea class="inp" id="as-desc" placeholder="Detaylar, bağlantılar..."></textarea></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div class="field"><label class="field-label">Tür</label>
         <select class="inp" id="as-type">
@@ -276,7 +306,7 @@ textarea.inp{resize:vertical;min-height:80px}
       </div>
       <div class="field"><label class="field-label">Teslim Tarihi</label><input class="inp" id="as-due" type="date"/></div>
     </div>
-    <div class="field"><label class="field-label">Puan (opsiyonel)</label><input class="inp" id="as-pts" type="number" min="0" max="200" placeholder="100"/></div>
+    <div class="field"><label class="field-label">Puan</label><input class="inp" id="as-pts" type="number" min="0" max="200" placeholder="100"/></div>
     <div class="row-btns">
       <button class="btn btn-secondary" onclick="closeModal('mo-assign')">İptal</button>
       <button class="btn btn-primary" onclick="saveAssignment()">Kaydet</button>
@@ -284,15 +314,31 @@ textarea.inp{resize:vertical;min-height:80px}
   </div>
 </div>
 
-<!-- Announcement Modal -->
+<!-- Review modal (teacher) -->
+<div class="overlay" id="mo-review">
+  <div class="modal">
+    <div class="modal-hd"><span class="modal-title" id="mo-review-title">Ödevi İncele</span><button class="modal-close" onclick="closeModal('mo-review')">×</button></div>
+    <div id="mo-review-body"></div>
+    <div class="field" style="margin-top:14px"><label class="field-label">Öğretmen Yorumu</label>
+      <textarea class="inp" id="review-comment" placeholder="Geri bildirim, düzeltme isteği..."></textarea></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="field"><label class="field-label">Not (opsiyonel)</label>
+        <input class="inp" id="review-grade" type="number" min="0" placeholder="—"/></div>
+    </div>
+    <div class="row-btns">
+      <button class="btn btn-warn" onclick="reviewAction('iade')">↩ İade Et</button>
+      <button class="btn btn-success" onclick="reviewAction('incelendi')">✓ İncelendi</button>
+    </div>
+  </div>
+</div>
+
+<!-- Announcement modal -->
 <div class="overlay" id="mo-ann">
   <div class="modal">
     <div class="modal-hd"><span class="modal-title">Duyuru Ekle</span><button class="modal-close" onclick="closeModal('mo-ann')">×</button></div>
-    <div class="field"><label class="field-label">Sınıf</label>
-      <select class="inp" id="ann-class"></select>
-    </div>
+    <div class="field"><label class="field-label">Sınıf</label><select class="inp" id="ann-class"></select></div>
     <div class="field"><label class="field-label">Başlık</label><input class="inp" id="ann-title" placeholder="Duyuru başlığı"/></div>
-    <div class="field"><label class="field-label">İçerik</label><textarea class="inp" id="ann-content" placeholder="Duyuru detayları..."></textarea></div>
+    <div class="field"><label class="field-label">İçerik</label><textarea class="inp" id="ann-content"></textarea></div>
     <div class="row-btns">
       <button class="btn btn-secondary" onclick="closeModal('mo-ann')">İptal</button>
       <button class="btn btn-primary" onclick="saveAnnouncement()">Yayınla</button>
@@ -300,14 +346,13 @@ textarea.inp{resize:vertical;min-height:80px}
   </div>
 </div>
 
-<!-- WhatsApp Modal -->
+<!-- WhatsApp modal -->
 <div class="overlay" id="mo-wa">
   <div class="modal">
     <div class="modal-hd"><span class="modal-title">💬 Veli Bildirimi</span><button class="modal-close" onclick="closeModal('mo-wa')">×</button></div>
-    <p style="font-size:.85rem;color:var(--text2);margin-bottom:12px">Ödevini teslim etmeyen öğrenciler için veli bildirim metni:</p>
+    <p style="font-size:.83rem;color:var(--text2);margin-bottom:10px">Eksik/geç öğrenciler için veli mesajı:</p>
     <div class="wa-box" id="waText"></div>
-    <button class="wa-copy-btn" onclick="copyWa()">📋 Kopyala</button>
-    <p style="font-size:.75rem;color:var(--text2);margin-top:10px">WhatsApp'a yapıştırıp gönderebilirsiniz.</p>
+    <button class="btn btn-success btn-sm" style="margin-top:10px" onclick="copyWa()">📋 Kopyala</button>
   </div>
 </div>
 
@@ -319,21 +364,66 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const sb=supabase.createClient(SB_URL,SB_KEY);
 
 const COLORS=['#4f7ef8','#9b59b6','#2db56a','#f5a623','#e05252','#1abc9c','#e67e22','#2980b9'];
-const TYPE_LABELS={odev:'📖 Ödev',proje:'🔬 Proje',quiz:'✏️ Quiz',arastirma:'🔍 Araştırma'};
-const STATUS_LABELS={bekliyor:'⏳ Bekliyor',teslim:'✅ Teslim',gec:'⚠️ Geç',eksik:'❌ Eksik'};
+const TYPE_LBL={odev:'📖 Ödev',proje:'🔬 Proje',quiz:'✏️ Quiz',arastirma:'🔍 Araştırma'};
+const STATUS_LBL={bekliyor:'⏳ Bekliyor',teslim:'✅ Teslim',gec:'⚠️ Geç',eksik:'❌ Eksik',incelendi:'🔍 İncelendi',iade:'↩ İade'};
 const STATUS_CYCLE={bekliyor:'teslim',teslim:'gec',gec:'eksik',eksik:'bekliyor'};
 
+// ── STATE
+let userType=null; // 'teacher'|'student'
+let teacherUser=null;
+let studentSession=null; // {id,name,number,class_id,class_name}
 let page='dashboard';
 let classes=[],students=[],assignments=[],submissions=[],announcements=[];
 let activeClassId=null,activeAssignId=null;
-let editClassId=null,editStudentId=null,editAssignId=null;
-let selectedColor=COLORS[0];
+let editClassId=null,selectedColor=COLORS[0];
+let assignForClass=null;
+let reviewSubId=null;
+let importRows=[];
 
-// ── AUTH
+// ── THEME
+(function(){const t=localStorage.getItem('ot_theme')||'light';document.documentElement.setAttribute('data-theme',t)})();
+function toggleTheme(){
+  const d=document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme',d?'light':'dark');
+  localStorage.setItem('ot_theme',d?'light':'dark');
+}
+
+// ── UTILS
+function toast(msg,err){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className='show';
+  if(err)el.style.background='var(--danger)';else el.style.background='';
+  setTimeout(()=>{el.className='';el.style.background=''},2600);
+}
+function esc(s){const d=document.createElement('div');d.textContent=String(s||'');return d.innerHTML;}
+function fmtDate(s){if(!s)return'';const p=s.split('T')[0].split('-');return p[2]+'.'+p[1]+'.'+p[0];}
+function dueStatus(d){
+  if(!d)return'none';
+  const now=new Date();now.setHours(0,0,0,0);
+  const diff=Math.ceil((new Date(d)-now)/(864e5));
+  return diff<0?'late':diff<=3?'soon':'ok';
+}
+function genCode(){return Math.random().toString(36).substr(2,6).toUpperCase();}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id);}));
+
+// ── AUTH SCREEN FLOW
+function showAuthType(){
+  document.getElementById('authTypeRow').style.display='grid';
+  document.getElementById('teacherForm').style.display='none';
+  document.getElementById('studentForm').style.display='none';
+}
+function showAuthForm(type){
+  document.getElementById('authTypeRow').style.display='none';
+  document.getElementById(type+'Form').style.display='block';
+}
+
+// Teacher auth
 let authMode='login';
 function authTab(mode){
   authMode=mode;
-  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',mode==='login'?i===0:i===1));
+  ['login','signup'].forEach((m,i)=>document.getElementById('tTab'+i).classList.toggle('active',m===mode));
   document.getElementById('authBtn').textContent=mode==='login'?'Giriş Yap':'Kayıt Ol';
   setAuthMsg('','');
 }
@@ -341,70 +431,98 @@ function setAuthMsg(msg,type){
   const e=document.getElementById('authMsg');
   e.textContent=msg;e.className='auth-msg'+(msg?' show':'')+(type?' '+type:'');
 }
-async function doAuth(){
-  const email=document.getElementById('authEmail')?.value.trim();
-  const pass=document.getElementById('authPass')?.value;
+async function doTeacherAuth(){
+  const email=document.getElementById('authEmail').value.trim();
+  const pass=document.getElementById('authPass').value;
   if(!email||!pass){setAuthMsg('E-posta ve şifre gerekli','err');return;}
-  const btn=document.getElementById('authBtn');
-  btn.textContent='...';btn.disabled=true;
+  const btn=document.getElementById('authBtn');btn.textContent='...';btn.disabled=true;
   const res=authMode==='login'
     ?await sb.auth.signInWithPassword({email,password:pass})
     :await sb.auth.signUp({email,password:pass});
   btn.disabled=false;btn.textContent=authMode==='login'?'Giriş Yap':'Kayıt Ol';
   if(res.error){setAuthMsg(res.error.message,'err');return;}
-  if(authMode==='signup'&&res.data?.user&&!res.data?.session){
-    setAuthMsg('✓ Kayıt başarılı! E-postanızı onaylayın, ardından giriş yapın.','ok');return;
-  }
-  showApp(res.data.user);await loadAll();
+  if(authMode==='signup'&&!res.data?.session){setAuthMsg('✓ Kayıt tamam! E-postanızı onaylayıp giriş yapın.','ok');return;}
+  teacherUser=res.data.user;userType='teacher';
+  startTeacherApp();
 }
-function showApp(user){
+
+// Student auth
+function setStuMsg(msg,type){
+  const e=document.getElementById('stuAuthMsg');
+  e.textContent=msg;e.className='auth-msg'+(msg?' show':'')+(type?' '+type:'');
+}
+async function doStudentAuth(){
+  const code=document.getElementById('stuCode').value.trim().toUpperCase();
+  const num=document.getElementById('stuNum').value.trim();
+  if(!code||!num){setStuMsg('Sınıf kodu ve okul numarası gerekli','err');return;}
+  const btn=document.getElementById('stuBtn');btn.textContent='...';btn.disabled=true;
+  // Find class by code
+  const{data:cls,error:e1}=await sb.from('hw_classes').select('*').eq('class_code',code).single();
+  if(e1||!cls){btn.disabled=false;btn.textContent='Sınıfa Gir';setStuMsg('Geçersiz sınıf kodu','err');return;}
+  // Find student in that class
+  const{data:stu,error:e2}=await sb.from('hw_students').select('*').eq('class_id',cls.id).eq('number',parseInt(num)).single();
+  if(e2||!stu){btn.disabled=false;btn.textContent='Sınıfa Gir';setStuMsg('Bu sınıfta okul numaranız bulunamadı','err');return;}
+  btn.disabled=false;btn.textContent='Sınıfa Gir';
+  studentSession={id:stu.id,name:stu.name,number:stu.number,class_id:cls.id,class_name:cls.name,class_color:cls.color};
+  localStorage.setItem('ot_student',JSON.stringify(studentSession));
+  userType='student';
+  startStudentApp();
+}
+
+function startTeacherApp(){
   document.getElementById('authScreen').style.display='none';
   document.getElementById('app').style.display='block';
-  document.getElementById('userEmail').textContent=user.email;
+  document.getElementById('userIcon').textContent='👨‍🏫';
+  document.getElementById('userLabel').textContent=teacherUser.email;
+  buildTeacherNav();
+  loadAll();
 }
-async function signOut(){await sb.auth.signOut();location.reload();}
+function startStudentApp(){
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('userIcon').textContent='👨‍🎓';
+  document.getElementById('userLabel').textContent=studentSession.name;
+  buildStudentNav();
+  loadStudentData();
+}
+async function signOutAll(){
+  if(userType==='teacher'){await sb.auth.signOut();}
+  localStorage.removeItem('ot_student');
+  location.reload();
+}
 
-// ── THEME
-(function(){const t=localStorage.getItem('ot_theme')||'light';document.documentElement.setAttribute('data-theme',t)})();
-function toggleTheme(){
-  const dark=document.documentElement.getAttribute('data-theme')==='dark';
-  document.documentElement.setAttribute('data-theme',dark?'light':'dark');
-  localStorage.setItem('ot_theme',dark?'light':'dark');
+// ── TEACHER NAV
+function buildTeacherNav(){
+  const nav=document.getElementById('nav');
+  nav.innerHTML=`
+    <button class="nav-btn active" data-p="dashboard" onclick="goto('dashboard')">🏠 Özet</button>
+    <button class="nav-btn" data-p="classes" onclick="goto('classes')">📚 Sınıflar</button>
+    <button class="nav-btn" data-p="assignments" onclick="goto('assignments')">📝 Ödevler</button>
+    <button class="nav-btn" data-p="announcements" onclick="goto('announcements')">📢 Duyurular</button>`;
 }
-
-// ── UTILS
-function toast(msg,err){
-  const el=document.getElementById('toast');
-  el.textContent=msg;el.className='show'+(err?' danger':'');
-  setTimeout(()=>el.className='',2500);
-}
-function esc(s){const d=document.createElement('div');d.textContent=String(s||'');return d.innerHTML;}
-function fmtDate(s){if(!s)return'';const[y,m,d]=s.split('-');return d+'.'+m+'.'+y;}
-function dueStatus(due){
-  if(!due)return'none';
-  const today=new Date();today.setHours(0,0,0,0);
-  const d=new Date(due);
-  const diff=Math.ceil((d-today)/(1000*60*60*24));
-  if(diff<0)return'late';
-  if(diff<=3)return'soon';
-  return'ok';
-}
-function openModal(id){document.getElementById(id).classList.add('open');}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id);}));
-
-// ── NAVIGATION
 function goto(p){
   page=p;activeAssignId=null;
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===p));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.p===p));
   render();
 }
 
-// ── DATA LOAD
+// ── STUDENT NAV
+function buildStudentNav(){
+  document.getElementById('nav').innerHTML=`
+    <button class="nav-btn active" data-p="my-assignments" onclick="gotoStu('my-assignments')">📝 Ödevlerim</button>
+    <button class="nav-btn" data-p="announcements" onclick="gotoStu('announcements')">📢 Duyurular</button>`;
+}
+function gotoStu(p){
+  page=p;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.p===p));
+  renderStudent();
+}
+
+// ── TEACHER DATA
 async function loadAll(){
   const[c,s,a,sub,ann]=await Promise.all([
     sb.from('hw_classes').select('*').order('created_at'),
-    sb.from('hw_students').select('*').order('name'),
+    sb.from('hw_students').select('*').order('number'),
     sb.from('hw_assignments').select('*').order('created_at',{ascending:false}),
     sb.from('hw_submissions').select('*'),
     sb.from('hw_announcements').select('*').order('created_at',{ascending:false})
@@ -414,31 +532,44 @@ async function loadAll(){
   render();
 }
 
-// ── RENDER ROUTER
+// ── STUDENT DATA
+async function loadStudentData(){
+  const[a,sub,ann]=await Promise.all([
+    sb.from('hw_assignments').select('*').eq('class_id',studentSession.class_id).order('due_date'),
+    sb.from('hw_submissions').select('*').eq('student_id',studentSession.id),
+    sb.from('hw_announcements').select('*').eq('class_id',studentSession.class_id).order('created_at',{ascending:false})
+  ]);
+  assignments=a.data||[];submissions=sub.data||[];announcements=ann.data||[];
+  renderStudent();
+}
+
+// ── TEACHER RENDER ROUTER
 function render(){
   const m=document.getElementById('main');
   if(activeAssignId){m.innerHTML=renderSubmissions();return;}
   if(page==='dashboard')m.innerHTML=renderDashboard();
   else if(page==='classes')m.innerHTML=activeClassId?renderClassDetail():renderClasses();
   else if(page==='assignments')m.innerHTML=renderAssignments();
-  else if(page==='announcements')m.innerHTML=renderAnnouncements();
+  else if(page==='announcements')m.innerHTML=renderAnnouncements(true);
 }
 
 // ── DASHBOARD
 function renderDashboard(){
   const today=new Date();today.setHours(0,0,0,0);
   const upcoming=assignments.filter(a=>a.due_date&&new Date(a.due_date)>=today).sort((a,b)=>new Date(a.due_date)-new Date(b.due_date)).slice(0,5);
-  const totalSubs=submissions.length;
-  const doneSubs=submissions.filter(s=>s.status==='teslim'||s.status==='gec').length;
-  const missSubs=submissions.filter(s=>s.status==='eksik').length;
-  const rate=totalSubs?Math.round(doneSubs/totalSubs*100):0;
+  const done=submissions.filter(s=>s.status==='teslim'||s.status==='gec'||s.status==='incelendi').length;
+  const total=submissions.length;
+  const miss=submissions.filter(s=>s.status==='eksik').length;
+  const pend=submissions.filter(s=>s.status==='teslim'&&s.file_url).length;
+  const rate=total?Math.round(done/total*100):0;
 
   let html=`<div class="page">
   <div class="stat-grid">
-    <div class="stat-card"><div class="stat-label">Sınıflar</div><div class="stat-val accent">${classes.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Sınıflar</div><div class="stat-val a">${classes.length}</div></div>
     <div class="stat-card"><div class="stat-label">Toplam Ödev</div><div class="stat-val">${assignments.length}</div></div>
-    <div class="stat-card"><div class="stat-label">Teslim Oranı</div><div class="stat-val success">${rate}%</div></div>
-    <div class="stat-card"><div class="stat-label">Eksik Teslim</div><div class="stat-val danger">${missSubs}</div></div>
+    <div class="stat-card"><div class="stat-label">Teslim Oranı</div><div class="stat-val s">${rate}%</div></div>
+    <div class="stat-card"><div class="stat-label">Eksik</div><div class="stat-val d">${miss}</div></div>
+    <div class="stat-card"><div class="stat-label">İnceleme Bekliyor</div><div class="stat-val w">${pend}</div></div>
   </div>`;
 
   if(upcoming.length){
@@ -446,32 +577,16 @@ function renderDashboard(){
     upcoming.forEach(a=>{
       const cls=classes.find(c=>c.id===a.class_id);
       const st=dueStatus(a.due_date);
-      html+=`<div class="assign-item" onclick="openAssignDetail('${a.id}')">
-        <span class="assign-type-badge type-${a.type}">${TYPE_LABELS[a.type]||a.type}</span>
-        <div style="flex:1"><div class="assign-title">${esc(a.title)}</div>
-        <div class="assign-meta">${cls?esc(cls.name):''}</div></div>
+      html+=`<div class="assign-item" style="cursor:pointer" onclick="openAssignDetail('${a.id}')">
+        <span class="type-badge type-${a.type}">${TYPE_LBL[a.type]||a.type}</span>
+        <div style="flex:1"><div style="font-weight:700">${esc(a.title)}</div>
+        <div style="font-size:.78rem;color:var(--text2)">${cls?esc(cls.name):''}</div></div>
         <span class="due-chip due-${st}">${fmtDate(a.due_date)}</span>
       </div>`;
     });
     html+=`</div></div>`;
   }
-
-  // Recent announcements
-  const recAnn=announcements.slice(0,3);
-  if(recAnn.length){
-    html+=`<div class="card"><div class="sec-hd"><span class="sec-title">📢 Son Duyurular</span></div>`;
-    recAnn.forEach(a=>{
-      const cls=classes.find(c=>c.id===a.class_id);
-      html+=`<div class="ann-item"><div class="ann-title">${esc(a.title)}</div>
-        <div class="ann-content">${esc(a.content||'')}</div>
-        <div class="ann-meta">${cls?esc(cls.name):''} · ${fmtDate(a.created_at?.split('T')[0])}</div></div>`;
-    });
-    html+=`</div>`;
-  }
-
-  if(!classes.length){
-    html+=`<div class="empty"><div class="empty-icon">📚</div><p>Henüz sınıf yok.<br>Sınıflar sekmesinden başlayın.</p></div>`;
-  }
+  if(!classes.length)html+=`<div class="empty"><div class="empty-icon">📚</div><p>Henüz sınıf eklenmedi.</p></div>`;
   return html+'</div>';
 }
 
@@ -493,6 +608,10 @@ function renderClasses(){
         </div>
         <div class="class-card-name">${esc(c.name)}</div>
         <div class="class-card-desc">${esc(c.description||' ')}</div>
+        <div class="class-code-box">
+          <span class="class-code">${c.class_code||'—'}</span>
+          <button class="btn-icon" style="font-size:.75rem;padding:4px 8px" onclick="event.stopPropagation();copyCode('${c.class_code}')">📋 Kopyala</button>
+        </div>
         <div class="class-card-stats">
           <div class="cs-stat"><div class="cs-num">${studs}</div><div class="cs-lbl">Öğrenci</div></div>
           <div class="cs-stat"><div class="cs-num">${assigns}</div><div class="cs-lbl">Ödev</div></div>
@@ -503,66 +622,76 @@ function renderClasses(){
   }
   return html+'</div>';
 }
-
+function copyCode(code){
+  navigator.clipboard.writeText(code||'').then(()=>toast('✓ Kod kopyalandı')).catch(()=>{});
+}
 function openClassDetail(id){activeClassId=id;render();}
 
 function renderClassDetail(){
-  const cls=classes.find(c=>c.id===activeClassId);
-  if(!cls)return'';
-  const studs=students.filter(s=>s.class_id===activeClassId);
+  const cls=classes.find(c=>c.id===activeClassId);if(!cls)return'';
+  const studs=students.filter(s=>s.class_id===activeClassId).sort((a,b)=>(a.number||0)-(b.number||0)||(a.name>b.name?1:-1));
   const assigns=assignments.filter(a=>a.class_id===activeClassId);
-
   let html=`<div class="page">
     <button class="back-btn" onclick="activeClassId=null;render()">← Sınıflara Dön</button>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap">
       <div style="width:12px;height:40px;border-radius:4px;background:${cls.color||COLORS[0]}"></div>
-      <div><div style="font-size:1.3rem;font-weight:800">${esc(cls.name)}</div>
-      <div style="font-size:.85rem;color:var(--text2)">${esc(cls.description||'')}</div></div>
+      <div style="flex:1">
+        <div style="font-size:1.25rem;font-weight:800">${esc(cls.name)}</div>
+        <div style="font-size:.83rem;color:var(--text2)">${esc(cls.description||'')}</div>
+      </div>
+      <div class="class-code-box" style="min-width:180px">
+        <div>
+          <div style="font-size:.7rem;font-weight:700;color:var(--text2);margin-bottom:2px">SINIF KODU</div>
+          <span class="class-code" style="font-size:1.6rem">${cls.class_code||'—'}</span>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="copyCode('${cls.class_code}')">📋 Kopyala</button>
+      </div>
     </div>
 
-    <div class="card" style="margin-bottom:20px">
-      <div class="sec-hd"><span class="sec-title">👥 Öğrenciler <span class="badge">${studs.length}</span></span>
-        <button class="btn btn-primary btn-sm" onclick="openStudentModal()">+ Öğrenci</button>
+    <div class="card" style="margin-bottom:18px">
+      <div class="sec-hd">
+        <span class="sec-title">👥 Öğrenciler <span class="badge">${studs.length}</span></span>
+        <button class="btn btn-secondary btn-sm" onclick="openImportModal()">📥 Excel Yükle</button>
+        <button class="btn btn-primary btn-sm" onclick="openStudentModal()">+ Ekle</button>
       </div>`;
-
   if(!studs.length){
-    html+=`<div style="color:var(--text2);font-size:.88rem;padding:12px 0">Henüz öğrenci eklenmedi.</div>`;
+    html+=`<div style="color:var(--text2);font-size:.86rem;padding:8px 0">Öğrenci yok. Excel veya tek tek ekleyin.</div>`;
   }else{
-    html+=`<div style="display:flex;flex-wrap:wrap;gap:8px">`;
-    studs.sort((a,b)=>(a.number||999)-(b.number||999)||(a.name>b.name?1:-1)).forEach(s=>{
-      html+=`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:5px 14px;font-size:.83rem;display:flex;align-items:center;gap:8px">
-        ${s.number?`<span style="color:var(--text2);font-size:.75rem">${s.number}</span>`:''}
-        <span>${esc(s.name)}</span>
-        <button class="btn-icon" style="padding:0 4px;font-size:.75rem" onclick="deleteStudent('${s.id}')">✕</button>
+    html+=`<div style="display:flex;flex-wrap:wrap;gap:7px">`;
+    studs.forEach(s=>{
+      html+=`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:5px 12px;font-size:.82rem;display:flex;align-items:center;gap:7px">
+        <span style="color:var(--text2);font-size:.73rem">${s.number||'?'}</span>
+        <span style="font-weight:600">${esc(s.name)}</span>
+        <button class="btn-icon" style="padding:0 4px;font-size:.72rem" onclick="deleteStudent('${s.id}')">✕</button>
       </div>`;
     });
     html+=`</div>`;
   }
-  html+=`</div>`;
-
-  // Assignments for this class
-  html+=`<div class="card"><div class="sec-hd"><span class="sec-title">📝 Ödevler <span class="badge">${assigns.length}</span></span>
-    <button class="btn btn-primary btn-sm" onclick="openAssignModal('${activeClassId}')">+ Ödev</button></div>`;
+  html+=`</div>
+  <div class="card">
+    <div class="sec-hd"><span class="sec-title">📝 Ödevler <span class="badge">${assigns.length}</span></span>
+      <button class="btn btn-primary btn-sm" onclick="openAssignModal('${activeClassId}')">+ Ödev</button></div>`;
   if(!assigns.length){
-    html+=`<div style="color:var(--text2);font-size:.88rem;padding:12px 0">Bu sınıfa henüz ödev eklenmedi.</div>`;
+    html+=`<div style="color:var(--text2);font-size:.86rem;padding:8px 0">Bu sınıfa henüz ödev eklenmedi.</div>`;
   }else{
     html+=`<div class="assign-list">`;
     assigns.forEach(a=>{
       const total=studs.length;
-      const done=submissions.filter(s=>s.assignment_id===a.id&&(s.status==='teslim'||s.status==='gec')).length;
+      const done=submissions.filter(s=>s.assignment_id===a.id&&['teslim','gec','incelendi'].includes(s.status)).length;
       const pct=total?Math.round(done/total*100):0;
+      const hasPending=submissions.some(s=>s.assignment_id===a.id&&s.status==='teslim'&&s.file_url);
       const st=dueStatus(a.due_date);
       html+=`<div class="assign-item">
-        <span class="assign-type-badge type-${a.type}">${TYPE_LABELS[a.type]||a.type}</span>
+        <span class="type-badge type-${a.type}">${TYPE_LBL[a.type]||a.type}</span>
         <div style="flex:1;cursor:pointer" onclick="openAssignDetail('${a.id}')">
-          <div class="assign-title">${esc(a.title)}</div>
-          ${a.due_date?`<div class="assign-meta">Teslim: ${fmtDate(a.due_date)}</div>`:''}
+          <div style="font-weight:700">${esc(a.title)}</div>
+          ${hasPending?`<div style="font-size:.75rem;color:var(--warn);font-weight:600">⚠ İnceleme bekleyen var</div>`:''}
         </div>
         <div class="assign-progress">
-          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-          <span style="font-size:.75rem;color:var(--text2);min-width:36px">${done}/${total}</span>
+          <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
+          <span style="font-size:.73rem;color:var(--text2);min-width:34px">${done}/${total}</span>
         </div>
-        <span class="due-chip due-${st}">${a.due_date?fmtDate(a.due_date):'Tarih yok'}</span>
+        <span class="due-chip due-${st}">${a.due_date?fmtDate(a.due_date):'Tarihsiz'}</span>
         <button class="btn-icon" onclick="deleteAssignment('${a.id}')">🗑</button>
       </div>`;
     });
@@ -575,34 +704,32 @@ function renderClassDetail(){
 // ── ASSIGNMENTS PAGE
 function renderAssignments(){
   let html=`<div class="page"><div class="sec-hd"><span class="sec-title">📝 Tüm Ödevler <span class="badge">${assignments.length}</span></span>
-    <button class="btn btn-primary" onclick="openAssignModal(null)">+ Ödev Ekle</button></div>`;
-
+    <button class="btn btn-primary" onclick="openAssignModal(null)">+ Ödev</button></div>`;
   if(!assignments.length){
-    html+=`<div class="empty"><div class="empty-icon">📝</div><p>Henüz ödev yok. Sınıflar sekmesinden sınıf ekleyip ödev oluşturun.</p></div>`;
+    html+=`<div class="empty"><div class="empty-icon">📝</div><p>Henüz ödev yok.</p></div>`;
   }else{
-    // Group by class
     classes.forEach(cls=>{
-      const clsAssigns=assignments.filter(a=>a.class_id===cls.id);
-      if(!clsAssigns.length)return;
-      html+=`<div style="margin-bottom:24px"><div style="font-size:.85rem;font-weight:700;color:var(--text2);margin-bottom:8px;display:flex;align-items:center;gap:8px">
-        <span style="width:10px;height:10px;border-radius:50%;background:${cls.color||COLORS[0]};display:inline-block"></span>
-        ${esc(cls.name)}</div><div class="assign-list">`;
-      clsAssigns.forEach(a=>{
+      const ca=assignments.filter(a=>a.class_id===cls.id);if(!ca.length)return;
+      html+=`<div style="margin-bottom:22px">
+        <div style="font-size:.82rem;font-weight:700;color:var(--text2);margin-bottom:8px;display:flex;align-items:center;gap:7px">
+          <span style="width:9px;height:9px;border-radius:50%;background:${cls.color||COLORS[0]};display:inline-block"></span>${esc(cls.name)}</div>
+        <div class="assign-list">`;
+      ca.forEach(a=>{
         const studs=students.filter(s=>s.class_id===cls.id).length;
-        const done=submissions.filter(s=>s.assignment_id===a.id&&(s.status==='teslim'||s.status==='gec')).length;
+        const done=submissions.filter(s=>s.assignment_id===a.id&&['teslim','gec','incelendi'].includes(s.status)).length;
         const pct=studs?Math.round(done/studs*100):0;
         const st=dueStatus(a.due_date);
         html+=`<div class="assign-item">
-          <span class="assign-type-badge type-${a.type}">${TYPE_LABELS[a.type]||a.type}</span>
+          <span class="type-badge type-${a.type}">${TYPE_LBL[a.type]||a.type}</span>
           <div style="flex:1;cursor:pointer" onclick="openAssignDetail('${a.id}')">
-            <div class="assign-title">${esc(a.title)}</div>
-            ${a.description?`<div class="assign-meta">${esc(a.description.slice(0,60))}${a.description.length>60?'…':''}</div>`:''}
+            <div style="font-weight:700">${esc(a.title)}</div>
+            ${a.description?`<div style="font-size:.78rem;color:var(--text2)">${esc(a.description.slice(0,60))}${a.description.length>60?'…':''}</div>`:''}
           </div>
           <div class="assign-progress">
-            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-            <span style="font-size:.75rem;color:var(--text2);min-width:36px">${done}/${studs}</span>
+            <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
+            <span style="font-size:.73rem;color:var(--text2);min-width:34px">${done}/${studs}</span>
           </div>
-          <span class="due-chip due-${st}">${a.due_date?fmtDate(a.due_date):'Tarih yok'}</span>
+          <span class="due-chip due-${st}">${a.due_date?fmtDate(a.due_date):'Tarihsiz'}</span>
           <button class="btn-icon" onclick="deleteAssignment('${a.id}')">🗑</button>
         </div>`;
       });
@@ -612,93 +739,227 @@ function renderAssignments(){
   return html+'</div>';
 }
 
-// ── SUBMISSIONS DETAIL
+// ── SUBMISSIONS DETAIL (Teacher)
 function openAssignDetail(id){activeAssignId=id;render();}
-
 function renderSubmissions(){
-  const assign=assignments.find(a=>a.id===activeAssignId);
-  if(!assign)return'';
+  const assign=assignments.find(a=>a.id===activeAssignId);if(!assign)return'';
   const cls=classes.find(c=>c.id===assign.class_id);
-  const studs=students.filter(s=>s.class_id===assign.class_id).sort((a,b)=>(a.number||999)-(b.number||999)||(a.name>b.name?1:-1));
-  const done=submissions.filter(s=>s.assignment_id===activeAssignId&&(s.status==='teslim'||s.status==='gec')).length;
-  const missing=submissions.filter(s=>s.assignment_id===activeAssignId&&s.status==='eksik').length;
+  const studs=students.filter(s=>s.class_id===assign.class_id).sort((a,b)=>(a.number||0)-(b.number||0)||(a.name>b.name?1:-1));
+  const done=submissions.filter(s=>s.assignment_id===activeAssignId&&['teslim','gec','incelendi'].includes(s.status)).length;
+  const miss=submissions.filter(s=>s.assignment_id===activeAssignId&&s.status==='eksik').length;
   const pct=studs.length?Math.round(done/studs.length*100):0;
 
   let html=`<div class="page">
-    <button class="back-btn" onclick="activeAssignId=null;render()">← Geri Dön</button>
-    <div class="card" style="margin-bottom:20px">
+    <button class="back-btn" onclick="activeAssignId=null;render()">← Geri</button>
+    <div class="card" style="margin-bottom:18px">
       <div style="display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap">
         <div style="flex:1">
-          <span class="assign-type-badge type-${assign.type}" style="margin-bottom:8px;display:inline-block">${TYPE_LABELS[assign.type]||assign.type}</span>
-          <div style="font-size:1.2rem;font-weight:800;margin-bottom:4px">${esc(assign.title)}</div>
-          ${assign.description?`<div style="font-size:.88rem;color:var(--text2);margin-bottom:8px">${esc(assign.description)}</div>`:''}
-          <div style="display:flex;gap:12px;flex-wrap:wrap">
-            ${cls?`<span style="font-size:.82rem;color:var(--text2)">📚 ${esc(cls.name)}</span>`:''}
+          <span class="type-badge type-${assign.type}" style="display:inline-block;margin-bottom:8px">${TYPE_LBL[assign.type]||assign.type}</span>
+          <div style="font-size:1.15rem;font-weight:800;margin-bottom:4px">${esc(assign.title)}</div>
+          ${assign.description?`<div style="font-size:.85rem;color:var(--text2);margin-bottom:8px">${esc(assign.description)}</div>`:''}
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            ${cls?`<span style="font-size:.8rem;color:var(--text2)">📚 ${esc(cls.name)}</span>`:''}
             ${assign.due_date?`<span class="due-chip due-${dueStatus(assign.due_date)}">📅 ${fmtDate(assign.due_date)}</span>`:''}
-            ${assign.points?`<span style="font-size:.82rem;color:var(--text2)">⭐ ${assign.points} puan</span>`:''}
+            ${assign.points?`<span style="font-size:.8rem;color:var(--text2)">⭐ ${assign.points} puan</span>`:''}
           </div>
         </div>
-        <div style="text-align:center;min-width:80px">
-          <div style="font-size:2rem;font-weight:800;color:${pct>=70?'var(--success)':pct>=40?'var(--warn)':'var(--danger)'}">${pct}%</div>
-          <div style="font-size:.75rem;color:var(--text2)">Teslim</div>
+        <div style="text-align:center;min-width:72px">
+          <div style="font-size:1.9rem;font-weight:800;color:${pct>=70?'var(--success)':pct>=40?'var(--warn)':'var(--danger)'}">${pct}%</div>
+          <div style="font-size:.72rem;color:var(--text2)">Teslim</div>
         </div>
       </div>
     </div>
-
     <div class="sec-hd">
       <span class="sec-title">👥 Öğrenci Durumları</span>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
         <button class="btn btn-secondary btn-sm" onclick="markAll('teslim')">✅ Tümü Teslim</button>
         <button class="btn btn-secondary btn-sm" onclick="markAll('eksik')">❌ Tümü Eksik</button>
-        ${missing>0?`<button class="btn btn-sm" style="background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.25);color:#1a7a3a" onclick="showWa()">💬 Veli Mesajı (${missing})</button>`:''}
+        ${miss>0?`<button class="btn btn-sm" style="background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.25);color:#1a7a3a" onclick="showWa()">💬 Veli Mesajı (${miss})</button>`:''}
       </div>
     </div>
-
-    <div class="card" style="overflow:auto">
+    <div class="card" style="overflow-x:auto">
     <table class="sub-table">
       <thead><tr>
-        <th>#</th><th>Öğrenci</th><th>Durum</th>
+        <th>#</th><th>Öğrenci</th><th>Durum</th><th>Dosya</th>
         ${assign.points?'<th>Not</th>':''}
-        <th>Not/Açıklama</th>
+        <th>İşlem</th>
       </tr></thead><tbody>`;
 
   studs.forEach((st,i)=>{
     const sub=submissions.find(s=>s.assignment_id===activeAssignId&&s.student_id===st.id)||{status:'bekliyor'};
+    const hasFile=!!sub.file_url;
     html+=`<tr>
-      <td style="color:var(--text2);font-size:.8rem">${st.number||i+1}</td>
+      <td style="color:var(--text2);font-size:.78rem">${st.number||i+1}</td>
       <td style="font-weight:600">${esc(st.name)}</td>
-      <td><button class="status-btn s-${sub.status}" onclick="cycleStatus('${st.id}','${sub.id||''}','${sub.status}')">${STATUS_LABELS[sub.status]||sub.status}</button></td>
-      ${assign.points?`<td><input class="grade-inp" type="number" min="0" max="${assign.points}" placeholder="—" value="${sub.grade??''}" onchange="saveGrade('${st.id}','${sub.id||''}',this.value)" oninput="this.style.color=this.value>=${assign.points}*0.5?'var(--success)':'var(--danger)'"/></td>`:''}
-      <td><input class="inp" style="font-size:.82rem;padding:5px 8px" placeholder="Açıklama..." value="${esc(sub.note||'')}" onchange="saveNote('${st.id}','${sub.id||''}',this.value)"/></td>
+      <td><button class="status-btn s-${sub.status}" onclick="cycleStatus('${st.id}','${sub.id||''}','${sub.status}')">${STATUS_LBL[sub.status]||sub.status}</button></td>
+      <td>${hasFile?`<a class="file-link" href="${sub.file_url}" target="_blank">📎 ${esc(sub.file_name||'Dosya')}</a>`:`<span style="color:var(--text2);font-size:.78rem">—</span>`}</td>
+      ${assign.points?`<td><input class="grade-inp" type="number" min="0" max="${assign.points}" placeholder="—" value="${sub.grade??''}" onchange="saveGrade('${st.id}','${sub.id||''}',this.value)"/></td>`:''}
+      <td>${hasFile?`<button class="btn btn-sm btn-secondary" onclick="openReview('${sub.id}','${esc(st.name)}')">🔍 İncele</button>`:`<span style="color:var(--text2);font-size:.78rem">—</span>`}</td>
     </tr>`;
+    if(sub.teacher_comment){
+      html+=`<tr><td colspan="99" style="background:rgba(79,126,248,.04);font-size:.8rem;padding:6px 12px;color:var(--text2)">💬 ${esc(sub.teacher_comment)}${sub.reviewed_at?' · <span style="color:var(--success)">İncelendi</span>':''}${sub.returned_at?' · <span style="color:var(--warn)">İade edildi</span>':''}</td></tr>`;
+    }
   });
 
   html+=`</tbody></table></div></div>`;
   return html;
 }
 
+// ── REVIEW MODAL
+function openReview(subId,studentName){
+  reviewSubId=subId;
+  const sub=submissions.find(s=>s.id===subId);if(!sub)return;
+  document.getElementById('mo-review-title').textContent=`📎 ${studentName} — Ödev İnceleme`;
+  const body=document.getElementById('mo-review-body');
+  let fileHtml='';
+  if(sub.file_url){
+    const isPdf=sub.file_type?.includes('pdf')||(sub.file_name||'').toLowerCase().endsWith('.pdf');
+    if(isPdf){
+      fileHtml=`<div style="margin-bottom:12px"><a class="file-link" href="${sub.file_url}" target="_blank">📄 ${esc(sub.file_name||'PDF')} — Yeni sekmede aç</a></div>
+        <iframe src="${sub.file_url}" style="width:100%;height:300px;border:1px solid var(--border);border-radius:8px"></iframe>`;
+    }else{
+      fileHtml=`<div style="margin-bottom:10px"><img src="${sub.file_url}" style="max-width:100%;border-radius:8px;border:1px solid var(--border)" alt="Ödev"/></div>
+        <a class="file-link" href="${sub.file_url}" target="_blank">🔗 Tam boyut aç</a>`;
+    }
+  }
+  body.innerHTML=fileHtml+(sub.teacher_comment?`<div class="feedback-box" style="margin-top:12px"><div class="feedback-label">Önceki Yorum</div>${esc(sub.teacher_comment)}</div>`:'');
+  document.getElementById('review-comment').value=sub.teacher_comment||'';
+  document.getElementById('review-grade').value=sub.grade??'';
+  openModal('mo-review');
+}
+async function reviewAction(action){
+  const comment=document.getElementById('review-comment').value.trim();
+  const grade=document.getElementById('review-grade').value;
+  const now=new Date().toISOString();
+  const update={teacher_comment:comment||null,grade:grade?parseFloat(grade):null};
+  if(action==='incelendi'){update.reviewed_at=now;update.returned_at=null;update.status='incelendi';}
+  else if(action==='iade'){update.returned_at=now;update.reviewed_at=null;update.status='iade';}
+  const{error}=await sb.from('hw_submissions').update(update).eq('id',reviewSubId);
+  if(error){toast('Hata: '+error.message,true);return;}
+  closeModal('mo-review');await loadAll();
+  toast(action==='incelendi'?'✓ İncelendi olarak işaretlendi':'✓ İade edildi');
+}
+
 // ── ANNOUNCEMENTS
-function renderAnnouncements(){
-  let html=`<div class="page"><div class="sec-hd"><span class="sec-title">📢 Duyurular <span class="badge">${announcements.length}</span></span>
-    <button class="btn btn-primary" onclick="openAnnModal()">+ Duyuru Ekle</button></div>`;
-  if(!announcements.length){
-    html+=`<div class="empty"><div class="empty-icon">📢</div><p>Henüz duyuru yok.</p></div>`;
-  }else{
-    announcements.forEach(a=>{
-      const cls=classes.find(c=>c.id===a.class_id);
-      html+=`<div class="ann-item">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
-          <div>
-            <div class="ann-title">${esc(a.title)}</div>
-            ${a.content?`<div class="ann-content">${esc(a.content)}</div>`:''}
-            <div class="ann-meta">${cls?`<span style="background:var(--accent-soft);color:var(--accent);border-radius:99px;padding:2px 8px;font-size:.72rem;font-weight:700;margin-right:6px">${esc(cls.name)}</span>`:''} ${fmtDate(a.created_at?.split('T')[0])}</div>
-          </div>
-          <button class="btn-icon" onclick="deleteAnn('${a.id}')">🗑</button>
+function renderAnnouncements(isTeacher){
+  const filtered=isTeacher?announcements:announcements.filter(a=>a.class_id===studentSession?.class_id);
+  let html=`<div class="page"><div class="sec-hd"><span class="sec-title">📢 Duyurular <span class="badge">${filtered.length}</span></span>
+    ${isTeacher?`<button class="btn btn-primary" onclick="openAnnModal()">+ Duyuru</button>`:''}
+  </div>`;
+  if(!filtered.length){html+=`<div class="empty"><div class="empty-icon">📢</div><p>Henüz duyuru yok.</p></div>`;}
+  else filtered.forEach(a=>{
+    const cls=classes.find(c=>c.id===a.class_id);
+    html+=`<div class="ann-item">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+        <div>
+          <div style="font-weight:700;margin-bottom:3px">${esc(a.title)}</div>
+          ${a.content?`<div style="font-size:.85rem;color:var(--text2);margin-bottom:6px">${esc(a.content)}</div>`:''}
+          <div style="font-size:.73rem;color:var(--text2)">${cls?`<span style="background:var(--accent-soft);color:var(--accent);border-radius:99px;padding:2px 8px;font-weight:700;margin-right:6px;font-size:.7rem">${esc(cls.name)}</span>`:''} ${fmtDate(a.created_at?.split('T')[0])}</div>
         </div>
+        ${isTeacher?`<button class="btn-icon" onclick="deleteAnn('${a.id}')">🗑</button>`:''}
+      </div>
+    </div>`;
+  });
+  return html+'</div>';
+}
+
+// ── STUDENT RENDER
+function renderStudent(){
+  const m=document.getElementById('main');
+  if(page==='announcements'){m.innerHTML=renderAnnouncements(false);return;}
+  m.innerHTML=renderMyAssignments();
+}
+
+function renderMyAssignments(){
+  const today=new Date();today.setHours(0,0,0,0);
+  const sorted=[...assignments].sort((a,b)=>{
+    if(!a.due_date&&!b.due_date)return 0;
+    if(!a.due_date)return 1;if(!b.due_date)return -1;
+    return new Date(a.due_date)-new Date(b.due_date);
+  });
+  let html=`<div class="page">
+    <div style="background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--radius);padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px">
+      <div style="font-size:1.5rem">👋</div>
+      <div><div style="font-weight:800">${esc(studentSession.name)}</div>
+      <div style="font-size:.82rem;color:var(--text2)">${esc(studentSession.class_name)}</div></div>
+    </div>`;
+
+  if(!sorted.length){
+    html+=`<div class="empty"><div class="empty-icon">📝</div><p>Henüz ödev yok.</p></div>`;
+  }else{
+    sorted.forEach(a=>{
+      const sub=submissions.find(s=>s.assignment_id===a.id&&s.student_id===studentSession.id)||{status:'bekliyor'};
+      const st=dueStatus(a.due_date);
+      const statusColors={bekliyor:'var(--text2)',teslim:'var(--success)',gec:'var(--warn)',eksik:'var(--danger)',incelendi:'var(--accent)',iade:'var(--purple)'};
+      html+=`<div class="student-assign-card">
+        <div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">
+          <div style="flex:1">
+            <span class="type-badge type-${a.type}" style="margin-bottom:6px;display:inline-block">${TYPE_LBL[a.type]||a.type}</span>
+            <div style="font-size:1rem;font-weight:800;margin-bottom:4px">${esc(a.title)}</div>
+            ${a.description?`<div style="font-size:.84rem;color:var(--text2);margin-bottom:8px">${esc(a.description)}</div>`:''}
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              ${a.due_date?`<span class="due-chip due-${st}">📅 ${fmtDate(a.due_date)}</span>`:''}
+              ${a.points?`<span style="font-size:.78rem;color:var(--text2)">⭐ ${a.points} puan</span>`:''}
+            </div>
+          </div>
+          <div class="student-assign-status" style="background:${statusColors[sub.status]}1a;border:1px solid ${statusColors[sub.status]}44;color:${statusColors[sub.status]}">${STATUS_LBL[sub.status]||sub.status}</div>
+        </div>
+
+        ${sub.teacher_comment?`<div class="feedback-box"><div class="feedback-label">Öğretmen Yorumu</div>${esc(sub.teacher_comment)}</div>`:''}
+        ${sub.file_url?`<div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+          <a class="file-link" href="${sub.file_url}" target="_blank">📎 ${esc(sub.file_name||'Yüklenen dosya')}</a>
+          ${sub.status==='iade'?`<span style="font-size:.78rem;color:var(--warn);font-weight:600">↩ İade edildi — yeniden yükleyebilirsiniz</span>`:''}
+        </div>`:''}
+
+        ${(sub.status==='bekliyor'||sub.status==='eksik'||sub.status==='iade')?`
+        <div class="upload-zone" id="uz-${a.id}" onclick="document.getElementById('uf-${a.id}').click()"
+          ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')"
+          ondrop="event.preventDefault();this.classList.remove('drag');handleFileDrop(event,'${a.id}','${sub.id||''}')">
+          <input type="file" id="uf-${a.id}" accept="image/*,.pdf" style="display:none" onchange="uploadHomework(event,'${a.id}','${sub.id||''}')"/>
+          <div style="font-size:1.5rem;margin-bottom:4px">📤</div>
+          <div style="font-weight:600;font-size:.86rem">Fotoğraf veya PDF yükle</div>
+          <div style="font-size:.75rem;color:var(--text2);margin-top:2px">Tıkla veya sürükle bırak</div>
+        </div>`:''}
       </div>`;
     });
   }
   return html+'</div>';
+}
+
+// ── FILE UPLOAD
+async function uploadHomework(event,assignId,subId){
+  const file=event.target.files[0];
+  if(!file)return;
+  await doUpload(file,assignId,subId);
+}
+async function handleFileDrop(event,assignId,subId){
+  const file=event.dataTransfer.files[0];
+  if(!file)return;
+  await doUpload(file,assignId,subId);
+}
+async function doUpload(file,assignId,subId){
+  if(file.size>10*1024*1024){toast('Dosya 10MB\'dan büyük olamaz',true);return;}
+  const allowed=['image/jpeg','image/png','image/gif','image/webp','application/pdf'];
+  if(!allowed.includes(file.type)){toast('Sadece fotoğraf veya PDF yükleyebilirsiniz',true);return;}
+  toast('Yükleniyor...');
+  const ext=file.name.split('.').pop();
+  const path=`${assignId}/${studentSession.id}/${Date.now()}.${ext}`;
+  const{error:upErr}=await sb.storage.from('hw-files').upload(path,file,{upsert:true,contentType:file.type});
+  if(upErr){
+    toast('Dosya yüklenemedi: '+upErr.message,true);
+    return;
+  }
+  const{data:urlData}=sb.storage.from('hw-files').getPublicUrl(path);
+  const fileUrl=urlData.publicUrl;
+  const now=new Date().toISOString();
+  const update={file_url:fileUrl,file_name:file.name,file_type:file.type,status:'teslim',submitted_at:now,updated_at:now,teacher_comment:null,reviewed_at:null,returned_at:null};
+  if(subId&&subId!==''){
+    await sb.from('hw_submissions').update(update).eq('id',subId);
+  }else{
+    await sb.from('hw_submissions').upsert({assignment_id:assignId,student_id:studentSession.id,...update});
+  }
+  toast('✓ Ödev yüklendi!');
+  await loadStudentData();
 }
 
 // ── CLASS CRUD
@@ -719,14 +980,14 @@ function openEditClass(id){
   renderColorRow();openModal('mo-class');
 }
 function renderColorRow(){
-  const row=document.getElementById('colorRow');
-  row.innerHTML=COLORS.map(c=>`<div class="color-dot${c===selectedColor?' selected':''}" style="background:${c}" onclick="selectedColor='${c}';renderColorRow()"></div>`).join('');
+  document.getElementById('colorRow').innerHTML=COLORS.map(c=>`<div class="color-dot${c===selectedColor?' selected':''}" style="background:${c}" onclick="selectedColor='${c}';renderColorRow()"></div>`).join('');
 }
 async function saveClass(){
   const name=document.getElementById('cl-name').value.trim();
   const desc=document.getElementById('cl-desc').value.trim();
   if(!name){toast('Sınıf adı gerekli',true);return;}
   const data={name,description:desc,color:selectedColor};
+  if(!editClassId)data.class_code=genCode();
   const res=editClassId
     ?await sb.from('hw_classes').update(data).eq('id',editClassId)
     :await sb.from('hw_classes').insert(data).select().single();
@@ -735,7 +996,7 @@ async function saveClass(){
 }
 async function deleteClass(id){
   const cls=classes.find(c=>c.id===id);
-  if(!confirm(`"${cls?.name}" sınıfı ve tüm öğrencileri/ödevleri silinsin mi?`))return;
+  if(!confirm(`"${cls?.name}" sınıfı tüm verisiyle silinsin mi?`))return;
   await sb.from('hw_classes').delete().eq('id',id);
   if(activeClassId===id)activeClassId=null;
   await loadAll();toast('Sınıf silindi');
@@ -743,34 +1004,65 @@ async function deleteClass(id){
 
 // ── STUDENT CRUD
 function openStudentModal(){
-  editStudentId=null;
-  document.getElementById('mo-student-title').textContent='Öğrenci Ekle';
-  document.getElementById('st-name').value='';
-  document.getElementById('st-num').value='';
-  openModal('mo-student');
-  setTimeout(()=>document.getElementById('st-name').focus(),100);
+  document.getElementById('st-name').value='';document.getElementById('st-num').value='';
+  openModal('mo-student');setTimeout(()=>document.getElementById('st-num').focus(),100);
 }
 async function saveStudent(){
   const name=document.getElementById('st-name').value.trim();
   const num=document.getElementById('st-num').value;
-  if(!name){toast('Öğrenci adı gerekli',true);return;}
-  const res=await sb.from('hw_students').insert({class_id:activeClassId,name,number:num?parseInt(num):null}).select().single();
-  if(res.error){toast('Hata: '+res.error.message,true);return;}
+  if(!name){toast('Ad gerekli',true);return;}
+  const{error}=await sb.from('hw_students').insert({class_id:activeClassId,name,number:num?parseInt(num):null});
+  if(error){toast('Hata: '+error.message,true);return;}
   closeModal('mo-student');await loadAll();toast('✓ Öğrenci eklendi');
 }
 async function deleteStudent(id){
-  if(!confirm('Bu öğrenciyi sil?'))return;
+  if(!confirm('Öğrenciyi sil?'))return;
   await sb.from('hw_students').delete().eq('id',id);
-  await loadAll();toast('Öğrenci silindi');
+  await loadAll();toast('Silindi');
+}
+
+// ── EXCEL IMPORT
+function openImportModal(){
+  document.getElementById('importPreview').innerHTML='';
+  document.getElementById('importSaveBtn').style.display='none';
+  document.getElementById('importFile').value='';
+  importRows=[];
+  openModal('mo-import');
+}
+async function handleImport(e){
+  const file=e.target.files[0];if(!file)return;
+  const data=await file.arrayBuffer();
+  const wb=XLSX.read(data);
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+  // Find columns for school number and name
+  if(!rows.length){document.getElementById('importPreview').innerHTML='<p style="color:var(--danger)">Dosyada veri bulunamadı.</p>';return;}
+  const keys=Object.keys(rows[0]);
+  const numKey=keys.find(k=>/okul.*no|no.*okul|okulno|öğrenci.*no|numara/i.test(k))||keys[0];
+  const nameKey=keys.find(k=>/adı.*soyadı|adsoyad|isim|ad.*soyad|soyadı.*adı|name/i.test(k))||keys[1];
+  importRows=rows.map(r=>({number:parseInt(r[numKey])||null,name:String(r[nameKey]||'').trim()})).filter(r=>r.name);
+  const prev=document.getElementById('importPreview');
+  if(!importRows.length){prev.innerHTML='<p style="color:var(--danger)">Uygun sütun bulunamadı. "Okul No" ve "Adı Soyadı" sütunları gerekli.</p>';return;}
+  prev.innerHTML=`<p style="font-size:.82rem;color:var(--text2);margin-bottom:8px">${importRows.length} öğrenci bulundu:</p>
+    <div style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--rsm);padding:8px">
+    ${importRows.slice(0,50).map(r=>`<div style="font-size:.82rem;padding:3px 0;border-bottom:1px solid var(--border)">${r.number||'—'} · ${esc(r.name)}</div>`).join('')}
+    ${importRows.length>50?`<div style="font-size:.78rem;color:var(--text2);padding:4px 0">+${importRows.length-50} daha...</div>`:''}
+    </div>`;
+  document.getElementById('importSaveBtn').style.display='block';
+}
+async function confirmImport(){
+  if(!importRows.length)return;
+  const toInsert=importRows.map(r=>({class_id:activeClassId,name:r.name,number:r.number}));
+  const{error}=await sb.from('hw_students').insert(toInsert);
+  if(error){toast('Hata: '+error.message,true);return;}
+  closeModal('mo-import');await loadAll();toast(`✓ ${importRows.length} öğrenci eklendi`);
 }
 
 // ── ASSIGNMENT CRUD
-let assignForClass=null;
 function openAssignModal(classId){
-  editAssignId=null;assignForClass=classId||activeClassId;
+  assignForClass=classId||activeClassId;
   document.getElementById('mo-assign-title').textContent='Ödev Ekle';
-  document.getElementById('as-title').value='';
-  document.getElementById('as-desc').value='';
+  ['as-title','as-desc'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('as-type').value='odev';
   document.getElementById('as-due').value='';
   document.getElementById('as-pts').value='100';
@@ -783,15 +1075,13 @@ async function saveAssignment(){
   const type=document.getElementById('as-type').value;
   const due=document.getElementById('as-due').value;
   const pts=document.getElementById('as-pts').value;
-  if(!title){toast('Ödev başlığı gerekli',true);return;}
-  if(!assignForClass){toast('Lütfen bir sınıf seçin',true);return;}
-  const data={class_id:assignForClass,title,description:desc,type,due_date:due||null,points:pts?parseInt(pts):null};
-  const res=await sb.from('hw_assignments').insert(data).select().single();
-  if(res.error){toast('Hata: '+res.error.message,true);return;}
-  // Create submission rows for all students in this class
+  if(!title){toast('Başlık gerekli',true);return;}
+  if(!assignForClass){toast('Sınıf seçin',true);return;}
+  const{data,error}=await sb.from('hw_assignments').insert({class_id:assignForClass,title,description:desc,type,due_date:due||null,points:pts?parseInt(pts):null}).select().single();
+  if(error){toast('Hata: '+error.message,true);return;}
   const studs=students.filter(s=>s.class_id===assignForClass);
   if(studs.length){
-    await sb.from('hw_submissions').insert(studs.map(s=>({assignment_id:res.data.id,student_id:s.id,status:'bekliyor'})));
+    await sb.from('hw_submissions').insert(studs.map(s=>({assignment_id:data.id,student_id:s.id,status:'bekliyor'})));
   }
   closeModal('mo-assign');await loadAll();toast('✓ Ödev eklendi');
 }
@@ -803,17 +1093,17 @@ async function deleteAssignment(id){
 }
 
 // ── SUBMISSION OPS
-async function cycleStatus(studentId,subId,currentStatus){
-  const newStatus=STATUS_CYCLE[currentStatus]||'teslim';
+async function cycleStatus(studentId,subId,current){
+  const next=STATUS_CYCLE[current]||'teslim';
   const now=new Date().toISOString();
   if(subId&&subId!==''){
-    await sb.from('hw_submissions').update({status:newStatus,updated_at:now}).eq('id',subId);
+    await sb.from('hw_submissions').update({status:next,updated_at:now}).eq('id',subId);
   }else{
-    await sb.from('hw_submissions').upsert({assignment_id:activeAssignId,student_id:studentId,status:newStatus,updated_at:now});
+    await sb.from('hw_submissions').upsert({assignment_id:activeAssignId,student_id:studentId,status:next,updated_at:now});
   }
   const idx=submissions.findIndex(s=>s.assignment_id===activeAssignId&&s.student_id===studentId);
-  if(idx>=0)submissions[idx].status=newStatus;
-  else submissions.push({id:'tmp',assignment_id:activeAssignId,student_id:studentId,status:newStatus});
+  if(idx>=0)submissions[idx]={...submissions[idx],status:next};
+  else submissions.push({assignment_id:activeAssignId,student_id:studentId,status:next});
   render();
 }
 async function saveGrade(studentId,subId,val){
@@ -822,18 +1112,9 @@ async function saveGrade(studentId,subId,val){
   if(subId&&subId!==''){
     await sb.from('hw_submissions').update({grade,updated_at:now}).eq('id',subId);
   }else{
-    const res=await sb.from('hw_submissions').upsert({assignment_id:activeAssignId,student_id:studentId,grade,status:'teslim',updated_at:now}).select().single();
-    if(res.data){const idx=submissions.findIndex(s=>s.assignment_id===activeAssignId&&s.student_id===studentId);if(idx>=0)submissions[idx]=res.data;else submissions.push(res.data);}
+    await sb.from('hw_submissions').upsert({assignment_id:activeAssignId,student_id:studentId,grade,status:'teslim',updated_at:now});
   }
-  toast('✓ Kaydedildi');
-}
-async function saveNote(studentId,subId,note){
-  const now=new Date().toISOString();
-  if(subId&&subId!==''){
-    await sb.from('hw_submissions').update({note,updated_at:now}).eq('id',subId);
-  }else{
-    await sb.from('hw_submissions').upsert({assignment_id:activeAssignId,student_id:studentId,note,status:'bekliyor',updated_at:now});
-  }
+  toast('✓');
 }
 async function markAll(status){
   const assign=assignments.find(a=>a.id===activeAssignId);if(!assign)return;
@@ -845,61 +1126,69 @@ async function markAll(status){
       ?sb.from('hw_submissions').update({status,updated_at:now}).eq('id',sub.id)
       :sb.from('hw_submissions').upsert({assignment_id:activeAssignId,student_id:s.id,status,updated_at:now});
   }));
-  await loadAll();toast(`✓ Tüm öğrenciler: ${STATUS_LABELS[status]}`);
+  await loadAll();toast(`✓ Tümü: ${STATUS_LBL[status]}`);
 }
 
 // ── WHATSAPP
 function showWa(){
   const assign=assignments.find(a=>a.id===activeAssignId);if(!assign)return;
   const cls=classes.find(c=>c.id===assign.class_id);
-  const missStudents=students.filter(s=>{
+  const studs=students.filter(s=>{
     const sub=submissions.find(x=>x.assignment_id===activeAssignId&&x.student_id===s.id);
     return !sub||sub.status==='eksik';
   });
-  if(!missStudents.length){toast('Eksik öğrenci yok!');return;}
-  const names=missStudents.map(s=>s.name).join(', ');
-  const msg=`Sayın velimiz,\n\n"${assign.title}" başlıklı ödev${assign.due_date?' ('+fmtDate(assign.due_date)+' tarihine kadar)':''} teslim edilmemiştir.\n\nİlgili öğrenciler: ${names}\n\nÖğrencinizin ödevi tamamlaması için lütfen destek olunuz.\n\nSaygılarımla,\n${cls?cls.name+' Öğretmeni':'Öğretmeniniz'}`;
+  if(!studs.length){toast('Eksik öğrenci yok!');return;}
+  const msg=`Sayın velimiz,\n\n"${assign.title}" başlıklı ödev${assign.due_date?' ('+fmtDate(assign.due_date)+')':''} teslim edilmemiştir.\n\nİlgili öğrenci(ler): ${studs.map(s=>s.name).join(', ')}\n\nÖğrencinizin ödevi tamamlaması için destek olunuz.\n\nSaygılarımla,\n${cls?cls.name+' Öğretmeni':'Öğretmeniniz'}`;
   document.getElementById('waText').textContent=msg;
   openModal('mo-wa');
 }
 function copyWa(){
   const txt=document.getElementById('waText').textContent;
-  navigator.clipboard.writeText(txt).then(()=>toast('✓ Kopyalandı')).catch(()=>{
-    const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('✓ Kopyalandı');
-  });
+  navigator.clipboard.writeText(txt).then(()=>toast('✓ Kopyalandı')).catch(()=>{});
 }
 
 // ── ANNOUNCEMENTS CRUD
 function openAnnModal(){
-  const sel=document.getElementById('ann-class');
-  sel.innerHTML=classes.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  document.getElementById('ann-class').innerHTML=classes.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
   document.getElementById('ann-title').value='';
   document.getElementById('ann-content').value='';
   openModal('mo-ann');
-  setTimeout(()=>document.getElementById('ann-title').focus(),100);
 }
 async function saveAnnouncement(){
   const class_id=document.getElementById('ann-class').value;
   const title=document.getElementById('ann-title').value.trim();
   const content=document.getElementById('ann-content').value.trim();
   if(!title){toast('Başlık gerekli',true);return;}
-  const res=await sb.from('hw_announcements').insert({class_id,title,content}).select().single();
-  if(res.error){toast('Hata: '+res.error.message,true);return;}
+  const{error}=await sb.from('hw_announcements').insert({class_id,title,content});
+  if(error){toast('Hata: '+error.message,true);return;}
   closeModal('mo-ann');await loadAll();toast('✓ Duyuru yayınlandı');
 }
 async function deleteAnn(id){
   if(!confirm('Duyuruyu sil?'))return;
   await sb.from('hw_announcements').delete().eq('id',id);
-  await loadAll();toast('Duyuru silindi');
+  await loadAll();toast('Silindi');
 }
 
 // ── INIT
 (async()=>{
+  // Check student session in localStorage
+  const stuData=localStorage.getItem('ot_student');
+  if(stuData){
+    try{
+      studentSession=JSON.parse(stuData);
+      userType='student';
+      startStudentApp();
+      return;
+    }catch(e){localStorage.removeItem('ot_student');}
+  }
+  // Check teacher session
   const{data:{session}}=await sb.auth.getSession();
-  if(session){showApp(session.user);await loadAll();}
-  sb.auth.onAuthStateChange(async(event,session)=>{
-    if(event==='SIGNED_OUT')location.reload();
-  });
+  if(session){
+    teacherUser=session.user;userType='teacher';
+    startTeacherApp();
+    return;
+  }
+  sb.auth.onAuthStateChange((_,session)=>{if(session&&!teacherUser){teacherUser=session.user;userType='teacher';startTeacherApp();}});
 })();
 </script>
 </body>
