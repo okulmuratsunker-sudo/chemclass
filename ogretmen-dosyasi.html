@@ -25,12 +25,19 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .theme-btn{background:none;border:1.5px solid var(--border);border-radius:50px;padding:5px 13px;cursor:pointer;font-size:.83rem;color:var(--text2);transition:all .2s}
 .theme-btn:hover{border-color:var(--accent);color:var(--accent)}
 
-nav{background:var(--surface);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 8px;gap:2px}
-nav::-webkit-scrollbar{height:3px}
-nav::-webkit-scrollbar-thumb{background:var(--border)}
-nav button{background:none;border:none;padding:13px 15px;cursor:pointer;font-size:.88rem;color:var(--text2);white-space:nowrap;border-bottom:2.5px solid transparent;transition:all .18s;font-family:inherit}
-nav button.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:700}
-nav button:hover:not(.active){color:var(--text);background:var(--surface2)}
+.nav-home-btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .15s;white-space:nowrap}
+.nav-home-btn:hover{opacity:.85}
+.nav-home-btn.active{outline:2.5px solid var(--accent);outline-offset:2px;opacity:.85}
+.hamburger-btn{background:none;border:1.5px solid var(--border);border-radius:8px;padding:6px 13px;font-size:1.2rem;cursor:pointer;color:var(--text2);transition:all .2s;font-family:inherit;line-height:1}
+.hamburger-btn:hover{border-color:var(--accent);color:var(--accent)}
+.menu-overlay{position:fixed;inset:0;background:var(--bg);z-index:300;display:none;flex-direction:column;overflow-y:auto}
+.menu-overlay.open{display:flex;animation:menuIn .18s ease}
+@keyframes menuIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.menu-hd{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.menu-lbl{font-size:1.05rem;font-weight:800;color:var(--accent)}
+.menu-item-btn{display:flex;align-items:center;gap:16px;padding:20px 20px;border:0;border-bottom:1px solid var(--border);background:transparent;color:var(--text);font-size:1rem;font-weight:700;cursor:pointer;width:100%;text-align:left;transition:background .15s;border-radius:0;font-family:inherit}
+.menu-item-btn:active,.menu-item-btn.active{background:var(--surface2);color:var(--accent)}
+.mi-ico{font-size:1.3rem;width:34px;text-align:center;flex-shrink:0}
 
 main{padding:20px;max-width:1280px;margin:0 auto;width:100%}
 
@@ -252,21 +259,27 @@ select.inp{cursor:pointer}
 
 <header>
   <div class="logo">📋 Öğretmen Dosyası</div>
+  <button class="nav-home-btn active" data-page="dashboard" onclick="goto('dashboard')">🏠 Ana Ekran</button>
   <div id="userChip" class="user-chip" style="display:none">
     <span>👤</span><span class="email" id="userEmail"></span>
     <button onclick="signOut()">Çıkış</button>
   </div>
-  <button class="theme-btn" onclick="toggleTheme()">🌙 Tema</button>
+  <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+  <button class="hamburger-btn" onclick="openMenu()">☰</button>
 </header>
-<nav id="nav">
-  <button data-page="dashboard" onclick="goto('dashboard')" class="active">🏠 Özet</button>
-  <button data-page="students" onclick="goto('students')">👥 Öğrenciler</button>
-  <button data-page="grades" onclick="goto('grades')">📝 Not Defteri</button>
-  <button data-page="analysis" onclick="goto('analysis')">🔬 Madde Analizi</button>
-  <button data-page="scores" onclick="goto('scores')">⭐ Puan Sistemi</button>
-  <button data-page="schedule" onclick="goto('schedule')">🗓️ Program</button>
-  <button data-page="plans" onclick="goto('plans')">📚 Ders Planları</button>
-</nav>
+<!-- MENU OVERLAY -->
+<div class="menu-overlay" id="menuOverlay">
+  <div class="menu-hd">
+    <span class="menu-lbl">📋 Öğretmen Dosyası</span>
+    <button class="btn btn-outline btn-sm" onclick="closeMenu()">✕ Kapat</button>
+  </div>
+  <button class="menu-item-btn" data-page="students" onclick="goto('students')"><span class="mi-ico">👥</span>Öğrenciler</button>
+  <button class="menu-item-btn" data-page="grades" onclick="goto('grades')"><span class="mi-ico">📝</span>Not Defteri</button>
+  <button class="menu-item-btn" data-page="analysis" onclick="goto('analysis')"><span class="mi-ico">🔬</span>Madde Analizi</button>
+  <button class="menu-item-btn" data-page="scores" onclick="goto('scores')"><span class="mi-ico">⭐</span>Puan Sistemi</button>
+  <button class="menu-item-btn" data-page="plans" onclick="goto('plans')"><span class="mi-ico">📚</span>Ders Planları</button>
+</div>
+
 <main id="main"><div class="loading">Yükleniyor…</div></main>
 
 <!-- Score Modal -->
@@ -382,9 +395,13 @@ function closeModal(id){document.getElementById(id).classList.remove('open')}
 
 function goto(p){
   page=p;searchQ='';editSched=false;
-  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===p));
+  document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===p));
   render();
+  closeMenu();
+  window.scrollTo({top:0,behavior:'smooth'});
 }
+function openMenu(){document.getElementById('menuOverlay').classList.add('open');}
+function closeMenu(){document.getElementById('menuOverlay').classList.remove('open');}
 
 // ── Load
 async function loadAll(){
@@ -486,19 +503,20 @@ function renderDash(){
     todayCells.length===0?'<div style="color:var(--text2)">Bugün programda ders yok.</div>':
     '<div class="today-strip">'+todayCells.map(tc=>`<div class="today-card"><div class="today-period">${PL[tc.period_index]||((tc.period_index+1)+'.Ders')}</div><div class="today-cls">${esc(tc.content||'—')}</div></div>`).join('')+'</div>'}
 </div>
-<div class="card"><div class="card-title">📊 Haftalık Ders Programı</div>${miniSchedule(todayIdx)}</div>`;
+<div class="card"><div class="card-title">🗓️ Haftalık Ders Programı<button class="btn ${editSched?'btn-success':'btn-outline'} btn-sm" onclick="toggleSchedEdit()">${editSched?'✓ Kaydet':'✏️ Düzenle'}</button></div>${schedGrid(todayIdx)}</div>`;
 }
 
-function miniSchedule(todayIdx){
+function schedGrid(todayIdx){
   const DAYS=['Pzt','Sal','Çar','Per','Cum'];
   const maxP=Math.max(8,...schedule.map(s=>s.period_index+1));
   let h='<div class="sch-grid"><div class="sch-plbl"></div>';
-  DAYS.forEach((d,i)=>h+=`<div class="sch-head" style="${i===todayIdx?'outline:2px solid var(--warn)':''}">${d}</div>`);
+  DAYS.forEach((d,i)=>h+=`<div class="sch-head" style="${i===todayIdx?'outline:2px solid var(--warn);outline-offset:2px':''}">${d}</div>`);
   for(let p=0;p<maxP;p++){
     h+=`<div class="sch-plbl">${p+1}</div>`;
     for(let di=0;di<5;di++){
       const c=schedule.find(s=>s.day_index===di&&s.period_index===p);
-      h+=`<div class="sch-cell ${c?.content?'filled':''} ${di===todayIdx?'today-col':''}">${c?.content?esc(c.content):''}</div>`;
+      if(editSched)h+=`<div class="sch-cell" style="padding:2px"><input type="text" maxlength="10" value="${esc(c?.content||'')}" data-day="${di}" data-period="${p}" data-id="${c?.id||''}"></div>`;
+      else h+=`<div class="sch-cell ${c?.content?'filled':''} ${di===todayIdx?'today-col':''}">${c?.content?esc(c.content):''}</div>`;
     }
   }
   return h+'</div>';
@@ -1008,23 +1026,9 @@ async function saveScore(){
 // DERS PROGRAMI
 // ════════════════════════════════════════
 function renderSchedule(){
-  const DAYS=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma'];
   const dow=new Date().getDay(),todayIdx=dow===0||dow===6?-1:dow-1;
-  const maxP=Math.max(8,...schedule.map(s=>s.period_index+1));
-  let h=`<div class="page-title">🗓️ Ders Programı
-<button class="btn ${editSched?'btn-success':'btn-outline'}" onclick="toggleSchedEdit()">${editSched?'✓ Kaydet':'✏️ Düzenle'}</button></div>
-<div class="card"><div class="sch-grid">
-<div class="sch-plbl"></div>
-${DAYS.map((d,i)=>`<div class="sch-head" style="${i===todayIdx?'outline:2px solid var(--warn);outline-offset:2px':''}">${d}</div>`).join('')}`;
-  for(let p=0;p<maxP;p++){
-    h+=`<div class="sch-plbl">${p+1}</div>`;
-    for(let di=0;di<5;di++){
-      const c=schedule.find(s=>s.day_index===di&&s.period_index===p);
-      if(editSched)h+=`<div class="sch-cell" style="padding:2px"><input type="text" maxlength="10" value="${esc(c?.content||'')}" data-day="${di}" data-period="${p}" data-id="${c?.id||''}"></div>`;
-      else h+=`<div class="sch-cell ${c?.content?'filled':''} ${di===todayIdx?'today-col':''}">${c?.content?esc(c.content):''}</div>`;
-    }
-  }
-  return h+'</div></div>'+(editSched?'<div style="margin-top:10px;font-size:.78rem;color:var(--text2)">💡 Değişiklikleri yazdıktan sonra ✓ Kaydet\'e basın.</div>':'');
+  return`<div class="page-title">🗓️ Ders Programı<button class="btn ${editSched?'btn-success':'btn-outline'}" onclick="toggleSchedEdit()">${editSched?'✓ Kaydet':'✏️ Düzenle'}</button></div>
+<div class="card">${schedGrid(todayIdx)}</div>`+(editSched?'<div style="margin-top:10px;font-size:.78rem;color:var(--text2)">💡 Değişiklikleri yazdıktan sonra ✓ Kaydet\'e basın.</div>':'');
 }
 
 async function toggleSchedEdit(){
