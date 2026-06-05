@@ -783,7 +783,11 @@ async function doSetup(){
 
   // Ask for biometric
   const wantBio = confirm('Biyometrik kimlik doğrulaması kaydetmek ister misiniz?');
-  if(wantBio) await registerWebAuthnSilent();
+  if(wantBio){
+    await registerWebAuthnSilent();
+    const cred = localStorage.getItem('kasa_webauthn');
+    if(cred){ const { rawId } = JSON.parse(cred); await storeBioPw(pw, rawId); }
+  }
 
   unlockApp();
 }
@@ -823,11 +827,22 @@ async function doUnlock(){
   }
 }
 
+async function storeBioPw(masterPw, rawId){
+  const fixedSalt = new TextEncoder().encode('kasa-bio-salt-v1');
+  const bioKey = await deriveKey(rawId, fixedSalt);
+  localStorage.setItem('kasa_bio_pw', await encrypt(bioKey, { pw: masterPw }));
+}
+
 async function biometricUnlock(){
   const stored = localStorage.getItem('kasa_webauthn');
   if(!stored){ toast('Kayıtlı biyometrik bulunamadı','error'); return; }
+  const bioPwEnc = localStorage.getItem('kasa_bio_pw');
+  if(!bioPwEnc){
+    toast('Biyometrik verisi eksik — Ayarlar\'dan yeniden kaydedin','error');
+    return;
+  }
   try {
-    const { credentialId, rawId } = JSON.parse(stored);
+    const { rawId } = JSON.parse(stored);
     const challenge = crypto.getRandomValues(new Uint8Array(32));
     await navigator.credentials.get({
       publicKey: {
@@ -837,18 +852,13 @@ async function biometricUnlock(){
         userVerification:'required'
       }
     });
-    // Biometric confirmed — now we still need the password to derive the key
-    // But since the key is already in memory if we haven't navigated away, this is fine
-    // For first bio unlock after page reload: use stored salt + prompt for password once
-    // In this flow biometric confirms identity; we use stored password hash approach.
-    // Simpler UX: after bio success, ask for password (but pre-fill notice that bio confirmed identity)
-    const pw = prompt('Biyometrik doğrulandı. Master şifrenizi girin:');
-    if(!pw) return;
-    const saltB64 = localStorage.getItem('kasa_salt');
-    const salt = new Uint8Array(unb64(saltB64));
+    const fixedSalt = new TextEncoder().encode('kasa-bio-salt-v1');
+    const bioKey = await deriveKey(rawId, fixedSalt);
+    const { pw } = await decrypt(bioKey, bioPwEnc);
+    const salt = new Uint8Array(unb64(localStorage.getItem('kasa_salt')));
     const key = await deriveKey(pw, salt);
     const vObj = await decrypt(key, localStorage.getItem('kasa_verifier'));
-    if(vObj.v !== 'kasa_ok_v1') throw new Error('wrong');
+    if(vObj.v !== 'kasa_ok_v1') throw new Error('Şifre eşleşmedi');
     _kasaKey = key;
     unlockApp();
   } catch(e){
@@ -865,8 +875,18 @@ async function registerWebAuthnSilent(){
 }
 
 async function registerWebAuthn(){
+  const pw = prompt('Biyometrik kayıt için master şifrenizi girin:');
+  if(!pw) return;
+  try {
+    const salt = new Uint8Array(unb64(localStorage.getItem('kasa_salt')));
+    const key = await deriveKey(pw, salt);
+    const vObj = await decrypt(key, localStorage.getItem('kasa_verifier'));
+    if(vObj.v !== 'kasa_ok_v1') throw new Error('Yanlış master şifre');
+  } catch(e){ toast('Yanlış master şifre','error'); return; }
   try {
     await doRegisterWebAuthn();
+    const cred = localStorage.getItem('kasa_webauthn');
+    if(cred){ const { rawId } = JSON.parse(cred); await storeBioPw(pw, rawId); }
     toast('Biyometrik başarıyla kaydedildi','success');
   } catch(e){
     toast('Biyometrik kayıt başarısız: ' + e.message, 'error');
