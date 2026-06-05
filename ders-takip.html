@@ -231,9 +231,13 @@ td.note-cell{font-size:12px;color:var(--t3);max-width:160px;white-space:nowrap;o
   .detail-stats{grid-template-columns:1fr 1fr}
 }
 @media(max-width:420px){.stat-val{font-size:20px}}
+#offlineBanner{position:fixed;top:0;left:0;right:0;z-index:9999;background:#ff4757;color:#fff;text-align:center;padding:9px 16px;font-size:13px;font-weight:700;display:none;flex-wrap:wrap;justify-content:center;gap:8px;align-items:center}
+#offlineBanner.show{display:flex}
+.offline-badge{background:rgba(255,255,255,.2);border-radius:12px;padding:2px 10px;font-size:11px}
 </style>
 </head>
 <body>
+<div id="offlineBanner">📴 Çevrimdışı — değişiklikler yerel kaydediliyor <span class="offline-badge" id="queueBadge"></span></div>
 <div id="toast" class="toast"></div>
 
 <!-- AUTH SCREEN -->
@@ -373,14 +377,57 @@ function showApp(user){
 }
 async function signOut(){await sb.auth.signOut();location.reload();}
 
+/* ── OFFLINE CACHE & QUEUE ── */
+const DT_CACHE='dt_v1_cache',DT_QUEUE='dt_v1_queue';
+function saveCache(){try{localStorage.setItem(DT_CACHE,JSON.stringify({students,sessions,at:Date.now()}));}catch(e){}}
+function loadCache(){try{let c=JSON.parse(localStorage.getItem(DT_CACHE)||'{}');students=c.students||[];sessions=c.sessions||[];}catch(e){students=[];sessions=[];}}
+function showOffline(on){
+  document.getElementById('offlineBanner').classList.toggle('show',on);
+  let q=JSON.parse(localStorage.getItem(DT_QUEUE)||'[]');
+  let b=document.getElementById('queueBadge');
+  if(b)b.textContent=q.length?q.length+' bekliyor':'';
+}
+function queueOp(op){
+  let q=JSON.parse(localStorage.getItem(DT_QUEUE)||'[]');q.push(op);
+  localStorage.setItem(DT_QUEUE,JSON.stringify(q));showOffline(true);
+}
+async function flushQueue(){
+  let q=JSON.parse(localStorage.getItem(DT_QUEUE)||'[]');if(!q.length)return;
+  let idMap={};
+  for(let op of q){
+    try{
+      if(op.t==='insert'){
+        let{data}=await sb.from(op.table).insert(op.data).select().single();
+        if(data&&op.tmpId)idMap[op.tmpId]=data.id;
+      }else if(op.t==='update'){
+        let id=idMap[op.id]||op.id;
+        if(id&&!String(id).startsWith('tmp_'))await sb.from(op.table).update(op.data).eq('id',id);
+      }else if(op.t==='delete'){
+        let id=idMap[op.id]||op.id;
+        if(id&&!String(id).startsWith('tmp_'))await sb.from(op.table).delete().eq('id',id);
+      }else if(op.t==='cascade_delete'){
+        let id=idMap[op.id]||op.id;
+        if(id&&!String(id).startsWith('tmp_')){
+          await sb.from('sessions').delete().eq('student_id',id);
+          await sb.from('students').delete().eq('id',id);
+        }
+      }
+    }catch(e){console.error('flush error',op,e);}
+  }
+  localStorage.removeItem(DT_QUEUE);
+}
+
 /* ── DATA ── */
 async function loadAll(){
+  if(!navigator.onLine){loadCache();showOffline(true);return;}
+  showOffline(false);
   const[r1,r2]=await Promise.all([
     sb.from('students').select('*').order('name'),
     sb.from('sessions').select('*').order('date',{ascending:false})
   ]);
   if(r1.error)toast('Öğrenciler yüklenemedi','error');else students=r1.data||[];
   if(r2.error)toast('Dersler yüklenemedi','error');else sessions=r2.data||[];
+  saveCache();
 }
 function filteredSessions(){
   return sessions.filter(s=>{
@@ -805,6 +852,18 @@ async function saveStudent(){
   if(!name){toast('Ad gerekli','error');return;}
   if(isNaN(rate)||rate<0){toast('Geçerli bir ücret girin','error');return;}
   const mode=$('modalBg').dataset.mode,id=$('modalBg').dataset.id;
+  if(!navigator.onLine){
+    if(mode==='edit-student'){
+      let s=students.find(x=>x.id===id);if(s){s.name=name;s.hourly_rate=rate;}
+      queueOp({t:'update',table:'students',id,data:{name,hourly_rate:rate}});
+    }else{
+      const tmpId='tmp_'+Date.now();
+      students.push({id:tmpId,name,hourly_rate:rate});
+      queueOp({t:'insert',table:'students',tmpId,data:{name,hourly_rate:rate}});
+    }
+    saveCache();toast(mode==='edit-student'?'Güncellendi (çevrimdışı)':'Öğrenci eklendi (çevrimdışı)','success');
+    closeModal();renderPage();return;
+  }
   const res=mode==='edit-student'
     ?await sb.from('students').update({name,hourly_rate:rate}).eq('id',id)
     :await sb.from('students').insert({name,hourly_rate:rate});
@@ -815,6 +874,12 @@ async function saveStudent(){
 async function deleteStudent(id){
   const st=students.find(x=>x.id===id);
   if(!confirm((st?st.name:'Bu öğrenci')+' silinsin mi? Tüm dersleri de silinir!'))return;
+  if(!navigator.onLine){
+    students=students.filter(x=>x.id!==id);
+    sessions=sessions.filter(x=>x.student_id!==id);
+    if(!String(id).startsWith('tmp_'))queueOp({t:'cascade_delete',id});
+    saveCache();toast('Öğrenci silindi (çevrimdışı)');renderPage();return;
+  }
   const r1=await sb.from('sessions').delete().eq('student_id',id);
   if(r1.error){toast('Dersler silinemedi: '+r1.error.message,'error');return;}
   const r2=await sb.from('students').delete().eq('id',id);
@@ -891,6 +956,19 @@ async function saveSession(){
   if(isNaN(duration)||duration<=0){toast('Geçerli süre girin','error');return;}
   if(isNaN(amount)||amount<0)   {toast('Geçerli tutar girin','error');return;}
   const mode=$('modalBg').dataset.mode,id=$('modalBg').dataset.id;
+  if(!navigator.onLine){
+    if(mode==='edit-session'){
+      let s=sessions.find(x=>x.id===id);
+      if(s)Object.assign(s,{student_id,date,duration,amount,paid,notes});
+      queueOp({t:'update',table:'sessions',id,data:{student_id,date,duration,amount,paid,notes}});
+    }else{
+      const tmpId='tmp_'+Date.now();
+      sessions.unshift({id:tmpId,student_id,date,duration,amount,paid,notes});
+      queueOp({t:'insert',table:'sessions',tmpId,data:{student_id,date,duration,amount,paid,notes}});
+    }
+    saveCache();toast(mode==='edit-session'?'Ders güncellendi (çevrimdışı)':'Ders eklendi (çevrimdışı)','success');
+    closeModal();renderPage();return;
+  }
   const res=mode==='edit-session'
     ?await sb.from('sessions').update({student_id,date,duration,amount,paid,notes}).eq('id',id)
     :await sb.from('sessions').insert({student_id,date,duration,amount,paid,notes});
@@ -899,6 +977,12 @@ async function saveSession(){
   closeModal();await renderPage();
 }
 async function togglePaid(id,current){
+  if(!navigator.onLine){
+    let s=sessions.find(x=>x.id===id);if(s)s.paid=!current;
+    if(!String(id).startsWith('tmp_'))queueOp({t:'update',table:'sessions',id,data:{paid:!current}});
+    saveCache();toast(!current?'Ödendi işaretlendi':'Ödenmedi olarak değiştirildi','success');
+    renderPage();return;
+  }
   const res=await sb.from('sessions').update({paid:!current}).eq('id',id);
   if(res.error){toast('Güncelleme hatası','error');return;}
   toast(!current?'Ödendi işaretlendi':'Ödenmedi olarak değiştirildi','success');
@@ -906,6 +990,11 @@ async function togglePaid(id,current){
 }
 async function deleteSession(id){
   if(!confirm('Bu ders silinsin mi?'))return;
+  if(!navigator.onLine){
+    sessions=sessions.filter(x=>x.id!==id);
+    if(!String(id).startsWith('tmp_'))queueOp({t:'delete',table:'sessions',id});
+    saveCache();toast('Ders silindi (çevrimdışı)');renderPage();return;
+  }
   const res=await sb.from('sessions').delete().eq('id',id);
   if(res.error){toast('Hata: '+res.error.message,'error');return;}
   toast('Ders silindi');await renderPage();
@@ -925,6 +1014,13 @@ window.addEventListener('load',async()=>{
     if(event==='SIGNED_OUT')location.reload();
   });
 });
+window.addEventListener('online',async()=>{
+  showOffline(false);
+  await flushQueue();
+  await loadAll();
+  renderPage();
+});
+window.addEventListener('offline',()=>showOffline(true));
 if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}
 </script>
 </body>

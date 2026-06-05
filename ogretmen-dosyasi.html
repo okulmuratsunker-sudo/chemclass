@@ -237,9 +237,13 @@ select.inp{cursor:pointer}
 .add-q-row label{font-size:.78rem;color:var(--text2);font-weight:600}
 .add-q-row .inp-sm{padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:.85rem;background:var(--bg);color:var(--text);font-family:inherit}
 .add-q-row .inp-sm:focus{outline:none;border-color:var(--accent)}
+#offlineBanner{position:fixed;top:0;left:0;right:0;z-index:9999;background:var(--danger);color:#fff;text-align:center;padding:9px 16px;font-size:13px;font-weight:700;display:none;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+#offlineBanner.show{display:flex}
+.offline-badge{background:rgba(255,255,255,.22);border-radius:12px;padding:2px 10px;font-size:11px}
 </style>
 </head>
 <body>
+<div id="offlineBanner">📴 Çevrimdışı — değişiklikler bağlanınca senkronize olur <span class="offline-badge" id="ofQueueBadge"></span></div>
 
 <!-- AUTH SCREEN -->
 <div id="authScreen">
@@ -409,8 +413,57 @@ function goto(p){
 function openMenu(){document.getElementById('menuOverlay').classList.add('open');}
 function closeMenu(){document.getElementById('menuOverlay').classList.remove('open');}
 
+/* ── OFFLINE ── */
+const OF_CACHE='of_v1_cache',OF_QUEUE='of_v1_queue';
+function ofSaveCache(){
+  try{localStorage.setItem(OF_CACHE,JSON.stringify({students,grades,scores,scoreHistory,schedule,plans,examQuestions,questionScores,at:Date.now()}));}catch(e){}
+}
+function ofLoadCache(){
+  try{
+    let c=JSON.parse(localStorage.getItem(OF_CACHE)||'{}');
+    students=c.students||[];grades=c.grades||[];scores=c.scores||[];
+    scoreHistory=c.scoreHistory||[];schedule=c.schedule||[];plans=c.plans||[];
+    photos=c.photos||[];examQuestions=c.examQuestions||[];questionScores=c.questionScores||[];
+  }catch(e){students=[];grades=[];scores=[];scoreHistory=[];schedule=[];plans=[];photos=[];examQuestions=[];questionScores=[];}
+}
+function ofShowOffline(on){
+  document.getElementById('offlineBanner').classList.toggle('show',on);
+  let q=JSON.parse(localStorage.getItem(OF_QUEUE)||'[]');
+  let b=document.getElementById('ofQueueBadge');
+  if(b)b.textContent=q.length?q.length+' bekliyor':'';
+}
+function ofQueue(op){
+  let q=JSON.parse(localStorage.getItem(OF_QUEUE)||'[]');q.push(op);
+  localStorage.setItem(OF_QUEUE,JSON.stringify(q));ofShowOffline(true);
+}
+async function ofFlush(){
+  let q=JSON.parse(localStorage.getItem(OF_QUEUE)||'[]');if(!q.length)return;
+  let idMap={};
+  for(let op of q){
+    try{
+      if(op.t==='insert'){
+        let{data}=await sb.from(op.table).insert(op.data).select().single();
+        if(data&&op.tmpId)idMap[op.tmpId]=data.id;
+      }else if(op.t==='update'){
+        let id=idMap[op.id]||op.id;
+        if(id&&!String(id).startsWith('tmp_'))await sb.from(op.table).update(op.data).eq('id',id);
+      }else if(op.t==='upsert'){
+        await sb.from(op.table).upsert(op.data,{onConflict:op.conflict});
+      }else if(op.t==='delete'){
+        let id=idMap[op.id]||op.id;
+        if(id&&!String(id).startsWith('tmp_'))await sb.from(op.table).delete().eq('id',id);
+      }else if(op.t==='score_history'){
+        await sb.from('score_history').insert(op.data);
+      }
+    }catch(e){console.error('ofFlush error',op,e);}
+  }
+  localStorage.removeItem(OF_QUEUE);
+}
+
 // ── Load
 async function loadAll(){
+  if(!navigator.onLine){ofLoadCache();ofShowOffline(true);render();return;}
+  ofShowOffline(false);
   const[s,g,sc,sh,sch,pl,ph,eq,qs]=await Promise.all([
     sb.from('teacher_students').select('*').order('name'),
     sb.from('teacher_grades').select('*'),
@@ -425,7 +478,7 @@ async function loadAll(){
   students=s.data||[];grades=g.data||[];scores=sc.data||[];scoreHistory=sh.data||[];
   schedule=sch.data||[];plans=pl.data||[];photos=ph.data||[];
   examQuestions=eq.data||[];questionScores=qs.data||[];
-  render();
+  ofSaveCache();render();
 }
 
 // ── Helpers
@@ -595,9 +648,10 @@ ${MCOLS.map(({k,l})=>`<div style="background:var(--surface2);border-radius:8px;p
 
 async function saveStudentNote(sid){
   const note=document.getElementById('st-notes-area').value;
+  let st=students.find(s=>s.id===sid);if(st)st.notes=note;
+  if(!navigator.onLine){ofQueue({t:'update',table:'teacher_students',id:sid,data:{notes:note}});ofSaveCache();toast('✓ Not kaydedildi (çevrimdışı)');return;}
   const{error}=await sb.from('teacher_students').update({notes:note}).eq('id',sid);
   if(error){toast('Hata: '+error.message,true);return}
-  const st=students.find(s=>s.id===sid);if(st)st.notes=note;
   toast('✓ Not kaydedildi');
 }
 
@@ -648,6 +702,13 @@ function renderGrades(){
 }
 
 async function saveGrade(sid,s,col,val){
+  if(!navigator.onLine){
+    let g=grades.find(x=>x.student_id===sid&&x.semester===s);
+    const nv=val===''||val===null?null:parseFloat(val);
+    if(g){g[col]=nv;ofQueue({t:'update',table:'teacher_grades',id:g.id,data:{[col]:nv,updated_at:new Date().toISOString()}});}
+    else{const row={student_id:sid,semester:s,[col]:nv,updated_at:new Date().toISOString()};grades.push(row);ofQueue({t:'insert',table:'teacher_grades',data:row});}
+    ofSaveCache();render();return;
+  }
   const nv=val===''?null:parseFloat(val);
   if(nv!==null&&(isNaN(nv)||nv<0||nv>100)){toast('Not 0-100 arasında olmalı',true);return}
   let g=grades.find(x=>x.student_id===sid&&x.semester===s);
@@ -1010,7 +1071,20 @@ function openScoreModal(sid){
 }
 
 async function saveScore(){
-  const sid=scoreStudentId,delta=parseInt(document.getElementById('sm-amt').value),note=document.getElementById('sm-note').value.trim();
+  const sid=scoreStudentId;if(!sid)return;
+  if(!navigator.onLine){
+    const delta=parseFloat(document.getElementById('sm-amt')?.value)||0;
+    const note=document.getElementById('sm-note')?.value.trim()||'';
+    if(!delta){toast('Puan girin',true);return;}
+    let sc=scores.find(x=>x.student_id===sid);
+    const nv=(sc?.score||0)+delta;
+    if(sc){sc.score=nv;ofQueue({t:'upsert',table:'student_scores',conflict:'student_id',data:{student_id:sid,score:nv,updated_at:new Date().toISOString()}});}
+    else{const row={student_id:sid,score:nv,updated_at:new Date().toISOString()};scores.push(row);ofQueue({t:'upsert',table:'student_scores',conflict:'student_id',data:{student_id:sid,score:nv,updated_at:new Date().toISOString()}});}
+    ofQueue({t:'score_history',data:{student_id:sid,delta,note}});
+    scoreHistory.unshift({student_id:sid,delta,note,created_at:new Date().toISOString()});
+    ofSaveCache();closeModal('mo-score');render();toast('✓ Puan kaydedildi (çevrimdışı)');return;
+  }
+  const sid_=scoreStudentId,delta=parseInt(document.getElementById('sm-amt').value),note=document.getElementById('sm-note').value.trim();
   if(isNaN(delta)){toast('Geçerli sayı girin',true);return}
   let sc=scores.find(s=>s.student_id===sid);
   if(sc){
@@ -1038,6 +1112,7 @@ function renderSchedule(){
 }
 
 async function toggleSchedEdit(){
+  if(!navigator.onLine&&editSched){toast('Program düzenleme için internet bağlantısı gerekli',true);editSched=false;render();return;}
   if(!editSched){editSched=true;render();return}
   const inputs=document.querySelectorAll('.sch-grid input'),ups=[],ins=[];
   inputs.forEach(inp=>{
@@ -1085,12 +1160,23 @@ async function savePlan(){
   const type=document.getElementById('pm-type').value,title=document.getElementById('pm-title').value.trim();
   const date=document.getElementById('pm-date').value,content=document.getElementById('pm-content').value.trim();
   if(!title){toast('Başlık zorunlu',true);return}
+  if(!navigator.onLine){
+    const tmpId='tmp_'+Date.now();
+    const row={id:tmpId,plan_type:type,title,date:date||null,content:content||null,created_at:new Date().toISOString()};
+    plans.unshift(row);ofQueue({t:'insert',table:'teacher_plans',tmpId,data:{plan_type:type,title,date:date||null,content:content||null}});
+    ofSaveCache();closeModal('mo-plan');render();toast('✓ Plan eklendi (çevrimdışı)');return;
+  }
   const{data,error}=await sb.from('teacher_plans').insert({plan_type:type,title,date:date||null,content:content||null}).select().single();
   if(error){toast('Hata: '+error.message,true);return}
   plans.unshift(data);closeModal('mo-plan');render();toast('✓ Plan eklendi');
 }
 async function deletePlan(id){
   if(!confirm('Bu planı silmek istiyor musunuz?'))return;
+  if(!navigator.onLine){
+    plans=plans.filter(p=>p.id!==id);
+    if(!String(id).startsWith('tmp_'))ofQueue({t:'delete',table:'teacher_plans',id});
+    ofSaveCache();render();toast('Plan silindi (çevrimdışı)');return;
+  }
   const{error}=await sb.from('teacher_plans').delete().eq('id',id);
   if(error){toast('Hata: '+error.message,true);return}
   plans=plans.filter(p=>p.id!==id);render();toast('Plan silindi');
@@ -1109,6 +1195,10 @@ document.head.appendChild(_s);
     if(event==='SIGNED_OUT')location.reload();
   });
 })();
+window.addEventListener('online',async()=>{
+  ofShowOffline(false);await ofFlush();await loadAll();
+});
+window.addEventListener('offline',()=>ofShowOffline(true));
 if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}
 </script>
 </body>
