@@ -1,7 +1,15 @@
 <!DOCTYPE html>
 <html lang="tr" data-theme="dark">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ChemClass v18</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ChemClass v18</title>
+<link rel="manifest" href="manifest-chemclass.json">
+<meta name="theme-color" content="#00d4aa">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ChemClass">
+<link rel="apple-touch-icon" href="icon-chemclass-180.png">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -1244,6 +1252,7 @@ loadLocal();loadTheme();loadSnd();loadCloudSettings();
 try{if(attDate)attDate.value=todayStr();}catch(e){}
 renderAll();drawTimer();checkBoardUrl();
 getSession().then(async()=>{renderCloud();if(sbUser)await loadFromCloud();});
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}
 </script>
 </body>
 </html>

@@ -2,8 +2,14 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Öğretmen Dosyası</title>
+<link rel="manifest" href="manifest-ogretmen.json">
+<meta name="theme-color" content="#4f7ef8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Öğretmen">
+<link rel="apple-touch-icon" href="icon-ogretmen-180.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 :root{
@@ -1103,6 +1109,7 @@ document.head.appendChild(_s);
     if(event==='SIGNED_OUT')location.reload();
   });
 })();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}
 </script>
 </body>
 </html>
