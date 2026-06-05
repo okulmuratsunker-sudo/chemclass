@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>ChemClass Tahta</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="/manifest-chemclass.json">
+  <style>
+    :root,[data-theme=dark]{
+      --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--fg:#e6edf3;--muted:#8b949e;
+      --gr:#00d4aa;--warn:#ff6b35;--info:#4f7ef8;--red:#f85149;
+      --border:#30363d;
+    }
+    [data-theme=light]{
+      --bg:#f6f8fa;--bg2:#fff;--bg3:#f0f2f5;--fg:#1f2328;--muted:#656d76;
+      --gr:#0ca77d;--warn:#d14e23;--info:#2b5adb;--red:#cf222e;
+      --border:#d0d7de;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;overflow-x:hidden}
+    .hide{display:none!important}
+    button{cursor:pointer;font-family:inherit}
+    a{color:var(--gr)}
+
+    /* ── PIN SCREEN ── */
+    #pinScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:20px;padding:24px}
+    .brand{font-size:34px;font-weight:900;letter-spacing:-1px}
+    .brand span{color:var(--gr)}
+    .pin-sub{font-size:16px;color:var(--muted);margin-top:-12px}
+    .pin-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:360px}
+    #pinInput{
+      width:100%;padding:16px;font-size:40px;font-weight:900;text-align:center;
+      background:var(--bg2);border:2px solid var(--border);border-radius:14px;
+      color:var(--fg);letter-spacing:16px;outline:none;transition:border-color .2s;
+    }
+    #pinInput:focus{border-color:var(--gr)}
+    .pin-btn{
+      width:100%;padding:16px;font-size:20px;font-weight:700;
+      background:var(--gr);color:#000;border:none;border-radius:14px;
+      transition:opacity .15s;
+    }
+    .pin-btn:active{opacity:.8}
+    #pinMsg{min-height:22px;font-size:14px;text-align:center}
+    .cfg-wrap{width:100%;max-width:360px;display:flex;flex-direction:column;gap:8px}
+    .cfg-inp{
+      width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);
+      border-radius:10px;color:var(--fg);font-size:14px;outline:none;
+    }
+    .cfg-inp:focus{border-color:var(--gr)}
+    .cfg-label{font-size:13px;color:var(--muted)}
+    .theme-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--fg);font-size:18px}
+
+    /* ── MAIN SCREEN ── */
+    #mainScreen{display:flex;flex-direction:column;min-height:100vh}
+    .top-bar{
+      display:flex;align-items:center;gap:8px;padding:10px 14px;
+      background:var(--bg2);border-bottom:1px solid var(--border);
+      position:sticky;top:0;z-index:20;flex-wrap:wrap;
+    }
+    .top-bar .brand{font-size:20px}
+    #boardClassName{font-size:17px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .pill{background:var(--bg3);border-radius:20px;padding:3px 10px;font-size:12px;color:var(--muted)}
+    .board-nav{
+      display:flex;gap:6px;padding:8px 12px;background:var(--bg2);
+      border-bottom:1px solid var(--border);overflow-x:auto;
+    }
+    .board-nav button{
+      flex-shrink:0;padding:8px 18px;border:1px solid var(--border);border-radius:20px;
+      background:var(--bg3);color:var(--muted);font-size:14px;font-weight:600;
+      white-space:nowrap;transition:all .2s;
+    }
+    .board-nav button.on{background:var(--gr);color:#000;border-color:var(--gr)}
+
+    /* ── VIEWS ── */
+    .view{padding:12px;max-width:1200px;margin:0 auto;width:100%}
+
+    /* List */
+    .student-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border-radius:10px;margin-bottom:6px;border:1px solid var(--border)}
+    .rank{width:40px;flex-shrink:0;font-weight:700;color:var(--muted);text-align:center}
+    .av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;font-size:17px}
+    .grow{flex:1;min-width:0}
+    .s-name{font-size:17px;font-weight:700}
+    .s-meta{font-size:12px;color:var(--muted)}
+    .bar{height:5px;background:var(--bg3);border-radius:3px;margin-top:5px}
+    .bar i{display:block;height:100%;background:var(--gr);border-radius:3px;transition:width .4s}
+    .score{font-size:22px;font-weight:900;flex-shrink:0}
+    .pos{color:var(--gr)}
+    .neg{color:var(--red)}
+    .muted{color:var(--muted);font-size:13px}
+    .empty{text-align:center;padding:48px 16px;font-size:16px;color:var(--muted)}
+
+    /* Pick view */
+    #view-pick{
+      display:flex;flex-direction:column;align-items:center;padding:24px 16px;gap:20px;
+      min-height:calc(100vh - 100px);justify-content:center;
+    }
+    .pick-box{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      background:var(--bg2);border:2px solid var(--border);border-radius:24px;
+      padding:40px 32px;width:100%;max-width:640px;gap:14px;
+      transition:border-color .3s,box-shadow .3s;
+    }
+    .pick-box.spinning{border-color:var(--gr);box-shadow:0 0 50px rgba(0,212,170,.2);animation:glow .4s infinite alternate}
+    @keyframes glow{to{box-shadow:0 0 60px rgba(0,212,170,.35)}}
+    #pickName{font-size:64px;font-weight:900;text-align:center;word-break:break-word;line-height:1.05;min-height:72px}
+    #pickInfo{font-size:22px;color:var(--muted)}
+    #pickScore{font-size:40px;font-weight:900;transition:color .3s}
+    .pick-av{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900}
+    .recent-box{font-size:14px;color:var(--muted);text-align:center;max-width:640px;line-height:1.9}
+
+    /* Groups */
+    #groupsGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;padding:12px;max-width:1200px;margin:0 auto;width:100%}
+    .group-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px}
+    .group-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+    .group-title{font-size:17px;font-weight:700;flex:1}
+    .group-sc{font-size:20px;font-weight:900}
+    .members{display:flex;flex-wrap:wrap;gap:6px}
+    .mpill{background:var(--bg3);border-radius:16px;padding:4px 12px;font-size:13px}
+
+    /* Timer */
+    #view-timer{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      min-height:calc(100vh - 100px);gap:12px;padding:24px;
+    }
+    #timerDisplay{
+      font-size:160px;font-weight:900;letter-spacing:-6px;line-height:1;
+      font-variant-numeric:tabular-nums;transition:color .3s;
+    }
+    #timerDisplay.danger{color:var(--red);animation:tpulse .5s infinite alternate}
+    @keyframes tpulse{to{text-shadow:0 0 50px rgba(248,81,73,.5)}}
+    #timerStatus{font-size:26px;font-weight:700;color:var(--muted)}
+    #timerTotal{font-size:18px;color:var(--muted)}
+
+    /* Util */
+    .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .b{background:var(--gr);color:#000;border:none;border-radius:8px;padding:8px 16px;font-weight:700;font-size:14px}
+    .s{background:var(--bg3);color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-weight:600;font-size:14px}
+
+    @media(max-width:480px){
+      #timerDisplay{font-size:88px;letter-spacing:-2px}
+      #pickName{font-size:44px}
+      .pin-wrap{max-width:100%}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ───────────── PIN SCREEN ───────────── -->
+<div id="pinScreen">
+  <div class="brand">CHEM<span>CLASS</span></div>
+  <div class="pin-sub">Akıllı Tahta</div>
+
+  <div id="cfgWrap" class="cfg-wrap hide">
+    <div class="cfg-label">Supabase bağlantı bilgileri (bir kez girilir)</div>
+    <input id="cfgUrl" class="cfg-inp" placeholder="https://xxx.supabase.co" type="url">
+    <input id="cfgKey" class="cfg-inp" placeholder="eyJ... (anon key)" type="text">
+    <button class="pin-btn" onclick="saveConfig()">Kaydet ve devam et</button>
+  </div>
+
+  <div class="pin-wrap" id="pinWrap">
+    <input id="pinInput" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6"
+      placeholder="——  ——  ——" autocomplete="off"
+      oninput="this.value=this.value.replace(/\D/g,'')"
+      onkeydown="if(event.key==='Enter')connectBoard()">
+    <button class="pin-btn" onclick="connectBoard()">🖥️ Bağlan</button>
+  </div>
+  <div id="pinMsg"></div>
+  <p class="muted" style="text-align:center;max-width:300px">Kodu öğretmenin telefonundaki <b>Tahta Modu</b> ekranından alın.</p>
+  <button class="theme-btn" onclick="toggleTheme()" id="themeBtnPin">🌙</button>
+</div>
+
+<!-- ───────────── MAIN BOARD ───────────── -->
+<div id="mainScreen" class="hide">
+  <div class="top-bar">
+    <div class="brand">CHEM<span>CLASS</span></div>
+    <div id="boardClassName">Yükleniyor...</div>
+    <span id="boardCode" class="pill">----</span>
+    <span id="boardUpdated" class="pill">Bekleniyor</span>
+    <button class="theme-btn" onclick="toggleTheme()" id="themeBtnBoard">🌙</button>
+    <button class="s" onclick="disconnectBoard()" style="padding:5px 10px;font-size:13px">✕ Çık</button>
+  </div>
+
+  <div class="board-nav">
+    <button data-view="list" onclick="localView('list')" class="on">📊 Liderlik</button>
+    <button data-view="pick" onclick="localView('pick')">🎲 Seçici</button>
+    <button data-view="groups" onclick="localView('groups')">👥 Gruplar</button>
+    <button data-view="timer" onclick="localView('timer')">⏱️ Sayaç</button>
+  </div>
+
+  <!-- LIST -->
+  <div id="view-list" class="view">
+    <div id="listContent"><div class="empty">Yükleniyor...</div></div>
+  </div>
+
+  <!-- PICK -->
+  <div id="view-pick" class="hide">
+    <div class="pick-box" id="pickBox">
+      <div class="pick-av" id="pickAv" style="display:none"></div>
+      <div id="pickName">?</div>
+      <div class="row" style="justify-content:center;gap:16px">
+        <div id="pickInfo"></div>
+        <div id="pickScore"></div>
+      </div>
+    </div>
+    <div class="recent-box" id="recentBox"></div>
+  </div>
+
+  <!-- GROUPS -->
+  <div id="groupsGrid" class="hide"></div>
+
+  <!-- TIMER -->
+  <div id="view-timer" class="hide">
+    <div id="timerDisplay">--:--</div>
+    <div id="timerStatus">Bekleniyor</div>
+    <div id="timerTotal"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const CFGKEY = 'chemclass_v15_cloud_settings';
+let sb = null;
+let pollTimer = null, localTimerIv = null;
+let currentCode = '';
+let lastData = null;
+let lastPickTime = null;
+let isSpinning = false;
+let viewMode = 'auto'; // 'auto' = follow teacher, 'manual' = user chose
+
+// ── THEME ──────────────────────────────────────────────────────────────────
+function setThemeIcon(t){
+  let ic = t==='dark' ? '☀️' : '🌙';
+  document.getElementById('themeBtnPin').textContent = ic;
+  document.getElementById('themeBtnBoard').textContent = ic;
+}
+function toggleTheme(){
+  let h = document.documentElement;
+  let isDark = h.getAttribute('data-theme') === 'dark';
+  let next = isDark ? 'light' : 'dark';
+  h.setAttribute('data-theme', next);
+  setThemeIcon(next);
+  localStorage.setItem('cc_theme', next);
+}
+function loadTheme(){
+  let t = localStorage.getItem('cc_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  setThemeIcon(t);
+}
+
+// ── UTILS ──────────────────────────────────────────────────────────────────
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fmtTime(x){x=Math.max(0,x|0);return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0')}
+
+const AV_BG=['rgba(0,212,170,.18)','rgba(255,107,53,.18)','rgba(255,215,0,.18)','rgba(167,139,250,.18)','rgba(244,114,182,.18)','rgba(56,189,248,.18)','rgba(52,211,153,.18)','rgba(251,146,60,.18)'];
+const AV_FG=['#00d4aa','#ff6b35','#ffd700','#a78bfa','#f472b6','#38bdf8','#34d399','#fb923c'];
+function avSt(c){c=c||0;return `background:${AV_BG[c]||AV_BG[0]};color:${AV_FG[c]||AV_FG[0]}`}
+
+// ── CONFIG ─────────────────────────────────────────────────────────────────
+function loadConfig(){
+  try{
+    let c = JSON.parse(localStorage.getItem(CFGKEY)||'{}');
+    if(c.url && c.key){ initSb(c.url, c.key); return true; }
+  }catch(e){}
+  return false;
+}
+function saveConfig(){
+  let url = document.getElementById('cfgUrl').value.trim();
+  let key = document.getElementById('cfgKey').value.trim();
+  if(!url||!key){pinMsg('URL ve key girin','red');return;}
+  localStorage.setItem(CFGKEY, JSON.stringify({url, key}));
+  initSb(url, key);
+  document.getElementById('cfgWrap').classList.add('hide');
+  document.getElementById('pinWrap').classList.remove('hide');
+}
+function initSb(url, key){
+  try{ sb = window.supabase.createClient(url, key); }
+  catch(e){ sb = null; }
+}
+
+// ── PIN / CONNECT ───────────────────────────────────────────────────────────
+function pinMsg(txt, color){
+  let el = document.getElementById('pinMsg');
+  el.textContent = txt;
+  el.style.color = color==='red' ? 'var(--red)' : 'var(--muted)';
+}
+async function connectBoard(){
+  let code = (document.getElementById('pinInput').value||'').trim();
+  if(!/^\d{6}$/.test(code)){pinMsg('6 haneli sayı girin','red');return;}
+  if(!sb){pinMsg('Supabase yapılandırılmamış','red');return;}
+  pinMsg('Bağlanıyor...','muted');
+
+  let{data:row, error} = await sb.from('chemclass_board_sessions')
+    .select('code,class_name,app_data,updated_at,active,expires_at')
+    .eq('code', code).eq('active', true).maybeSingle();
+
+  if(error||!row){pinMsg('Kod bulunamadı veya geçersiz','red');return;}
+  if(row.expires_at && new Date(row.expires_at) < new Date()){pinMsg('Bu kodun süresi doldu','red');return;}
+
+  currentCode = code;
+  document.getElementById('pinScreen').classList.add('hide');
+  document.getElementById('mainScreen').classList.remove('hide');
+  document.getElementById('boardCode').textContent = '#' + code;
+  processData(row);
+  startPolling();
+}
+function disconnectBoard(){
+  stopPolling();
+  currentCode = ''; lastData = null; lastPickTime = null; isSpinning = false;
+  document.getElementById('mainScreen').classList.add('hide');
+  document.getElementById('pinScreen').classList.remove('hide');
+  document.getElementById('pinInput').value = '';
+  pinMsg('','muted');
+}
+
+// ── POLLING ─────────────────────────────────────────────────────────────────
+function startPolling(){pollTimer = setInterval(poll, 2000);}
+function stopPolling(){
+  clearInterval(pollTimer); pollTimer = null;
+  clearInterval(localTimerIv); localTimerIv = null;
+}
+async function poll(){
+  if(!sb||!currentCode) return;
+  let{data:row, error} = await sb.from('chemclass_board_sessions')
+    .select('code,class_name,app_data,updated_at,active,expires_at')
+    .eq('code', currentCode).eq('active', true).maybeSingle();
+  if(error||!row){
+    document.getElementById('boardUpdated').textContent = '⚠️ Bağlantı yok';
+    return;
+  }
+  if(row.expires_at && new Date(row.expires_at) < new Date()){
+    stopPolling(); alert('Tahta oturumu sona erdi.'); disconnectBoard(); return;
+  }
+  processData(row);
+}
+
+// ── PROCESS DATA ─────────────────────────────────────────────────────────────
+function processData(row){
+  let d = row.app_data || {};
+  lastData = d;
+
+  document.getElementById('boardClassName').textContent = d.className || row.class_name || 'Sınıf';
+  document.getElementById('boardUpdated').textContent = 'Güncel: ' + new Date(row.updated_at||Date.now()).toLocaleTimeString('tr-TR');
+
+  // Auto-view switch
+  let targetView = d.view || 'list';
+  if(viewMode === 'auto') setActiveView(targetView);
+
+  // Detect new pick (by pickTime change)
+  let newPickTime = d.pickTime;
+  if(newPickTime && newPickTime !== lastPickTime && d.lastPick){
+    lastPickTime = newPickTime;
+    if(viewMode === 'auto'){
+      setActiveView('pick');
+      triggerSpin(d.lastPick, d.students || []);
+    } else if(activeView() === 'pick'){
+      triggerSpin(d.lastPick, d.students || []);
+    } else {
+      updatePickStatic(d.lastPick);
+    }
+  } else {
+    updatePickStatic(d.lastPick);
+  }
+
+  renderCurrentView();
+}
+
+// ── VIEW MANAGEMENT ──────────────────────────────────────────────────────────
+function activeView(){
+  for(let b of document.querySelectorAll('.board-nav button'))
+    if(b.classList.contains('on')) return b.getAttribute('data-view');
+  return 'list';
+}
+function setActiveView(v){
+  // Hide all views
+  ['view-list','view-pick','groupsGrid','view-timer'].forEach(id=>{
+    let el=document.getElementById(id);
+    if(el) el.classList.add('hide');
+  });
+  let el = document.getElementById(v==='list'?'view-list':v==='pick'?'view-pick':v==='groups'?'groupsGrid':'view-timer');
+  if(el) el.classList.remove('hide');
+  document.querySelectorAll('.board-nav button').forEach(b=>b.classList.toggle('on', b.getAttribute('data-view')===v));
+}
+function localView(v){viewMode='manual'; setActiveView(v); renderCurrentView();}
+
+// ── RENDER ───────────────────────────────────────────────────────────────────
+function renderCurrentView(){
+  let v = activeView();
+  if(v==='list') renderList();
+  else if(v==='groups') renderGroups();
+  else if(v==='timer') renderTimer();
+  renderRecent();
+}
+
+function renderList(){
+  let d = lastData||{};
+  let ss = (d.students||[]).slice().sort((a,b)=>(b.score||0)-(a.score||0));
+  let el = document.getElementById('listContent');
+  if(!ss.length){el.innerHTML='<div class="empty">Öğrenci bulunamadı.</div>';return;}
+  let mx = Math.max(1,...ss.map(s=>Math.abs(s.score||0)));
+  el.innerHTML = ss.map((s,i)=>`
+    <div class="student-row">
+      <div class="rank">#${i+1}</div>
+      <div class="av" style="${avSt(s.color)}">${esc((s.name||'?')[0])}</div>
+      <div class="grow">
+        <div class="s-name">${esc(s.name)}</div>
+        <div class="s-meta">${esc(s.className||'')}${s.no?' · No: '+esc(s.no):''}</div>
+        <div class="bar"><i style="width:${Math.max(4,Math.abs(s.score||0)/mx*100)}%"></i></div>
+      </div>
+      <div class="score ${(s.score||0)<0?'neg':'pos'}" style="font-size:24px">${s.score>0?'+':''}${s.score||0}</div>
+    </div>`).join('');
+}
+
+function renderGroups(){
+  let d = lastData||{};
+  let gs = d.groups||[];
+  let el = document.getElementById('groupsGrid');
+  if(!gs.length){el.innerHTML='<div class="empty">Henüz grup oluşturulmadı.</div>';return;}
+  el.innerHTML = gs.map(g=>`
+    <div class="group-card">
+      <div class="group-head">
+        <div class="group-title">${esc(g.name)}</div>
+        ${g.score!==undefined?`<div class="group-sc ${g.score<0?'neg':'pos'}">${g.score>0?'+':''}${g.score}</div>`:''}
+      </div>
+      <div class="members">
+        ${(g.members||[]).map(n=>`<span class="mpill">${esc(n)}</span>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function renderRecent(){
+  let d = lastData||{};
+  let r = d.recent||[];
+  let el = document.getElementById('recentBox');
+  if(!el) return;
+  el.textContent = r.length ? 'Son seçilenler: ' + r.join(' · ') : '';
+}
+
+// ── TIMER ────────────────────────────────────────────────────────────────────
+function renderTimer(){
+  clearInterval(localTimerIv); localTimerIv = null;
+  let d = lastData||{};
+  let disp = document.getElementById('timerDisplay');
+  let stat = document.getElementById('timerStatus');
+  let tot = document.getElementById('timerTotal');
+  tot.textContent = d.timerTotal ? 'Toplam: ' + fmtTime(d.timerTotal) : '';
+
+  if(!d.timerPaused && d.timerEnd){
+    stat.textContent = '▶ Çalışıyor';
+    function tick(){
+      let rem = (new Date(d.timerEnd).getTime() - Date.now()) / 1000;
+      rem = Math.max(0, rem);
+      disp.textContent = fmtTime(rem);
+      disp.classList.toggle('danger', rem > 0 && rem <= 10);
+      if(rem <= 0){clearInterval(localTimerIv); localTimerIv = null; stat.textContent = '⏰ Süre bitti!';}
+    }
+    tick();
+    localTimerIv = setInterval(tick, 250);
+  } else if(d.timerRemaining !== undefined){
+    disp.textContent = fmtTime(d.timerRemaining);
+    disp.classList.remove('danger');
+    stat.textContent = d.timerRemaining > 0 ? '⏸ Duraklatıldı' : '⏹ Durduruldu';
+  } else {
+    disp.textContent = '--:--';
+    stat.textContent = 'Bekleniyor';
+  }
+}
+
+// ── PICK ANIMATION ───────────────────────────────────────────────────────────
+function triggerSpin(pick, students){
+  if(isSpinning) return;
+  isSpinning = true;
+  let box = document.getElementById('pickBox');
+  let nameEl = document.getElementById('pickName');
+  let infoEl = document.getElementById('pickInfo');
+  let scoreEl = document.getElementById('pickScore');
+  let avEl = document.getElementById('pickAv');
+
+  box.classList.add('spinning');
+  infoEl.textContent = '';
+  scoreEl.textContent = '';
+  avEl.style.display = 'none';
+
+  let pool = students.map(s=>s.name).filter(n=>n && n !== pick.name);
+  if(!pool.length) pool = ['...'];
+
+  let spins = 0, total = 20;
+  let speed = 60;
+  let iv = setInterval(()=>{
+    nameEl.textContent = pool[spins % pool.length];
+    spins++;
+    if(spins >= total){
+      clearInterval(iv);
+      box.classList.remove('spinning');
+      nameEl.textContent = pick.name;
+      infoEl.textContent = pick.no ? 'No: ' + pick.no : '';
+      scoreEl.textContent = (pick.score > 0 ? '+' : '') + (pick.score || 0);
+      scoreEl.style.color = (pick.score||0) < 0 ? 'var(--red)' : 'var(--gr)';
+      avEl.style.cssText = avSt(pick.color) + ';display:flex;width:80px;height:80px;border-radius:50%;align-items:center;justify-content:center;font-size:36px;font-weight:900';
+      avEl.textContent = (pick.name||'?')[0];
+      isSpinning = false;
+    }
+  }, speed);
+}
+
+function updatePickStatic(pick){
+  if(isSpinning) return;
+  let nameEl = document.getElementById('pickName');
+  let infoEl = document.getElementById('pickInfo');
+  let scoreEl = document.getElementById('pickScore');
+  let avEl = document.getElementById('pickAv');
+  if(!pick){nameEl.textContent='?';infoEl.textContent='';scoreEl.textContent='';avEl.style.display='none';return;}
+  nameEl.textContent = pick.name;
+  infoEl.textContent = pick.no ? 'No: ' + pick.no : '';
+  scoreEl.textContent = (pick.score > 0 ? '+' : '') + (pick.score || 0);
+  scoreEl.style.color = (pick.score||0) < 0 ? 'var(--red)' : 'var(--gr)';
+  avEl.style.cssText = avSt(pick.color) + ';display:flex;width:80px;height:80px;border-radius:50%;align-items:center;justify-content:center;font-size:36px;font-weight:900';
+  avEl.textContent = (pick.name||'?')[0];
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+loadTheme();
+let hasCfg = loadConfig();
+if(!hasCfg){
+  document.getElementById('cfgWrap').classList.remove('hide');
+  document.getElementById('pinWrap').classList.add('hide');
+}
+
+// Auto-connect from URL
+let urlCode = new URLSearchParams(location.search).get('code');
+if(urlCode && /^\d{6}$/.test(urlCode)){
+  document.getElementById('pinInput').value = urlCode;
+  setTimeout(connectBoard, 600);
+}
+
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
+</script>
+</body>
+</html>
