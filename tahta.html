@@ -152,13 +152,6 @@
   <div class="brand">CHEM<span>CLASS</span></div>
   <div class="pin-sub">Akıllı Tahta</div>
 
-  <div id="cfgWrap" class="cfg-wrap hide">
-    <div class="cfg-label">Supabase bağlantı bilgileri (bir kez girilir)</div>
-    <input id="cfgUrl" class="cfg-inp" placeholder="https://xxx.supabase.co" type="url">
-    <input id="cfgKey" class="cfg-inp" placeholder="eyJ... (anon key)" type="text">
-    <button class="pin-btn" onclick="saveConfig()">Kaydet ve devam et</button>
-  </div>
-
   <div class="pin-wrap" id="pinWrap">
     <input id="pinInput" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6"
       placeholder="——  ——  ——" autocomplete="off"
@@ -221,6 +214,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 const CFGKEY = 'chemclass_v15_cloud_settings';
+const _DU = 'https://krqyzhmioqtfihwrblmb.supabase.co';
+const _DK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtycXl6aG1pb3F0Zmlod3JibG1iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNTQzOTQsImV4cCI6MjA5NTczMDM5NH0.qE5bmGq7DksTJ4WHklpS_cGPeghkQrk5ZwjR36dn0GI';
 let sb = null;
 let pollTimer = null, localTimerIv = null;
 let currentCode = '';
@@ -259,20 +254,23 @@ function avSt(c){c=c||0;return `background:${AV_BG[c]||AV_BG[0]};color:${AV_FG[c
 
 // ── CONFIG ─────────────────────────────────────────────────────────────────
 function loadConfig(){
+  // 1. URL params (teacher-generated link contains encoded config)
+  let p = new URLSearchParams(location.search);
+  let pu = p.get('u'), pk = p.get('k');
+  if(pu && pk){
+    try{
+      let url = atob(pu), key = atob(pk);
+      localStorage.setItem(CFGKEY, JSON.stringify({url, key}));
+      initSb(url, key); return;
+    }catch(e){}
+  }
+  // 2. localStorage (previously saved)
   try{
     let c = JSON.parse(localStorage.getItem(CFGKEY)||'{}');
-    if(c.url && c.key){ initSb(c.url, c.key); return true; }
+    if(c.url && c.key){ initSb(c.url, c.key); return; }
   }catch(e){}
-  return false;
-}
-function saveConfig(){
-  let url = document.getElementById('cfgUrl').value.trim();
-  let key = document.getElementById('cfgKey').value.trim();
-  if(!url||!key){pinMsg('URL ve key girin','red');return;}
-  localStorage.setItem(CFGKEY, JSON.stringify({url, key}));
-  initSb(url, key);
-  document.getElementById('cfgWrap').classList.add('hide');
-  document.getElementById('pinWrap').classList.remove('hide');
+  // 3. Hardcoded defaults
+  initSb(_DU, _DK);
 }
 function initSb(url, key){
   try{ sb = window.supabase.createClient(url, key); }
@@ -521,17 +519,13 @@ function updatePickStatic(pick){
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
 loadTheme();
-let hasCfg = loadConfig();
-if(!hasCfg){
-  document.getElementById('cfgWrap').classList.remove('hide');
-  document.getElementById('pinWrap').classList.add('hide');
-}
+loadConfig(); // always succeeds (hardcoded fallback)
 
-// Auto-connect from URL
+// Auto-connect from URL param
 let urlCode = new URLSearchParams(location.search).get('code');
 if(urlCode && /^\d{6}$/.test(urlCode)){
   document.getElementById('pinInput').value = urlCode;
-  setTimeout(connectBoard, 600);
+  setTimeout(connectBoard, 400);
 }
 
 if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});

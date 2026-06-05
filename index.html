@@ -1191,7 +1191,9 @@ async function createBoardCode(){
   if(error)return msg('Tahta kodu oluşturulamadı: '+error.message);
   boardCodeText.textContent=activeBoardCode;
   boardCodeInfo.textContent=cls+' sınıfı için '+hours+' saat geçerli.';
-  let url=location.origin+'/tahta.html?code='+activeBoardCode;
+  let _cfg={};try{_cfg=JSON.parse(localStorage.getItem(CLOUDKEY)||'{}');}catch(e){}
+  let _u=btoa(_cfg.url||sbUrl?.value||''),_k=btoa(_cfg.key||sbKey?.value||'');
+  let url=location.origin+'/tahta.html?code='+activeBoardCode+'&u='+_u+'&k='+_k;
   boardUrl.value=url;boardUrlBox.style.display='flex';msg('Tahta kodu oluşturuldu ✓');
 }
 async function refreshBoardSession(){
