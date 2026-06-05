@@ -353,22 +353,36 @@ function setAuthMsg(msg,type){
 async function doAuth(){
   const email=$('authEmail').value.trim();
   const pass=$('authPass').value;
-  if(!email||!pass){setAuthMsg('E-posta ve şifre gerekli','err');return;}
+  if(!email||!pass){setAuthMsg('E-posta ve şifre gerekli','err');toast('E-posta ve şifre gerekli','error');return;}
   const btn=$('authBtn');
   btn.textContent='...';btn.disabled=true;
-  const res=authMode==='login'
-    ?await sb.auth.signInWithPassword({email,password:pass})
-    :await sb.auth.signUp({email,password:pass});
-  btn.disabled=false;
-  btn.textContent=authMode==='login'?'Giriş Yap':'Kayıt Ol';
-  if(res.error){setAuthMsg(res.error.message,'err');return;}
-  if(authMode==='signup'&&res.data?.user&&!res.data?.session){
-    setAuthMsg('✓ Kayıt başarılı! E-postanızı onaylayın, ardından giriş yapın.','ok');
-    return;
+  try{
+    const res=authMode==='login'
+      ?await sb.auth.signInWithPassword({email,password:pass})
+      :await sb.auth.signUp({email,password:pass});
+    btn.disabled=false;
+    btn.textContent=authMode==='login'?'Giriş Yap':'Kayıt Ol';
+    if(res.error){
+      const msg=res.error.message==='Invalid login credentials'?'E-posta veya şifre hatalı':res.error.message;
+      setAuthMsg(msg,'err');
+      toast(msg,'error');
+      return;
+    }
+    if(authMode==='signup'&&res.data?.user&&!res.data?.session){
+      const msg='✓ Kayıt başarılı! E-postanızı onaylayın, ardından giriş yapın.';
+      setAuthMsg(msg,'ok');
+      toast('Kayıt başarılı — e-postanızı onaylayın');
+      return;
+    }
+    showApp(res.data.user);
+    await loadAll();
+    renderPage();
+  }catch(e){
+    btn.disabled=false;
+    btn.textContent=authMode==='login'?'Giriş Yap':'Kayıt Ol';
+    setAuthMsg('Bağlantı hatası: '+e.message,'err');
+    toast('Bağlantı hatası','error');
   }
-  showApp(res.data.user);
-  await loadAll();
-  renderPage();
 }
 function showApp(user){
   $('authScreen').style.display='none';
