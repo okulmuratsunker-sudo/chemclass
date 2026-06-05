@@ -1,0 +1,12 @@
+{
+  "appId": "com.muratsunker.chemclass",
+  "appName": "ChemClass",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "limitsNavigationsToAppBoundDomains": false
+  }
+}
