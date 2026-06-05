@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Kasa" />
+<meta name="theme-color" content="#7c6fe0" />
+<title>Kasa</title>
+<link rel="manifest" href="manifest-kasa.json" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+/* ── CSS VARIABLES ───────────────────────────────────── */
+:root {
+  --bg:#0f0e17; --s1:#1a1933; --s2:#231f3d; --bd:#2d2952;
+  --accent:#7c6fe0; --accent2:#5c4fe0; --text:#e8e6f0; --text2:#9b98b5;
+  --gr:#4caf50; --re:#f44336; --ye:#ff9800;
+  --radius:14px; --radius-sm:8px; --nav-h:64px; --safe-b:env(safe-area-inset-bottom,0px);
+  --shadow:0 4px 24px rgba(0,0,0,.45);
+}
+[data-theme=light] {
+  --bg:#f2f1fa; --s1:#ffffff; --s2:#eceaf5; --bd:#d4d0ec;
+  --text:#1a1833; --text2:#5a5875;
+  --shadow:0 4px 24px rgba(0,0,0,.12);
+}
+/* ── RESET ───────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+button{font-family:inherit;cursor:pointer;border:none;outline:none;background:none}
+input,select,textarea{font-family:inherit;outline:none;background:var(--s2);border:1px solid var(--bd);color:var(--text);border-radius:var(--radius-sm);padding:10px 14px;width:100%;font-size:15px;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:80px}
+select option{background:var(--s1)}
+a{color:var(--accent);text-decoration:none}
+/* ── LAYOUT ──────────────────────────────────────────── */
+#app{display:flex;flex-direction:column;height:100%}
+.page{display:none;flex:1;overflow-y:auto;padding:16px 16px calc(var(--nav-h) + 16px + var(--safe-b));animation:fadeIn .25s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+/* ── BOTTOM NAV ──────────────────────────────────────── */
+#bottom-nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe-b));padding-bottom:var(--safe-b);background:var(--s1);border-top:1px solid var(--bd);display:flex;align-items:stretch;z-index:100}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--text2);font-size:11px;font-weight:500;transition:color .2s;padding-top:6px}
+.nav-btn .icon{font-size:22px;line-height:1}
+.nav-btn.active{color:var(--accent)}
+/* ── LOCK SCREEN ─────────────────────────────────────── */
+#lock{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:24px}
+#lock .logo{font-size:64px;line-height:1}
+#lock h1{font-size:28px;font-weight:700;color:var(--accent)}
+#lock p{color:var(--text2);text-align:center;font-size:14px}
+#lock .lock-form{width:100%;max-width:380px;display:flex;flex-direction:column;gap:12px}
+#lock .bio-btn{width:100%;max-width:380px;padding:14px;background:var(--s2);border:1px solid var(--bd);border-radius:var(--radius);color:var(--text);font-size:15px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s,border-color .2s}
+#lock .bio-btn:hover{background:var(--bd);border-color:var(--accent)}
+/* ── CARDS / ITEMS ───────────────────────────────────── */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px}
+.section-header h2{font-size:20px;font-weight:700}
+.search-row{display:flex;gap:8px;margin-bottom:16px}
+.search-row input{flex:1}
+.item-list{display:flex;flex-direction:column;gap:10px}
+.item-card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--radius);padding:14px;transition:border-color .2s}
+.item-card:hover{border-color:var(--accent)}
+.item-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.item-card-title{font-weight:600;font-size:16px}
+.item-card-sub{color:var(--text2);font-size:13px;margin-top:2px}
+.item-card-actions{display:flex;gap:6px;flex-shrink:0}
+.icon-btn{width:34px;height:34px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:16px;transition:background .2s;color:var(--text2)}
+.icon-btn:hover{background:var(--bd);color:var(--text)}
+.icon-btn.danger:hover{background:rgba(244,67,54,.15);color:var(--re)}
+/* ── BADGES ──────────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
+.badge-purple{background:rgba(124,111,224,.2);color:var(--accent)}
+.badge-green{background:rgba(76,175,80,.2);color:var(--gr)}
+.badge-red{background:rgba(244,67,54,.2);color:var(--re)}
+.badge-orange{background:rgba(255,152,0,.2);color:var(--ye)}
+.badge-gray{background:rgba(155,152,181,.15);color:var(--text2)}
+/* ── BUTTONS ─────────────────────────────────────────── */
+.btn{padding:12px 20px;border-radius:var(--radius-sm);font-size:15px;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-secondary{background:var(--s2);color:var(--text);border:1px solid var(--bd)}
+.btn-secondary:hover{background:var(--bd)}
+.btn-danger{background:rgba(244,67,54,.15);color:var(--re);border:1px solid rgba(244,67,54,.3)}
+.btn-danger:hover{background:rgba(244,67,54,.25)}
+.btn-full{width:100%}
+.btn-sm{padding:8px 14px;font-size:13px}
+/* ── MODAL ───────────────────────────────────────────── */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:flex-end;justify-content:center;padding:0}
+.modal-backdrop.open{display:flex;animation:bdIn .2s ease}
+@keyframes bdIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--s1);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:540px;max-height:92vh;overflow-y:auto;padding:24px;animation:slideUp .3s ease;padding-bottom:calc(24px + var(--safe-b))}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-title{font-size:18px;font-weight:700}
+.modal-close{width:34px;height:34px;border-radius:50%;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text2)}
+.modal-close:hover{background:var(--bd)}
+.form-group{margin-bottom:14px}
+.form-label{display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-footer{display:flex;gap:10px;margin-top:20px}
+.modal-footer .btn{flex:1}
+/* ── PASSWORD SPECIFIC ───────────────────────────────── */
+.pw-masked{font-family:monospace;letter-spacing:2px;font-size:17px}
+.strength-bar{height:5px;border-radius:3px;margin-top:6px;transition:width .3s,background .3s;background:var(--bd);width:100%}
+.strength-fill{height:100%;border-radius:3px;transition:width .4s,background .4s}
+.strength-label{font-size:12px;margin-top:4px;font-weight:600}
+.generator-section{background:var(--s2);border-radius:var(--radius-sm);padding:14px;margin-top:8px}
+.generator-controls{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.toggle-row{display:flex;align-items:center;gap:8px;font-size:13px}
+.toggle{width:36px;height:20px;background:var(--bd);border-radius:10px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--accent)}
+.toggle::after{content:'';width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .2s}
+.toggle.on::after{left:18px}
+.slider-row{display:flex;align-items:center;gap:10px}
+.slider-row input[type=range]{flex:1;accent-color:var(--accent);background:transparent;border:none;padding:0}
+.pw-gen-result{display:flex;gap:8px;margin-top:10px}
+.pw-gen-result input{flex:1;font-family:monospace;font-size:14px}
+/* ── BILLS SPECIFIC ──────────────────────────────────── */
+.bill-amount{font-weight:700;font-size:18px;color:var(--accent)}
+.bill-meta{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;align-items:center}
+.paid-toggle{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;font-size:13px;color:var(--text2)}
+.paid-toggle input{accent-color:var(--accent);width:16px;height:16px}
+/* ── IDS SPECIFIC ────────────────────────────────────── */
+.id-number{font-family:monospace;font-size:14px;color:var(--text2);margin-top:4px}
+.expiry-label{font-size:12px;font-weight:600;margin-top:6px}
+/* ── SETTINGS ────────────────────────────────────────── */
+.settings-section{background:var(--s1);border:1px solid var(--bd);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+.settings-section h3{font-size:15px;font-weight:700;margin-bottom:14px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.api-key-display{background:var(--s2);border:1px solid var(--bd);border-radius:var(--radius-sm);padding:10px 14px;font-family:monospace;font-size:12px;word-break:break-all;color:var(--accent);cursor:pointer;user-select:all}
+/* ── TOAST ───────────────────────────────────────────── */
+#toast-container{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:99999;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:min(92vw,380px)}
+.toast{background:var(--s1);border:1px solid var(--bd);border-radius:var(--radius-sm);padding:12px 18px;font-size:14px;font-weight:500;box-shadow:var(--shadow);animation:toastIn .3s ease;pointer-events:auto;display:flex;align-items:center;gap:10px}
+.toast.success{border-color:var(--gr);color:var(--gr)}
+.toast.error{border-color:var(--re);color:var(--re)}
+.toast.info{border-color:var(--accent);color:var(--accent)}
+.toast.warning{border-color:var(--ye);color:var(--ye)}
+@keyframes toastIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateY(-8px)}}
+/* ── SETUP STEPS ─────────────────────────────────────── */
+.setup-steps{display:flex;flex-direction:column;gap:16px;width:100%;max-width:380px}
+/* ── EMPTY STATE ─────────────────────────────────────── */
+.empty-state{text-align:center;padding:48px 16px;color:var(--text2)}
+.empty-state .empty-icon{font-size:52px;margin-bottom:12px}
+.empty-state p{font-size:15px}
+/* ── DIVIDER ─────────────────────────────────────────── */
+.divider{height:1px;background:var(--bd);margin:16px 0}
+/* ── THEME SWITCH ────────────────────────────────────── */
+.theme-toggle{display:flex;align-items:center;gap:10px}
+/* ── EXPORT BUTTONS ──────────────────────────────────── */
+.export-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+/* ── NO API WARNING ──────────────────────────────────── */
+.no-api-warning{text-align:center;padding:32px 16px;background:var(--s1);border:1px dashed var(--bd);border-radius:var(--radius);color:var(--text2)}
+.no-api-warning .icon{font-size:40px;margin-bottom:10px}
+/* ── RESPONSIVE ──────────────────────────────────────── */
+@media(min-width:600px){
+  .modal{border-radius:var(--radius);margin:auto;margin-bottom:0}
+  .modal-backdrop{padding:24px;align-items:center}
+}
+/* ── SCROLLBAR ───────────────────────────────────────── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+/* ── SPINNER ─────────────────────────────────────────── */
+.spinner{width:20px;height:20px;border:2px solid var(--bd);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ── FILE INDICATOR ──────────────────────────────────── */
+.file-chip{display:inline-flex;align-items:center;gap:5px;background:rgba(124,111,224,.12);border:1px solid rgba(124,111,224,.3);color:var(--accent);border-radius:20px;padding:2px 10px;font-size:12px;cursor:pointer}
+.file-chip:hover{background:rgba(124,111,224,.25)}
+</style>
+</head>
+<body>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- LOCK SCREEN -->
+<div id="lock">
+  <div class="logo">🔐</div>
+  <h1>Kasa</h1>
+  <p id="lock-subtitle">Kasanıza erişmek için master şifrenizi girin</p>
+  <div id="lock-content"></div>
+</div>
+
+<!-- USER AUTH SCREEN -->
+<div id="user-auth" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:8000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:20px">
+  <div style="font-size:52px">🔐</div>
+  <h1 style="font-size:24px;font-weight:700;color:var(--accent)">Kasa</h1>
+  <div class="auth-tabs" style="display:flex;gap:0;background:var(--s2);border-radius:10px;padding:4px;width:100%;max-width:380px">
+    <button id="ua-tab-login" class="auth-tab-btn active" onclick="switchAuthTab('login')" style="flex:1;padding:9px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;background:var(--accent);color:#fff;transition:all .2s">Giriş Yap</button>
+    <button id="ua-tab-register" class="auth-tab-btn" onclick="switchAuthTab('register')" style="flex:1;padding:9px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;background:none;color:var(--text2);transition:all .2s">Kayıt Ol</button>
+  </div>
+  <div style="width:100%;max-width:380px;display:flex;flex-direction:column;gap:12px">
+    <div id="ua-msg" style="display:none;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:500"></div>
+    <input type="email" id="ua-email" placeholder="E-posta adresiniz" autocomplete="email" onkeydown="if(event.key==='Enter')doUserAuth()" />
+    <input type="password" id="ua-pass" placeholder="Şifreniz (en az 6 karakter)" autocomplete="current-password" onkeydown="if(event.key==='Enter')doUserAuth()" />
+    <button class="btn btn-primary btn-full" id="ua-btn" onclick="doUserAuth()">Giriş Yap</button>
+  </div>
+  <p style="font-size:12px;color:var(--text2);text-align:center;max-width:320px">Fatura ve kimlik verileriniz bulutta güvenli saklanır. Şifreleriniz yalnızca cihazınızda kalır.</p>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+  <!-- PAGES -->
+  <div id="page-passwords" class="page active">
+    <div class="section-header">
+      <h2>🔑 Şifreler</h2>
+      <button class="btn btn-primary btn-sm" onclick="openPasswordModal()">+ Ekle</button>
+    </div>
+    <div class="search-row">
+      <input type="search" id="pw-search" placeholder="Site veya kullanıcı adı ara..." oninput="renderPasswords()" />
+    </div>
+    <div id="pw-list" class="item-list"></div>
+  </div>
+
+  <div id="page-bills" class="page">
+    <div class="section-header">
+      <h2>🧾 Faturalar</h2>
+      <button class="btn btn-primary btn-sm" onclick="openBillModal()">+ Ekle</button>
+    </div>
+    <div class="search-row">
+      <input type="search" id="bill-search" placeholder="Fatura ara..." oninput="renderBills()" />
+      <select id="bill-filter" onchange="renderBills()" style="width:auto;min-width:110px">
+        <option value="">Tümü</option>
+        <option value="0">Ödenmemiş</option>
+        <option value="1">Ödenmiş</option>
+      </select>
+    </div>
+    <div id="bill-list" class="item-list"></div>
+  </div>
+
+  <div id="page-ids" class="page">
+    <div class="section-header">
+      <h2>🪪 Kimlikler</h2>
+      <button class="btn btn-primary btn-sm" onclick="openIdModal()">+ Ekle</button>
+    </div>
+    <div class="search-row">
+      <input type="search" id="id-search" placeholder="Kimlik ara..." oninput="renderIds()" />
+    </div>
+    <div id="id-list" class="item-list"></div>
+  </div>
+
+  <div id="page-settings" class="page">
+    <div class="section-header"><h2>⚙️ Ayarlar</h2></div>
+
+    <!-- Account -->
+    <div class="settings-section">
+      <h3>👤 Hesap</h3>
+      <div id="acct-info" style="background:var(--s2);border-radius:10px;padding:14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div>
+          <div style="font-size:13px;color:var(--text2)">Giriş yapıldı</div>
+          <div id="acct-email" style="font-weight:600;font-size:15px"></div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="doUserLogout()">Çıkış</button>
+      </div>
+    </div>
+
+    <!-- API Connection -->
+    <div class="settings-section">
+      <h3>🌐 API Bağlantısı</h3>
+      <div class="form-group">
+        <label class="form-label">Worker URL</label>
+        <input type="url" id="cfg-worker-url" placeholder="https://kasa-api.xxxxx.workers.dev" />
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" onclick="saveApiConfig()">Kaydet</button>
+        <button class="btn btn-secondary btn-sm" onclick="testApiConnection()">Test Et</button>
+      </div>
+    </div>
+
+    <!-- Biometric -->
+    <div class="settings-section">
+      <h3>👆 Biyometrik</h3>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Parmak izi veya Face ID ile hızlı erişim</p>
+      <button class="btn btn-secondary btn-full" onclick="registerWebAuthn()">Biyometriği Kaydet / Yenile</button>
+    </div>
+
+    <!-- Change Password -->
+    <div class="settings-section">
+      <h3>🔒 Master Şifre Değiştir</h3>
+      <div class="form-group">
+        <label class="form-label">Mevcut Şifre</label>
+        <input type="password" id="chpw-old" placeholder="Mevcut master şifreniz" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Yeni Şifre</label>
+        <input type="password" id="chpw-new" placeholder="Yeni master şifreniz" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Yeni Şifre (Tekrar)</label>
+        <input type="password" id="chpw-confirm" placeholder="Yeni şifrenizi tekrar girin" />
+      </div>
+      <button class="btn btn-primary btn-full" onclick="changeMasterPassword()">Şifreyi Değiştir</button>
+    </div>
+
+    <!-- Appearance -->
+    <div class="settings-section">
+      <h3>🎨 Görünüm</h3>
+      <div class="theme-toggle">
+        <span style="font-size:13px">Karanlık Tema</span>
+        <div class="toggle" id="theme-toggle" onclick="toggleTheme()"></div>
+        <span style="font-size:13px">Aydınlık Tema</span>
+      </div>
+    </div>
+
+    <!-- Export -->
+    <div class="settings-section">
+      <h3>📤 Dışa Aktar</h3>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Verilerinizi farklı formatlarda dışa aktarın</p>
+      <div class="export-grid">
+        <button class="btn btn-secondary" onclick="exportPNG()">📸 PNG</button>
+        <button class="btn btn-secondary" onclick="confirmExportPDF()">📄 PDF</button>
+        <button class="btn btn-secondary" onclick="confirmExportExcel()">📊 Excel</button>
+      </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="settings-section">
+      <h3 style="color:var(--re)">⚠️ Tehlikeli Bölge</h3>
+      <button class="btn btn-danger btn-full" onclick="confirmClearAll()">Tüm Verileri Sil</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav id="bottom-nav">
+    <button class="nav-btn active" onclick="switchPage('passwords',this)" data-page="passwords">
+      <span class="icon">🔑</span>Şifreler
+    </button>
+    <button class="nav-btn" onclick="switchPage('bills',this)" data-page="bills">
+      <span class="icon">🧾</span>Faturalar
+    </button>
+    <button class="nav-btn" onclick="switchPage('ids',this)" data-page="ids">
+      <span class="icon">🪪</span>Kimlikler
+    </button>
+    <button class="nav-btn" onclick="switchPage('settings',this)" data-page="settings">
+      <span class="icon">⚙️</span>Ayarlar
+    </button>
+  </nav>
+</div>
+
+<!-- ── MODALS ─────────────────────────────────────────────────────────── -->
+
+<!-- PASSWORD MODAL -->
+<div class="modal-backdrop" id="pw-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="pw-modal-title">Şifre Ekle</h2>
+      <button class="modal-close" onclick="closeModal('pw-modal')">✕</button>
+    </div>
+    <input type="hidden" id="pw-edit-id" />
+    <div class="form-group">
+      <label class="form-label">Site / Uygulama *</label>
+      <input type="text" id="pw-site" placeholder="örn. Google, Instagram..." />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Kullanıcı Adı / E-posta *</label>
+      <input type="text" id="pw-user" placeholder="kullanici@ornek.com" autocomplete="off" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Şifre *</label>
+      <div style="position:relative">
+        <input type="password" id="pw-pass" placeholder="Şifre" autocomplete="off" oninput="updateStrengthMeter(this.value)" />
+        <button class="icon-btn" onclick="togglePasswordVisibility('pw-pass')" style="position:absolute;right:4px;top:50%;transform:translateY(-50%)">👁</button>
+      </div>
+      <div class="strength-bar"><div class="strength-fill" id="pw-strength-fill"></div></div>
+      <div class="strength-label" id="pw-strength-label" style="color:var(--text2)"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notlar</label>
+      <textarea id="pw-notes" placeholder="İsteğe bağlı notlar..."></textarea>
+    </div>
+
+    <!-- Generator -->
+    <div class="generator-section">
+      <div style="font-weight:600;font-size:13px;color:var(--text2);margin-bottom:8px">⚡ Şifre Üreteci</div>
+      <div class="slider-row">
+        <span style="font-size:13px;color:var(--text2)">Uzunluk:</span>
+        <input type="range" id="gen-length" min="8" max="32" value="16" oninput="document.getElementById('gen-length-val').textContent=this.value" />
+        <span id="gen-length-val" style="font-weight:700;min-width:24px;text-align:right">16</span>
+      </div>
+      <div class="generator-controls">
+        <label class="toggle-row"><div class="toggle on" id="gen-upper" onclick="toggleGen(this)"></div>Büyük Harf (A-Z)</label>
+        <label class="toggle-row"><div class="toggle on" id="gen-lower" onclick="toggleGen(this)"></div>Küçük Harf (a-z)</label>
+        <label class="toggle-row"><div class="toggle on" id="gen-digits" onclick="toggleGen(this)"></div>Rakam (0-9)</label>
+        <label class="toggle-row"><div class="toggle" id="gen-symbols" onclick="toggleGen(this)"></div>Sembol (!@#...)</label>
+      </div>
+      <div class="pw-gen-result">
+        <input type="text" id="gen-result" readonly placeholder="Şifre üretmek için tıklayın..." />
+        <button class="btn btn-secondary btn-sm" onclick="generatePassword()">Üret</button>
+        <button class="btn btn-secondary btn-sm" onclick="useGeneratedPassword()">Kullan</button>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('pw-modal')">İptal</button>
+      <button class="btn btn-primary" onclick="savePassword()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- BILL MODAL -->
+<div class="modal-backdrop" id="bill-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="bill-modal-title">Fatura Ekle</h2>
+      <button class="modal-close" onclick="closeModal('bill-modal')">✕</button>
+    </div>
+    <input type="hidden" id="bill-edit-id" />
+    <input type="hidden" id="bill-file-key" />
+    <input type="hidden" id="bill-file-name" />
+    <input type="hidden" id="bill-file-type" />
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Başlık *</label>
+        <input type="text" id="bill-title" placeholder="Fatura başlığı" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kategori</label>
+        <select id="bill-category">
+          <option>Elektrik</option><option>Su</option><option>Doğalgaz</option>
+          <option>İnternet</option><option>Telefon</option><option>Kira</option><option>Diğer</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Tutar (₺)</label>
+        <input type="number" id="bill-amount" placeholder="0.00" step="0.01" min="0" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fatura Tarihi</label>
+        <input type="date" id="bill-date" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Son Ödeme Tarihi</label>
+        <input type="date" id="bill-due" />
+      </div>
+      <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:2px">
+        <label class="paid-toggle" style="font-size:14px;color:var(--text)">
+          <input type="checkbox" id="bill-paid" />
+          Ödenmiş
+        </label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notlar</label>
+      <textarea id="bill-notes" placeholder="İsteğe bağlı notlar..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Dosya (Fotoğraf / PDF)</label>
+      <input type="file" id="bill-file-input" accept="image/*,application/pdf" capture="environment" onchange="previewBillFile(this)" />
+      <div id="bill-file-preview" style="margin-top:8px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('bill-modal')">İptal</button>
+      <button class="btn btn-primary" id="bill-save-btn" onclick="saveBill()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- ID MODAL -->
+<div class="modal-backdrop" id="id-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="id-modal-title">Kimlik Ekle</h2>
+      <button class="modal-close" onclick="closeModal('id-modal')">✕</button>
+    </div>
+    <input type="hidden" id="id-edit-id" />
+    <input type="hidden" id="id-file-key" />
+    <input type="hidden" id="id-file-name" />
+    <input type="hidden" id="id-file-type" />
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Başlık *</label>
+        <input type="text" id="id-title" placeholder="örn. TC Kimliğim" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Belge Türü</label>
+        <select id="id-doctype">
+          <option>TC Kimlik</option><option>Pasaport</option><option>Ehliyet</option>
+          <option>Sağlık Kartı</option><option>Sigorta</option><option>Diğer</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Belge Numarası</label>
+        <input type="text" id="id-number" placeholder="Belge no" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Veren Kurum</label>
+        <input type="text" id="id-issuer" placeholder="Kurum adı" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Düzenleme Tarihi</label>
+        <input type="date" id="id-issue-date" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Son Geçerlilik Tarihi</label>
+        <input type="date" id="id-expiry-date" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notlar</label>
+      <textarea id="id-notes" placeholder="İsteğe bağlı notlar..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Dosya (Fotoğraf / PDF)</label>
+      <input type="file" id="id-file-input" accept="image/*,application/pdf" capture="environment" onchange="previewIdFile(this)" />
+      <div id="id-file-preview" style="margin-top:8px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('id-modal')">İptal</button>
+      <button class="btn btn-primary" id="id-save-btn" onclick="saveId()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-backdrop" id="confirm-modal">
+  <div class="modal" style="max-height:auto">
+    <div class="modal-header">
+      <h2 class="modal-title" id="confirm-title">Emin misiniz?</h2>
+      <button class="modal-close" onclick="closeModal('confirm-modal')">✕</button>
+    </div>
+    <p id="confirm-msg" style="color:var(--text2);margin-bottom:20px"></p>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('confirm-modal')">İptal</button>
+      <button class="btn btn-danger" id="confirm-ok-btn">Evet, Devam Et</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// GLOBALS
+// ═══════════════════════════════════════════════════════════════════════════
+let _kasaKey = null;       // CryptoKey in memory
+let _inactivityTimer = null;
+let _clipboardTimer = null;
+let _billsCache = [];
+let _idsCache = [];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════════════════
+function $(id){ return document.getElementById(id); }
+function b64(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))); }
+function unb64(s){ return Uint8Array.from(atob(s), c => c.charCodeAt(0)).buffer; }
+function uuid(){ return crypto.randomUUID(); }
+
+function toast(msg, type='info', duration=3000){
+  const c = $('toast-container');
+  const t = document.createElement('div');
+  const icons = {success:'✅',error:'❌',info:'ℹ️',warning:'⚠️'};
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => {
+    t.style.animation='toastOut .3s ease forwards';
+    setTimeout(()=>t.remove(), 300);
+  }, duration);
+}
+
+function formatDate(dateStr){
+  if(!dateStr) return '—';
+  try { return new Date(dateStr).toLocaleDateString('tr-TR'); } catch(_){ return dateStr; }
+}
+
+function formatAmount(n){ return Number(n||0).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+function maskString(s, visible=2){
+  if(!s) return '—';
+  if(s.length <= visible*2) return '*'.repeat(s.length);
+  return s.slice(0,visible) + '*'.repeat(Math.max(s.length-visible*2, 3)) + s.slice(-visible);
+}
+
+function getCfg(){
+  try { return JSON.parse(localStorage.getItem('kasa_cfg')||'{}'); } catch(_){ return {}; }
+}
+
+function saveCfg(obj){
+  const c = getCfg();
+  localStorage.setItem('kasa_cfg', JSON.stringify({...c,...obj}));
+}
+
+function getWorkerUrl(){
+  return (getCfg().workerUrl||'').replace(/\/$/,'');
+}
+
+function getToken(){
+  return localStorage.getItem('kasa_token')||'';
+}
+
+function getUserEmail(){
+  return localStorage.getItem('kasa_email')||'';
+}
+
+// ── USER AUTH ────────────────────────────────────────────────────────────────
+let _authMode = 'login';
+
+function switchAuthTab(mode){
+  _authMode = mode;
+  const isLogin = mode === 'login';
+  $('ua-tab-login').style.background  = isLogin ? 'var(--accent)' : 'none';
+  $('ua-tab-login').style.color       = isLogin ? '#fff' : 'var(--text2)';
+  $('ua-tab-register').style.background = !isLogin ? 'var(--accent)' : 'none';
+  $('ua-tab-register').style.color      = !isLogin ? '#fff' : 'var(--text2)';
+  $('ua-btn').textContent = isLogin ? 'Giriş Yap' : 'Kayıt Ol';
+  setUaMsg('','');
+}
+
+function setUaMsg(msg, type){
+  const el = $('ua-msg');
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+  el.style.background = type==='err' ? 'rgba(244,67,54,.12)' : 'rgba(76,175,80,.12)';
+  el.style.color      = type==='err' ? 'var(--re)' : 'var(--gr)';
+  el.style.border     = '1px solid '+(type==='err' ? 'rgba(244,67,54,.25)' : 'rgba(76,175,80,.25)');
+}
+
+async function doUserAuth(){
+  const email = $('ua-email').value.trim();
+  const pass  = $('ua-pass').value;
+  if(!email||!pass){ setUaMsg('E-posta ve şifre gerekli','err'); return; }
+  const url = getWorkerUrl();
+  if(!url){ setUaMsg('Önce Ayarlar\'dan Worker URL girin','err'); return; }
+  const btn = $('ua-btn');
+  btn.textContent='...'; btn.disabled=true;
+  try {
+    const endpoint = _authMode==='login' ? '/auth/login' : '/auth/register';
+    const res = await fetch(url+endpoint, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, password:pass})
+    });
+    const data = await res.json();
+    if(!res.ok){ setUaMsg(data.error||'Hata','err'); return; }
+    localStorage.setItem('kasa_token', data.token);
+    localStorage.setItem('kasa_email', data.user.email);
+    showMainApp();
+  } catch(e){
+    setUaMsg('Bağlantı hatası: '+e.message,'err');
+  } finally {
+    btn.disabled=false;
+    btn.textContent=_authMode==='login'?'Giriş Yap':'Kayıt Ol';
+  }
+}
+
+function doUserLogout(){
+  localStorage.removeItem('kasa_token');
+  localStorage.removeItem('kasa_email');
+  toast('Çıkış yapıldı');
+  setTimeout(()=>location.reload(), 800);
+}
+
+function showUserAuthScreen(){
+  $('user-auth').style.display='flex';
+  $('app').style.display='none';
+  if($('cfg-worker-url')) $('ua-email').focus();
+}
+
+function showMainApp(){
+  $('user-auth').style.display='none';
+  $('app').style.display='flex';
+  if($('acct-email')) $('acct-email').textContent = getUserEmail();
+  if($('cfg-worker-url')) $('cfg-worker-url').value = getCfg().workerUrl||'';
+  loadBills();
+  loadIds();
+  renderPasswords();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CRYPTO
+// ═══════════════════════════════════════════════════════════════════════════
+async function deriveKey(password, salt){
+  const enc = new TextEncoder();
+  const baseKey = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt, iterations:100000, hash:'SHA-256' },
+    baseKey,
+    { name:'AES-GCM', length:256 },
+    false, ['encrypt','decrypt']
+  );
+}
+
+async function encrypt(key, data){
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const enc = new TextEncoder();
+  const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, enc.encode(JSON.stringify(data)));
+  // pack: iv(12) + ciphertext
+  const combined = new Uint8Array(12 + ct.byteLength);
+  combined.set(iv, 0);
+  combined.set(new Uint8Array(ct), 12);
+  return b64(combined.buffer);
+}
+
+async function decrypt(key, b64str){
+  const buf = new Uint8Array(unb64(b64str));
+  const iv = buf.slice(0,12);
+  const ct = buf.slice(12);
+  const plain = await crypto.subtle.decrypt({name:'AES-GCM', iv}, key, ct);
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+
+async function encryptPasswords(passwords){
+  if(!_kasaKey) throw new Error('Anahtar yok');
+  return encrypt(_kasaKey, passwords);
+}
+
+async function decryptPasswords(){
+  if(!_kasaKey) throw new Error('Anahtar yok');
+  const raw = localStorage.getItem('kasa_passwords');
+  if(!raw) return [];
+  return decrypt(_kasaKey, raw);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LOCK SCREEN
+// ═══════════════════════════════════════════════════════════════════════════
+function showLock(){
+  const cfg = getCfg();
+  const lockEl = $('lock');
+  lockEl.style.display = 'flex';
+  $('app').style.display = 'none';
+  const content = $('lock-content');
+
+  if(!cfg.setupDone){
+    renderSetup(content);
+  } else {
+    renderUnlock(content);
+  }
+}
+
+function renderSetup(container){
+  $('lock-subtitle').textContent = 'Kasayı ilk kez kullanıyorsunuz. Master şifrenizi belirleyin.';
+  container.innerHTML = `
+    <div class="setup-steps">
+      <div class="form-group">
+        <label class="form-label" style="text-align:left">Master Şifre *</label>
+        <input type="password" id="setup-pw" placeholder="En az 8 karakter" style="max-width:380px" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="text-align:left">Master Şifre (Tekrar) *</label>
+        <input type="password" id="setup-pw2" placeholder="Şifrenizi tekrar girin" style="max-width:380px" />
+      </div>
+      <button class="btn btn-primary btn-full" onclick="doSetup()" style="max-width:380px">Kasayı Kur</button>
+    </div>`;
+}
+
+async function doSetup(){
+  const pw  = $('setup-pw').value;
+  const pw2 = $('setup-pw2').value;
+  if(pw.length < 8){ toast('Şifre en az 8 karakter olmalıdır','error'); return; }
+  if(pw !== pw2){ toast('Şifreler eşleşmiyor','error'); return; }
+
+  // Generate salt
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  localStorage.setItem('kasa_salt', b64(salt.buffer));
+
+  // Derive key
+  _kasaKey = await deriveKey(pw, salt);
+
+  // Store verifier (encrypted known string)
+  const verifier = await encrypt(_kasaKey, { v:'kasa_ok_v1' });
+  localStorage.setItem('kasa_verifier', verifier);
+
+  // Generate API key if not exists
+  if(!getCfg().apiKey){
+    const apiKey = Array.from(crypto.getRandomValues(new Uint8Array(32))).map(b=>b.toString(16).padStart(2,'0')).join('');
+    saveCfg({ apiKey });
+  }
+
+  saveCfg({ setupDone:true });
+
+  // Ask for biometric
+  const wantBio = confirm('Biyometrik kimlik doğrulaması kaydetmek ister misiniz?');
+  if(wantBio) await registerWebAuthnSilent();
+
+  unlockApp();
+}
+
+function renderUnlock(container){
+  const hasBio = !!localStorage.getItem('kasa_webauthn');
+  $('lock-subtitle').textContent = 'Master şifrenizi girerek veya biyometrik ile giriş yapın.';
+  container.innerHTML = `
+    <div class="lock-form">
+      ${hasBio ? `<button class="bio-btn" onclick="biometricUnlock()">👆 Biyometrik ile Giriş</button><div style="text-align:center;color:var(--text2);font-size:13px">— veya —</div>` : ''}
+      <input type="password" id="unlock-pw" placeholder="Master şifre" onkeydown="if(event.key==='Enter') doUnlock()" />
+      <button class="btn btn-primary btn-full" onclick="doUnlock()">Kilidi Aç</button>
+    </div>`;
+  // auto focus
+  setTimeout(()=>{ const el = $('unlock-pw'); if(el) el.focus(); }, 100);
+}
+
+async function doUnlock(){
+  const pw = $('unlock-pw').value;
+  if(!pw){ toast('Şifre boş olamaz','error'); return; }
+  const saltB64 = localStorage.getItem('kasa_salt');
+  if(!saltB64){ toast('Salt bulunamadı, sıfırlamak gerekebilir','error'); return; }
+  const salt = new Uint8Array(unb64(saltB64));
+
+  try {
+    const key = await deriveKey(pw, salt);
+    // Verify
+    const verifierB64 = localStorage.getItem('kasa_verifier');
+    const vObj = await decrypt(key, verifierB64);
+    if(vObj.v !== 'kasa_ok_v1') throw new Error('wrong');
+    _kasaKey = key;
+    unlockApp();
+  } catch(_){
+    toast('Yanlış şifre','error');
+    const el = $('unlock-pw');
+    if(el){ el.value=''; el.focus(); }
+  }
+}
+
+async function biometricUnlock(){
+  const stored = localStorage.getItem('kasa_webauthn');
+  if(!stored){ toast('Kayıtlı biyometrik bulunamadı','error'); return; }
+  try {
+    const { credentialId, rawId } = JSON.parse(stored);
+    const challenge = crypto.getRandomValues(new Uint8Array(32));
+    await navigator.credentials.get({
+      publicKey: {
+        challenge,
+        allowCredentials: [{ id: new Uint8Array(unb64(rawId)), type:'public-key' }],
+        timeout: 60000,
+        userVerification:'required'
+      }
+    });
+    // Biometric confirmed — now we still need the password to derive the key
+    // But since the key is already in memory if we haven't navigated away, this is fine
+    // For first bio unlock after page reload: use stored salt + prompt for password once
+    // In this flow biometric confirms identity; we use stored password hash approach.
+    // Simpler UX: after bio success, ask for password (but pre-fill notice that bio confirmed identity)
+    const pw = prompt('Biyometrik doğrulandı. Master şifrenizi girin:');
+    if(!pw) return;
+    const saltB64 = localStorage.getItem('kasa_salt');
+    const salt = new Uint8Array(unb64(saltB64));
+    const key = await deriveKey(pw, salt);
+    const vObj = await decrypt(key, localStorage.getItem('kasa_verifier'));
+    if(vObj.v !== 'kasa_ok_v1') throw new Error('wrong');
+    _kasaKey = key;
+    unlockApp();
+  } catch(e){
+    toast('Biyometrik doğrulama başarısız: ' + e.message, 'error');
+  }
+}
+
+async function registerWebAuthnSilent(){
+  try {
+    await doRegisterWebAuthn();
+  } catch(e){
+    console.warn('WebAuthn registration skipped:', e.message);
+  }
+}
+
+async function registerWebAuthn(){
+  try {
+    await doRegisterWebAuthn();
+    toast('Biyometrik başarıyla kaydedildi','success');
+  } catch(e){
+    toast('Biyometrik kayıt başarısız: ' + e.message, 'error');
+  }
+}
+
+async function doRegisterWebAuthn(){
+  if(!navigator.credentials || !window.PublicKeyCredential){
+    throw new Error('Bu cihaz WebAuthn desteklemiyor');
+  }
+  const challenge = crypto.getRandomValues(new Uint8Array(32));
+  const userId = crypto.getRandomValues(new Uint8Array(16));
+  const credential = await navigator.credentials.create({
+    publicKey: {
+      challenge,
+      rp: { name:'Kasa', id: location.hostname },
+      user: { id: userId, name:'kasa-user', displayName:'Kasa Kullanıcısı' },
+      pubKeyCredParams: [
+        { type:'public-key', alg:-7 },
+        { type:'public-key', alg:-257 }
+      ],
+      authenticatorSelection: { userVerification:'required', residentKey:'discouraged' },
+      timeout: 60000
+    }
+  });
+  const rawId = b64(credential.rawId);
+  localStorage.setItem('kasa_webauthn', JSON.stringify({ credentialId: credential.id, rawId }));
+}
+
+function unlockApp(){
+  $('lock').style.display = 'none';
+  resetInactivityTimer();
+  loadSettings();
+  // Check if user is logged in to cloud
+  if(getToken() && getWorkerUrl()){
+    showMainApp();
+  } else if(getWorkerUrl() && !getToken()){
+    // Worker configured but not logged in
+    showUserAuthScreen();
+  } else {
+    // No worker configured — show app without cloud features
+    $('app').style.display = 'flex';
+    renderPasswords();
+    renderBillsNoApi();
+    renderIdsNoApi();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INACTIVITY / VISIBILITY
+// ═══════════════════════════════════════════════════════════════════════════
+function resetInactivityTimer(){
+  clearTimeout(_inactivityTimer);
+  _inactivityTimer = setTimeout(()=>{
+    showLock();
+    toast('Hareketsizlik nedeniyle kilitlendi','info');
+  }, 2 * 60 * 1000);
+}
+
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden && $('app').style.display !== 'none'){
+    showLock();
+  }
+});
+
+['click','keydown','touchstart','scroll','mousemove'].forEach(ev=>{
+  document.addEventListener(ev, resetInactivityTimer, { passive:true });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════════════════════════════
+function switchPage(name, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  $(`page-${name}`).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MODAL HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+function openModal(id){
+  const m = $(id);
+  m.classList.add('open');
+  m.addEventListener('click', e=>{ if(e.target===m) closeModal(id); }, {once:true});
+}
+
+function closeModal(id){
+  const m = $(id);
+  m.classList.remove('open');
+}
+
+function showConfirm(title, msg, onOk){
+  $('confirm-title').textContent = title;
+  $('confirm-msg').textContent = msg;
+  const btn = $('confirm-ok-btn');
+  btn.onclick = ()=>{ closeModal('confirm-modal'); onOk(); };
+  openModal('confirm-modal');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PASSWORDS
+// ═══════════════════════════════════════════════════════════════════════════
+let _editPwId = null;
+
+function openPasswordModal(id=null){
+  _editPwId = id;
+  $('pw-modal-title').textContent = id ? 'Şifre Düzenle' : 'Şifre Ekle';
+  $('pw-edit-id').value = id||'';
+  $('pw-site').value=''; $('pw-user').value=''; $('pw-pass').value=''; $('pw-notes').value='';
+  $('pw-strength-fill').style.width='0'; $('pw-strength-label').textContent='';
+  $('gen-result').value='';
+
+  if(id){
+    decryptPasswords().then(list=>{
+      const item = list.find(p=>p.id===id);
+      if(item){
+        $('pw-site').value = item.site||'';
+        $('pw-user').value = item.username||'';
+        $('pw-pass').value = item.password||'';
+        $('pw-notes').value = item.notes||'';
+        updateStrengthMeter(item.password||'');
+      }
+    }).catch(e=>toast('Şifreler yüklenemedi: '+e.message,'error'));
+  }
+  openModal('pw-modal');
+}
+
+async function savePassword(){
+  const site = $('pw-site').value.trim();
+  const username = $('pw-user').value.trim();
+  const password = $('pw-pass').value;
+  const notes = $('pw-notes').value.trim();
+
+  if(!site){ toast('Site adı gerekli','error'); return; }
+  if(!username){ toast('Kullanıcı adı gerekli','error'); return; }
+  if(!password){ toast('Şifre gerekli','error'); return; }
+
+  try {
+    let list = await decryptPasswords();
+    const now = new Date().toISOString();
+    if(_editPwId){
+      list = list.map(p=> p.id===_editPwId ? {...p, site, username, password, notes, updatedAt:now} : p);
+    } else {
+      list.push({ id:uuid(), site, username, password, notes, updatedAt:now });
+    }
+    localStorage.setItem('kasa_passwords', await encryptPasswords(list));
+    closeModal('pw-modal');
+    renderPasswords();
+    toast(_editPwId ? 'Şifre güncellendi' : 'Şifre kaydedildi','success');
+  } catch(e){
+    toast('Kaydedilemedi: '+e.message,'error');
+  }
+}
+
+async function deletePassword(id){
+  showConfirm('Şifreyi Sil','Bu şifre kalıcı olarak silinecek. Devam edilsin mi?', async ()=>{
+    try {
+      let list = await decryptPasswords();
+      list = list.filter(p=>p.id!==id);
+      localStorage.setItem('kasa_passwords', await encryptPasswords(list));
+      renderPasswords();
+      toast('Şifre silindi','success');
+    } catch(e){ toast('Silinemedi: '+e.message,'error'); }
+  });
+}
+
+async function renderPasswords(){
+  const container = $('pw-list');
+  const search = ($('pw-search').value||'').toLowerCase();
+  let list;
+  try { list = await decryptPasswords(); }
+  catch(_){ container.innerHTML=`<div class="empty-state"><div class="empty-icon">🔒</div><p>Şifreler yüklenemedi</p></div>`; return; }
+
+  const filtered = list.filter(p=>
+    (p.site||'').toLowerCase().includes(search) ||
+    (p.username||'').toLowerCase().includes(search)
+  );
+
+  if(!filtered.length){
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🔑</div><p>${search ? 'Sonuç bulunamadı' : 'Henüz şifre eklenmemiş'}</p></div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(p=>`
+    <div class="item-card">
+      <div class="item-card-top">
+        <div>
+          <div class="item-card-title">${escHtml(p.site)}</div>
+          <div class="item-card-sub">${escHtml(p.username)}</div>
+          <div class="pw-masked" id="pw-val-${p.id}">••••••••</div>
+        </div>
+        <div class="item-card-actions">
+          <button class="icon-btn" title="Göster/Gizle" onclick="togglePwCard('${p.id}', this)">👁</button>
+          <button class="icon-btn" title="Şifreyi kopyala" onclick="copyPasswordCard('${p.id}')">📋</button>
+          <button class="icon-btn" title="Düzenle" onclick="openPasswordModal('${p.id}')">✏️</button>
+          <button class="icon-btn danger" title="Sil" onclick="deletePassword('${p.id}')">🗑</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // store decrypted list temporarily for card actions
+  container._pwList = list;
+}
+
+function togglePwCard(id, btn){
+  const el = $(`pw-val-${id}`);
+  const container = $('pw-list');
+  const list = container._pwList || [];
+  const item = list.find(p=>p.id===id);
+  if(!item) return;
+  if(el.textContent === '••••••••' || el.dataset.hidden==='1'){
+    el.textContent = item.password;
+    el.dataset.hidden='0';
+    btn.textContent='🙈';
+  } else {
+    el.textContent='••••••••';
+    el.dataset.hidden='1';
+    btn.textContent='👁';
+  }
+}
+
+function copyPasswordCard(id){
+  const container = $('pw-list');
+  const list = container._pwList || [];
+  const item = list.find(p=>p.id===id);
+  if(!item) return;
+  copyToClipboard(item.password, 'Şifre kopyalandı');
+}
+
+function copyToClipboard(text, msg='Kopyalandı'){
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(()=>{
+      toast(`${msg} — 30 saniye sonra temizlenecek`,'success');
+      startClipboardTimer();
+    }).catch(()=>fallbackCopy(text,msg));
+  } else {
+    fallbackCopy(text, msg);
+  }
+}
+
+function fallbackCopy(text, msg){
+  const ta = document.createElement('textarea');
+  ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); toast(`${msg} — 30 saniye sonra temizlenecek`,'success'); startClipboardTimer(); }
+  catch(_){ toast('Kopyalama başarısız','error'); }
+  document.body.removeChild(ta);
+}
+
+let _clipboardCountdown = null;
+let _clipboardSeconds = 0;
+
+function startClipboardTimer(){
+  clearInterval(_clipboardCountdown);
+  _clipboardSeconds = 30;
+  _clipboardCountdown = setInterval(async ()=>{
+    _clipboardSeconds--;
+    if(_clipboardSeconds <= 0){
+      clearInterval(_clipboardCountdown);
+      try { await navigator.clipboard.writeText(''); } catch(_){}
+      toast('Pano temizlendi','info');
+    }
+  }, 1000);
+}
+
+// ── PASSWORD GENERATOR ────────────────────────────────────────────────────
+function toggleGen(el){ el.classList.toggle('on'); }
+
+function generatePassword(){
+  const len = parseInt($('gen-length').value);
+  const upper = $('gen-upper').classList.contains('on');
+  const lower = $('gen-lower').classList.contains('on');
+  const digits = $('gen-digits').classList.contains('on');
+  const symbols = $('gen-symbols').classList.contains('on');
+
+  let chars = '';
+  if(upper)   chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  if(lower)   chars += 'abcdefghijklmnopqrstuvwxyz';
+  if(digits)  chars += '0123456789';
+  if(symbols) chars += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+  if(!chars){ toast('En az bir karakter türü seçin','error'); return; }
+
+  const arr = new Uint8Array(len);
+  crypto.getRandomValues(arr);
+  const pw = Array.from(arr).map(b => chars[b % chars.length]).join('');
+  $('gen-result').value = pw;
+}
+
+function useGeneratedPassword(){
+  const pw = $('gen-result').value;
+  if(!pw){ toast('Önce şifre üretin','warning'); return; }
+  $('pw-pass').value = pw;
+  updateStrengthMeter(pw);
+}
+
+function updateStrengthMeter(pw){
+  const fill = $('pw-strength-fill');
+  const label = $('pw-strength-label');
+  if(!pw){ fill.style.width='0'; label.textContent=''; return; }
+
+  let score = 0;
+  if(pw.length >= 8)  score++;
+  if(pw.length >= 12) score++;
+  if(/[A-Z]/.test(pw)) score++;
+  if(/[a-z]/.test(pw)) score++;
+  if(/[0-9]/.test(pw)) score++;
+  if(/[^A-Za-z0-9]/.test(pw)) score++;
+
+  const levels = [
+    {w:'20%', bg:'var(--re)',  txt:'Çok Zayıf'},
+    {w:'35%', bg:'var(--re)',  txt:'Zayıf'},
+    {w:'55%', bg:'var(--ye)',  txt:'Orta'},
+    {w:'75%', bg:'var(--ye)',  txt:'Güçlü'},
+    {w:'90%', bg:'var(--gr)',  txt:'Çok Güçlü'},
+    {w:'100%',bg:'var(--gr)',  txt:'Mükemmel'},
+  ];
+  const l = levels[Math.min(score, levels.length-1)];
+  fill.style.width  = l.w;
+  fill.style.background = l.bg;
+  label.textContent = l.txt;
+  label.style.color = l.bg;
+}
+
+function togglePasswordVisibility(inputId){
+  const el = $(inputId);
+  el.type = el.type==='password' ? 'text' : 'password';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// API HELPER
+// ═══════════════════════════════════════════════════════════════════════════
+async function apiCall(method, path, body=null, isFormData=false){
+  const url = getWorkerUrl();
+  if(!url) throw new Error('Worker URL yapılandırılmamış');
+  const token = getToken();
+  if(!token) throw new Error('Giriş yapılmamış');
+  const opts = {
+    method,
+    headers: { 'Authorization': `Bearer ${token}` }
+  };
+  if(body && !isFormData){
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  } else if(body && isFormData){
+    opts.body = body;
+  }
+  const res = await fetch(url + path, opts);
+  if(res.status === 401){
+    // Token expired — force re-login
+    localStorage.removeItem('kasa_token');
+    showUserAuthScreen();
+    throw new Error('Oturum süresi doldu, lütfen tekrar giriş yapın');
+  }
+  if(!res.ok){
+    const errData = await res.json().catch(()=>({error: res.statusText}));
+    throw new Error(errData.error || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BILLS
+// ═══════════════════════════════════════════════════════════════════════════
+async function loadBills(){
+  try {
+    _billsCache = await apiCall('GET', '/bills');
+    renderBills();
+  } catch(e){
+    toast('Faturalar yüklenemedi: '+e.message,'error');
+    renderBillsNoApi();
+  }
+}
+
+function renderBillsNoApi(){
+  const msg = !getWorkerUrl() ? 'Worker URL girilmemiş. <strong>Ayarlar</strong> bölümünden yapılandırın.' : 'Hesabınıza giriş yapın.';
+  $('bill-list').innerHTML = `<div class="no-api-warning"><div class="icon">🌐</div><p>${msg}</p></div>`;
+}
+
+function renderBills(){
+  const search = ($('bill-search').value||'').toLowerCase();
+  const filterPaid = $('bill-filter').value;
+  const container = $('bill-list');
+
+  if(!getWorkerUrl()){ renderBillsNoApi(); return; }
+
+  let list = _billsCache;
+  if(search) list = list.filter(b=>(b.title||'').toLowerCase().includes(search)||(b.category||'').toLowerCase().includes(search));
+  if(filterPaid!=='') list = list.filter(b=> String(b.paid?1:0) === filterPaid);
+
+  if(!list.length){
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🧾</div><p>${search||filterPaid!=='' ? 'Sonuç bulunamadı' : 'Henüz fatura eklenmemiş'}</p></div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(b=>`
+    <div class="item-card">
+      <div class="item-card-top">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <div class="item-card-title">${escHtml(b.title)}</div>
+            <span class="badge badge-purple">${escHtml(b.category||'Diğer')}</span>
+            ${b.paid ? '<span class="badge badge-green">Ödenmiş</span>' : '<span class="badge badge-red">Ödenmemiş</span>'}
+          </div>
+          <div class="bill-amount">₺${formatAmount(b.amount)}</div>
+          <div class="bill-meta">
+            ${b.bill_date ? `<span style="font-size:12px;color:var(--text2)">📅 ${formatDate(b.bill_date)}</span>` : ''}
+            ${b.due_date ? `<span style="font-size:12px;color:var(--text2)">⏰ Son: ${formatDate(b.due_date)}</span>` : ''}
+            ${b.file_key ? `<span class="file-chip" onclick="openFile('${b.file_key}')">📎 ${escHtml(b.file_name||'Dosya')}</span>` : ''}
+          </div>
+        </div>
+        <div class="item-card-actions">
+          <button class="icon-btn" title="Düzenle" onclick="openBillModal('${b.id}')">✏️</button>
+          <button class="icon-btn danger" title="Sil" onclick="deleteBill('${b.id}')">🗑</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openBillModal(id=null){
+  $('bill-modal-title').textContent = id ? 'Fatura Düzenle' : 'Fatura Ekle';
+  $('bill-edit-id').value = id||'';
+  $('bill-file-key').value=''; $('bill-file-name').value=''; $('bill-file-type').value='';
+  $('bill-title').value=''; $('bill-category').value='Elektrik';
+  $('bill-amount').value=''; $('bill-date').value=''; $('bill-due').value='';
+  $('bill-paid').checked=false; $('bill-notes').value='';
+  $('bill-file-input').value='';
+  $('bill-file-preview').innerHTML='';
+
+  if(id){
+    const b = _billsCache.find(x=>x.id===id);
+    if(b){
+      $('bill-title').value = b.title||'';
+      $('bill-category').value = b.category||'Elektrik';
+      $('bill-amount').value = b.amount||'';
+      $('bill-date').value = b.bill_date||'';
+      $('bill-due').value = b.due_date||'';
+      $('bill-paid').checked = !!b.paid;
+      $('bill-notes').value = b.notes||'';
+      $('bill-file-key').value = b.file_key||'';
+      $('bill-file-name').value = b.file_name||'';
+      $('bill-file-type').value = b.file_type||'';
+      if(b.file_key){
+        $('bill-file-preview').innerHTML = `<span class="file-chip" onclick="openFile('${b.file_key}')">📎 ${escHtml(b.file_name||'Dosya')}</span>`;
+      }
+    }
+  }
+  openModal('bill-modal');
+}
+
+async function previewBillFile(input){
+  const file = input.files[0];
+  if(!file) return;
+  const size = (file.size/1024).toFixed(1);
+  $('bill-file-preview').innerHTML = `<div style="font-size:13px;color:var(--text2)">📎 ${escHtml(file.name)} (${size} KB) — kayıt sırasında yüklenecek</div>`;
+}
+
+async function saveBill(){
+  const title = $('bill-title').value.trim();
+  if(!title){ toast('Başlık gerekli','error'); return; }
+
+  if(!getWorkerUrl()){ toast('API yapılandırılmamış','error'); return; }
+
+  const btn = $('bill-save-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
+
+  try {
+    let fileKey = $('bill-file-key').value;
+    let fileName = $('bill-file-name').value;
+    let fileType = $('bill-file-type').value;
+
+    // Upload file if selected
+    const fileInput = $('bill-file-input');
+    if(fileInput.files.length > 0){
+      const fd = new FormData();
+      fd.append('file', fileInput.files[0]);
+      const result = await apiCall('POST','/upload',fd,true);
+      fileKey = result.key;
+      fileName = result.name;
+      fileType = result.type;
+    }
+
+    const data = {
+      title,
+      category: $('bill-category').value,
+      amount: parseFloat($('bill-amount').value)||0,
+      currency: 'TRY',
+      bill_date: $('bill-date').value||null,
+      due_date: $('bill-due').value||null,
+      paid: $('bill-paid').checked ? 1 : 0,
+      notes: $('bill-notes').value.trim(),
+      file_key: fileKey||null,
+      file_name: fileName||null,
+      file_type: fileType||null,
+    };
+
+    const editId = $('bill-edit-id').value;
+    if(editId){
+      const updated = await apiCall('PUT', `/bills/${editId}`, data);
+      _billsCache = _billsCache.map(b=>b.id===editId ? updated : b);
+      toast('Fatura güncellendi','success');
+    } else {
+      const created = await apiCall('POST', '/bills', data);
+      _billsCache.unshift(created);
+      toast('Fatura eklendi','success');
+    }
+    closeModal('bill-modal');
+    renderBills();
+  } catch(e){
+    toast('Kaydedilemedi: '+e.message,'error');
+  } finally {
+    btn.disabled=false; btn.textContent='Kaydet';
+  }
+}
+
+async function deleteBill(id){
+  showConfirm('Faturayı Sil','Bu fatura kalıcı olarak silinecek. Devam edilsin mi?', async ()=>{
+    try {
+      await apiCall('DELETE',`/bills/${id}`);
+      _billsCache = _billsCache.filter(b=>b.id!==id);
+      renderBills();
+      toast('Fatura silindi','success');
+    } catch(e){ toast('Silinemedi: '+e.message,'error'); }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// IDS
+// ═══════════════════════════════════════════════════════════════════════════
+async function loadIds(){
+  try {
+    _idsCache = await apiCall('GET','/ids');
+    renderIds();
+  } catch(e){
+    toast('Kimlikler yüklenemedi: '+e.message,'error');
+    renderIdsNoApi();
+  }
+}
+
+function renderIdsNoApi(){
+  const msg = !getWorkerUrl() ? 'Worker URL girilmemiş. <strong>Ayarlar</strong> bölümünden yapılandırın.' : 'Hesabınıza giriş yapın.';
+  $('id-list').innerHTML = `<div class="no-api-warning"><div class="icon">🌐</div><p>${msg}</p></div>`;
+}
+
+function expiryClass(dateStr){
+  if(!dateStr) return '';
+  const diff = (new Date(dateStr) - new Date()) / (1000*60*60*24);
+  if(diff < 0) return 'badge-red';
+  if(diff < 30) return 'badge-red';
+  if(diff < 90) return 'badge-orange';
+  return 'badge-green';
+}
+
+function expiryLabel(dateStr){
+  if(!dateStr) return '—';
+  const diff = Math.floor((new Date(dateStr) - new Date()) / (1000*60*60*24));
+  if(diff < 0) return `Süresi doldu (${formatDate(dateStr)})`;
+  if(diff < 30) return `${diff} gün kaldı (${formatDate(dateStr)})`;
+  return formatDate(dateStr);
+}
+
+function renderIds(){
+  const search = ($('id-search').value||'').toLowerCase();
+  const container = $('id-list');
+
+  if(!getWorkerUrl()){ renderIdsNoApi(); return; }
+
+  let list = _idsCache;
+  if(search) list = list.filter(i=>(i.title||'').toLowerCase().includes(search)||(i.doc_type||'').toLowerCase().includes(search));
+
+  if(!list.length){
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🪪</div><p>${search ? 'Sonuç bulunamadı' : 'Henüz kimlik eklenmemiş'}</p></div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(id=>`
+    <div class="item-card">
+      <div class="item-card-top">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <div class="item-card-title">${escHtml(id.title)}</div>
+            <span class="badge badge-purple">${escHtml(id.doc_type||'Diğer')}</span>
+          </div>
+          <div class="id-number">${maskString(id.doc_number||'')}</div>
+          <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            ${id.expiry_date ? `<span class="badge ${expiryClass(id.expiry_date)}" style="font-size:12px">📅 ${expiryLabel(id.expiry_date)}</span>` : ''}
+            ${id.issuer ? `<span style="font-size:12px;color:var(--text2)">${escHtml(id.issuer)}</span>` : ''}
+            ${id.file_key ? `<span class="file-chip" onclick="openFile('${id.file_key}')">📎 ${escHtml(id.file_name||'Dosya')}</span>` : ''}
+          </div>
+        </div>
+        <div class="item-card-actions">
+          <button class="icon-btn" title="Düzenle" onclick="openIdModal('${id.id}')">✏️</button>
+          <button class="icon-btn danger" title="Sil" onclick="deleteId('${id.id}')">🗑</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openIdModal(id=null){
+  $('id-modal-title').textContent = id ? 'Kimlik Düzenle' : 'Kimlik Ekle';
+  $('id-edit-id').value = id||'';
+  $('id-file-key').value=''; $('id-file-name').value=''; $('id-file-type').value='';
+  $('id-title').value=''; $('id-doctype').value='TC Kimlik';
+  $('id-number').value=''; $('id-issuer').value='';
+  $('id-issue-date').value=''; $('id-expiry-date').value='';
+  $('id-notes').value='';
+  $('id-file-input').value='';
+  $('id-file-preview').innerHTML='';
+
+  if(id){
+    const item = _idsCache.find(x=>x.id===id);
+    if(item){
+      $('id-title').value = item.title||'';
+      $('id-doctype').value = item.doc_type||'TC Kimlik';
+      $('id-number').value = item.doc_number||'';
+      $('id-issuer').value = item.issuer||'';
+      $('id-issue-date').value = item.issue_date||'';
+      $('id-expiry-date').value = item.expiry_date||'';
+      $('id-notes').value = item.notes||'';
+      $('id-file-key').value = item.file_key||'';
+      $('id-file-name').value = item.file_name||'';
+      $('id-file-type').value = item.file_type||'';
+      if(item.file_key){
+        $('id-file-preview').innerHTML = `<span class="file-chip" onclick="openFile('${item.file_key}')">📎 ${escHtml(item.file_name||'Dosya')}</span>`;
+      }
+    }
+  }
+  openModal('id-modal');
+}
+
+async function previewIdFile(input){
+  const file = input.files[0];
+  if(!file) return;
+  const size = (file.size/1024).toFixed(1);
+  $('id-file-preview').innerHTML = `<div style="font-size:13px;color:var(--text2)">📎 ${escHtml(file.name)} (${size} KB) — kayıt sırasında yüklenecek</div>`;
+}
+
+async function saveId(){
+  const title = $('id-title').value.trim();
+  if(!title){ toast('Başlık gerekli','error'); return; }
+
+  if(!getWorkerUrl()){ toast('API yapılandırılmamış','error'); return; }
+
+  const btn = $('id-save-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
+
+  try {
+    let fileKey = $('id-file-key').value;
+    let fileName = $('id-file-name').value;
+    let fileType = $('id-file-type').value;
+
+    const fileInput = $('id-file-input');
+    if(fileInput.files.length > 0){
+      const fd = new FormData();
+      fd.append('file', fileInput.files[0]);
+      const result = await apiCall('POST','/upload',fd,true);
+      fileKey = result.key;
+      fileName = result.name;
+      fileType = result.type;
+    }
+
+    const data = {
+      title,
+      doc_type: $('id-doctype').value,
+      doc_number: $('id-number').value.trim(),
+      issuer: $('id-issuer').value.trim(),
+      issue_date: $('id-issue-date').value||null,
+      expiry_date: $('id-expiry-date').value||null,
+      notes: $('id-notes').value.trim(),
+      file_key: fileKey||null,
+      file_name: fileName||null,
+      file_type: fileType||null,
+    };
+
+    const editId = $('id-edit-id').value;
+    if(editId){
+      const updated = await apiCall('PUT',`/ids/${editId}`,data);
+      _idsCache = _idsCache.map(i=>i.id===editId ? updated : i);
+      toast('Kimlik güncellendi','success');
+    } else {
+      const created = await apiCall('POST','/ids',data);
+      _idsCache.unshift(created);
+      toast('Kimlik eklendi','success');
+    }
+    closeModal('id-modal');
+    renderIds();
+  } catch(e){
+    toast('Kaydedilemedi: '+e.message,'error');
+  } finally {
+    btn.disabled=false; btn.textContent='Kaydet';
+  }
+}
+
+async function deleteId(id){
+  showConfirm('Kimliği Sil','Bu kimlik kalıcı olarak silinecek. Devam edilsin mi?', async ()=>{
+    try {
+      await apiCall('DELETE',`/ids/${id}`);
+      _idsCache = _idsCache.filter(i=>i.id!==id);
+      renderIds();
+      toast('Kimlik silindi','success');
+    } catch(e){ toast('Silinemedi: '+e.message,'error'); }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FILE VIEWER
+// ═══════════════════════════════════════════════════════════════════════════
+function openFile(key){
+  const url = getWorkerUrl();
+  const token = getToken();
+  if(!url||!token){ toast('Giriş yapınız','error'); return; }
+  fetch(`${url}/files/${key}`, {headers:{'Authorization':`Bearer ${token}`}})
+    .then(async r=>{
+      if(!r.ok) throw new Error('Dosya yüklenemedi');
+      const blob = await r.blob();
+      window.open(URL.createObjectURL(blob),'_blank');
+    })
+    .catch(e=>toast('Dosya açılamadı: '+e.message,'error'));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════════════════════════════
+function loadSettings(){
+  const cfg = getCfg();
+  if($('cfg-worker-url')) $('cfg-worker-url').value = cfg.workerUrl||'';
+  if($('acct-email')) $('acct-email').textContent = getUserEmail();
+
+  const theme = localStorage.getItem('kasa_theme')||'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  const toggle = $('theme-toggle');
+  if(toggle) toggle.classList.toggle('on', theme==='light');
+}
+
+function saveApiConfig(){
+  const workerUrl = $('cfg-worker-url').value.trim();
+  saveCfg({workerUrl});
+  toast('Worker URL kaydedildi','success');
+  if(workerUrl && getToken()){ loadBills(); loadIds(); }
+}
+
+async function testApiConnection(){
+  const url = ($('cfg-worker-url').value||'').trim();
+  if(!url){ toast('Worker URL boş','error'); return; }
+  const token = getToken();
+  if(!token){ toast('Önce giriş yapın','error'); return; }
+  try {
+    const res = await fetch(url+'/health');
+    if(res.ok) toast('Bağlantı başarılı ✓','success');
+    else toast(`Bağlantı hatası: HTTP ${res.status}`,'error');
+  } catch(e){
+    toast('Bağlanamadı: '+e.message,'error');
+  }
+}
+
+async function changeMasterPassword(){
+  const oldPw = $('chpw-old').value;
+  const newPw = $('chpw-new').value;
+  const confirmPw = $('chpw-confirm').value;
+
+  if(!oldPw||!newPw||!confirmPw){ toast('Tüm alanları doldurun','error'); return; }
+  if(newPw !== confirmPw){ toast('Yeni şifreler eşleşmiyor','error'); return; }
+  if(newPw.length < 8){ toast('Yeni şifre en az 8 karakter olmalı','error'); return; }
+
+  try {
+    // Verify old password
+    const saltB64 = localStorage.getItem('kasa_salt');
+    const salt = new Uint8Array(unb64(saltB64));
+    const oldKey = await deriveKey(oldPw, salt);
+    const vObj = await decrypt(oldKey, localStorage.getItem('kasa_verifier'));
+    if(vObj.v !== 'kasa_ok_v1') throw new Error('Mevcut şifre yanlış');
+
+    // Decrypt passwords with old key
+    const pwList = await decrypt(oldKey, localStorage.getItem('kasa_passwords')||null).catch(()=>[]);
+
+    // New salt & key
+    const newSalt = crypto.getRandomValues(new Uint8Array(16));
+    localStorage.setItem('kasa_salt', b64(newSalt.buffer));
+    const newKey = await deriveKey(newPw, newSalt);
+
+    // Re-encrypt verifier
+    const newVerifier = await encrypt(newKey, {v:'kasa_ok_v1'});
+    localStorage.setItem('kasa_verifier', newVerifier);
+
+    // Re-encrypt passwords
+    if(pwList && pwList.length){
+      const enc = await encrypt(newKey, pwList);
+      localStorage.setItem('kasa_passwords', enc);
+    }
+
+    _kasaKey = newKey;
+    $('chpw-old').value=''; $('chpw-new').value=''; $('chpw-confirm').value='';
+    toast('Master şifre başarıyla değiştirildi','success');
+  } catch(e){
+    toast('Şifre değiştirilemedi: '+e.message,'error');
+  }
+}
+
+function toggleTheme(){
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current==='dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('kasa_theme', next);
+  const toggle = $('theme-toggle');
+  if(toggle) toggle.classList.toggle('on', next==='light');
+}
+
+function confirmClearAll(){
+  showConfirm('Tüm Verileri Sil','Bu işlem geri alınamaz. Tüm şifreler, ayarlar ve yerel veriler silinecek. Devam edilsin mi?', ()=>{
+    localStorage.clear();
+    toast('Tüm veriler silindi','success');
+    setTimeout(()=>location.reload(), 1000);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════════════════════════
+async function exportPNG(){
+  toast('PNG oluşturuluyor...','info');
+  const target = document.querySelector('.page.active');
+  try {
+    const canvas = await html2canvas(target, { backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() });
+    const a = document.createElement('a');
+    a.download = `kasa-export-${Date.now()}.png`;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+    toast('PNG indirildi','success');
+  } catch(e){ toast('PNG oluşturulamadı: '+e.message,'error'); }
+}
+
+function confirmExportPDF(){
+  showConfirm('PDF Dışa Aktar','Şifreler PDF\'de düz metin olarak görünecek. Dosyayı güvenli bir yerde saklayın. Devam edilsin mi?', exportPDF);
+}
+
+async function exportPDF(){
+  toast('PDF oluşturuluyor...','info');
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+    const pw = await decryptPasswords().catch(()=>[]);
+
+    doc.setFontSize(18);
+    doc.setTextColor(124,111,224);
+    doc.text('Kasa - Kişisel Kasa', 14, 20);
+    doc.setFontSize(10);
+    doc.setTextColor(155,152,181);
+    doc.text(`Oluşturulma: ${new Date().toLocaleString('tr-TR')}`, 14, 27);
+
+    let y = 38;
+
+    // Passwords
+    doc.setFontSize(14);
+    doc.setTextColor(232,230,240);
+    doc.text('Şifreler', 14, y); y+=8;
+    pw.forEach((p,i)=>{
+      if(y > 270){ doc.addPage(); y=20; }
+      doc.setFontSize(10);
+      doc.setTextColor(200,200,200);
+      doc.text(`${i+1}. ${p.site||''} | ${p.username||''} | ${p.password||''} | ${p.notes||''}`, 14, y);
+      y += 6;
+    });
+
+    y += 6;
+
+    // Bills
+    doc.setFontSize(14);
+    doc.setTextColor(232,230,240);
+    if(y>260){ doc.addPage(); y=20; }
+    doc.text('Faturalar', 14, y); y+=8;
+    _billsCache.forEach((b,i)=>{
+      if(y > 270){ doc.addPage(); y=20; }
+      doc.setFontSize(10);
+      doc.setTextColor(200,200,200);
+      doc.text(`${i+1}. ${b.title||''} | ${b.category||''} | ₺${formatAmount(b.amount)} | ${b.paid?'Ödenmiş':'Ödenmemiş'} | Son: ${formatDate(b.due_date)}`, 14, y);
+      y += 6;
+    });
+
+    y += 6;
+
+    // IDs
+    doc.setFontSize(14);
+    doc.setTextColor(232,230,240);
+    if(y>260){ doc.addPage(); y=20; }
+    doc.text('Kimlikler', 14, y); y+=8;
+    _idsCache.forEach((id,i)=>{
+      if(y > 270){ doc.addPage(); y=20; }
+      doc.setFontSize(10);
+      doc.setTextColor(200,200,200);
+      doc.text(`${i+1}. ${id.title||''} | ${id.doc_type||''} | ${id.doc_number||''} | Son: ${formatDate(id.expiry_date)}`, 14, y);
+      y += 6;
+    });
+
+    doc.save(`kasa-export-${Date.now()}.pdf`);
+    toast('PDF indirildi','success');
+  } catch(e){ toast('PDF oluşturulamadı: '+e.message,'error'); }
+}
+
+function confirmExportExcel(){
+  showConfirm('Excel Dışa Aktar','Şifreler Excel\'de düz metin olarak görünecek. Dosyayı güvenli bir yerde saklayın. Devam edilsin mi?', exportExcel);
+}
+
+async function exportExcel(){
+  toast('Excel oluşturuluyor...','info');
+  try {
+    const pw = await decryptPasswords().catch(()=>[]);
+    const wb = XLSX.utils.book_new();
+
+    // Passwords sheet
+    const pwRows = [['Site','Kullanıcı Adı','Şifre','Notlar','Güncellenme']];
+    pw.forEach(p=> pwRows.push([p.site, p.username, p.password, p.notes, p.updatedAt]));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(pwRows), 'Şifreler');
+
+    // Bills sheet
+    const billRows = [['Başlık','Kategori','Tutar','Para Birimi','Fatura Tarihi','Son Ödeme','Ödenmiş','Notlar']];
+    _billsCache.forEach(b=> billRows.push([b.title, b.category, b.amount, b.currency||'TRY', b.bill_date, b.due_date, b.paid?'Evet':'Hayır', b.notes]));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(billRows), 'Faturalar');
+
+    // IDs sheet
+    const idRows = [['Başlık','Belge Türü','Belge No','Kurum','Düzenleme Tarihi','Son Geçerlilik','Notlar']];
+    _idsCache.forEach(i=> idRows.push([i.title, i.doc_type, i.doc_number, i.issuer, i.issue_date, i.expiry_date, i.notes]));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(idRows), 'Kimlikler');
+
+    XLSX.writeFile(wb, `kasa-export-${Date.now()}.xlsx`);
+    toast('Excel indirildi','success');
+  } catch(e){ toast('Excel oluşturulamadı: '+e.message,'error'); }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HTML ESCAPE
+// ═══════════════════════════════════════════════════════════════════════════
+function escHtml(s){
+  if(!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════
+(function init(){
+  // Apply theme
+  const theme = localStorage.getItem('kasa_theme')||'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+
+  // Show lock screen
+  showLock();
+
+  // Register service worker
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/sw.js').catch(e=>console.warn('SW reg failed:',e));
+  }
+})();
+</script>
+</body>
+</html>

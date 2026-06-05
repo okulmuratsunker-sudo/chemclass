@@ -1,0 +1,16 @@
+name = "kasa-api"
+compatibility_date = "2025-01-01"
+main = "worker.js"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "kasa-db"
+database_id = "1531442b-722d-418e-8641-9c942aacb2a8"
+
+# R2 file storage — uncomment after creating the bucket in Cloudflare Dashboard
+# [[r2_buckets]]
+# binding = "FILES"
+# bucket_name = "kasa-files"
+
+# Secrets — set via: wrangler secret put JWT_SECRET
+# Use a strong random value, e.g.: openssl rand -hex 32
