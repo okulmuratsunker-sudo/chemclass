@@ -612,6 +612,7 @@ function openModal(id){document.getElementById(id).classList.add('open')}
 function save(){
   if(!data.customBtns)data.customBtns=[];
   if(!data.attendance)data.attendance={};
+  data._modified=Date.now();
   localStorage.setItem(KEY,JSON.stringify(data));
   renderAll();scheduleCloudSave();scheduleBoardUpdate();
 }
@@ -1234,18 +1235,55 @@ async function signOut(){
 async function getSession(){if(!sb)return null;let{data:res}=await sb.auth.getSession();sbUser=res.session?.user||null;return sbUser;}
 function renderCloud(){
   if(!document.getElementById('cloudStatus'))return;
-  let online=!!sbUser;
-  cloudStatus.textContent=online?'☁️ Bulut aktif':'Giriş yok';
-  if(document.getElementById('cloudInfo'))cloudInfo.textContent=online?('Giriş yapıldı: '+(sbUser.email||'')):'Giriş yapılmadı. Veriler sadece giriş yaptıktan sonra buluttan yüklenir.';
+  const pending=localStorage.getItem('cc_pending')==='1';
+  const isOnline=navigator.onLine;
+  if(!isOnline)cloudStatus.textContent='📴 Çevrimdışı';
+  else if(sbUser&&pending)cloudStatus.textContent='🔄 Sync bekliyor';
+  else if(sbUser)cloudStatus.textContent='☁️ Bulut aktif';
+  else cloudStatus.textContent='Giriş yok';
+  if(document.getElementById('cloudInfo'))cloudInfo.textContent=sbUser?('Giriş yapıldı: '+(sbUser.email||'')):'Giriş yapılmadı. Veriler sadece giriş yaptıktan sonra buluttan yüklenir.';
 }
-function scheduleCloudSave(){if(!sbUser||!sb)return;clearTimeout(syncTimer);syncTimer=setTimeout(saveToCloudNow,900);}
-async function saveToCloudNow(){if(!sbUser)await getSession();if(!sb||!sbUser)return msg('Buluta kaydetmek için giriş yapın');let payload={user_id:sbUser.id,app_data:data,updated_at:new Date().toISOString()};let{error}=await sb.from('chemclass_data').upsert(payload,{onConflict:'user_id'});if(error)return msg('Bulut kayıt hatası: '+error.message);msg('Buluta kaydedildi ✓');}
-async function loadFromCloud(){if(!sbUser)await getSession();if(!sb||!sbUser)return msg('Buluttan yüklemek için giriş yapın');let{data:row,error}=await sb.from('chemclass_data').select('app_data').eq('user_id',sbUser.id).maybeSingle();if(error)return msg('Bulut okuma hatası: '+error.message);if(row&&row.app_data){data=row.app_data;if(!data.customBtns)data.customBtns=[];if(!data.attendance)data.attendance={};localStorage.setItem(KEY,JSON.stringify(data));renderAll();msg('Buluttan yüklendi ✓');}else{await saveToCloudNow();msg('Bulutta kayıt yoktu, mevcut veri kaydedildi');}}
+function scheduleCloudSave(){
+  if(!sbUser||!sb){localStorage.setItem('cc_pending','1');return;}
+  clearTimeout(syncTimer);syncTimer=setTimeout(saveToCloudNow,900);
+}
+async function saveToCloudNow(){
+  if(!navigator.onLine){localStorage.setItem('cc_pending','1');renderCloud();return;}
+  if(!sbUser)await getSession();
+  if(!sb||!sbUser){localStorage.setItem('cc_pending','1');renderCloud();return;}
+  const payload={user_id:sbUser.id,app_data:data,updated_at:new Date().toISOString()};
+  const{error}=await sb.from('chemclass_data').upsert(payload,{onConflict:'user_id'});
+  if(error){localStorage.setItem('cc_pending','1');renderCloud();return msg('Bulut kayıt hatası: '+error.message);}
+  localStorage.removeItem('cc_pending');renderCloud();msg('Buluta kaydedildi ✓');
+}
+async function loadFromCloud(){
+  if(!sbUser)await getSession();
+  if(!sb||!sbUser)return msg('Buluttan yüklemek için giriş yapın');
+  const{data:row,error}=await sb.from('chemclass_data').select('app_data,updated_at').eq('user_id',sbUser.id).maybeSingle();
+  if(error)return msg('Bulut okuma hatası: '+error.message);
+  if(row&&row.app_data){
+    const cloudTime=new Date(row.updated_at).getTime();
+    const localTime=data._modified||0;
+    if(localTime>cloudTime){
+      await saveToCloudNow();
+      msg('Yerel veri buluta aktarıldı ✓');
+    }else{
+      data=row.app_data;
+      if(!data.customBtns)data.customBtns=[];
+      if(!data.attendance)data.attendance={};
+      data._modified=cloudTime;
+      localStorage.setItem(KEY,JSON.stringify(data));
+      renderAll();msg('Buluttan yüklendi ✓');
+    }
+  }else{
+    await saveToCloudNow();msg('Bulutta kayıt yoktu, mevcut veri kaydedildi');
+  }
+}
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function loadLocal(){
   let raw=localStorage.getItem(KEY)||localStorage.getItem('chemclass_v17_data')||'{}';
-  try{let d=JSON.parse(raw);data.classes=d.classes||[];data.students=d.students||[];data.attendance=d.attendance||{};data.customBtns=d.customBtns||[];}catch(e){}
+  try{let d=JSON.parse(raw);data.classes=d.classes||[];data.students=d.students||[];data.attendance=d.attendance||{};data.customBtns=d.customBtns||[];data._modified=d._modified||0;}catch(e){}
 }
 
 loadLocal();loadTheme();loadSnd();loadCloudSettings();
@@ -1253,6 +1291,11 @@ try{if(attDate)attDate.value=todayStr();}catch(e){}
 renderAll();drawTimer();checkBoardUrl();
 getSession().then(async()=>{renderCloud();if(sbUser)await loadFromCloud();});
 if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}
+window.addEventListener('online',async()=>{
+  renderCloud();
+  if(localStorage.getItem('cc_pending')==='1'&&sbUser&&sb){await saveToCloudNow();}
+});
+window.addEventListener('offline',()=>{renderCloud();});
 </script>
 </body>
 </html>
