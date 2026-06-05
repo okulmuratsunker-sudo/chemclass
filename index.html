@@ -406,12 +406,22 @@ button:active{transform:scale(.96)}
         <button class="s small" onclick="copyBoardUrl()">Linki Kopyala</button>
       </div>
     </div>
+    <div style="margin-top:10px">
+      <div class="muted" style="margin-bottom:6px">Tahta görünümü:</div>
+      <div class="row">
+        <button class="s small" onclick="setBoardView('list')">📊 Liste</button>
+        <button class="s small" onclick="setBoardView('pick')">🎲 Seçici</button>
+        <button class="s small" onclick="setBoardView('groups')">👥 Gruplar</button>
+        <button class="s small" onclick="setBoardView('timer')">⏱️ Sayaç</button>
+      </div>
+    </div>
   </div>
   <div class="card">
     <h3>Akıllı tahtada açılacak ekran</h3>
     <div class="row">
       <input id="boardEnterCode" class="inp" style="max-width:180px" placeholder="6 haneli kod">
-      <button class="b" onclick="enterBoardCode()">Tahta Girişi Aç</button>
+      <button class="b" onclick="enterBoardCode()">Tahta.html'i Aç</button>
+      <a href="/tahta.html" target="_blank" class="s small" style="text-decoration:none">Tahta ekranı ↗</a>
     </div>
   </div>
 </section>
@@ -577,6 +587,7 @@ let picked=[],lastPick=null,groups=[];
 let timerTotal=300,timerLeft=300,timerRun=null;
 let sb=null,sbUser=null,syncTimer=null;
 let activeBoardCode='',activeBoardClass='',boardPoll=null,boardViewData=null;
+let boardCurrentView='list';
 let tempCustomBtns=[];
 let sndType='beep';
 let boardRate=3000;
@@ -809,7 +820,8 @@ function pickStudent(){
       quick.classList.remove('hide');quickScore.textContent=chosen.score||0;
       renderCustomBtnsQuick();
       recent.textContent=picked.slice(-8).map(id=>data.students.find(s=>s.id===id)?.name).filter(Boolean).reverse().join(', ');
-      scheduleBoardUpdate();
+      window._lastPickTime=new Date().toISOString();
+      setBoardView('pick');
     }
   },60);
 }
@@ -890,6 +902,7 @@ function makeGroups(){
   else{for(let i=0;i<ss.length;i+=v)arr.push(ss.slice(i,i+v));}
   groups=arr.map((m,i)=>({name:'Grup '+(i+1),score:0,m,id:uid()}));
   renderGroups();
+  setBoardView('groups');
 }
 function renderGroups(){
   groupList.innerHTML=groups.map((g,i)=>`
@@ -1072,9 +1085,10 @@ function startTimer(){
   if(timerLeft<=0)return msg('Süre girin');
   drawTimer();
   timerRun=setInterval(()=>{timerLeft--;drawTimer();if(timerLeft<=0){pauseTimer();beep();msg('⏰ Süre bitti!',3000);}},1000);
+  setBoardView('timer');
 }
-function pauseTimer(){if(timerRun){clearInterval(timerRun);timerRun=null;}}
-function resetTimer(){pauseTimer();timerTotal=(parseInt(timerMin.value)||0)*60+(parseInt(timerSec.value)||0);timerLeft=timerTotal||300;drawTimer();}
+function pauseTimer(){if(timerRun){clearInterval(timerRun);timerRun=null;scheduleBoardUpdate();}}
+function resetTimer(){pauseTimer();timerTotal=(parseInt(timerMin.value)||0)*60+(parseInt(timerSec.value)||0);timerLeft=timerTotal||300;drawTimer();scheduleBoardUpdate();}
 
 // ─── CSV / EXCEL IMPORT ────────────────────────────────────────────────────────
 function splitCsvLine(line){
@@ -1148,7 +1162,22 @@ function importData(e){
 function makeBoardSnapshot(cls){
   let students=getByClass(cls).map(s=>({id:s.id,name:s.name,no:s.no||'',className:s.className,score:s.score||0,color:s.color||0})).sort((a,b)=>(b.score||0)-(a.score||0));
   let recentNames=picked.slice(-8).map(id=>data.students.find(s=>s.id===id)).filter(s=>s&&(!cls||s.className===cls)).map(s=>s.name).reverse();
-  return{className:cls||'Tüm Öğrenciler',students,recent:recentNames,updatedAt:new Date().toISOString()};
+  let lastPickStudent=lastPick?data.students.find(s=>s.id===lastPick):null;
+  let timerEnd=timerRun?new Date(Date.now()+timerLeft*1000).toISOString():null;
+  return{
+    className:cls||'Tüm Öğrenciler',
+    students,
+    recent:recentNames,
+    view:boardCurrentView,
+    lastPick:lastPickStudent?{id:lastPickStudent.id,name:lastPickStudent.name,no:lastPickStudent.no||'',score:lastPickStudent.score||0,color:lastPickStudent.color||0}:null,
+    pickTime:window._lastPickTime||null,
+    groups:groups.map(g=>({name:g.name,score:g.score,members:g.m.map(s=>s.name)})),
+    timerEnd:timerEnd,
+    timerPaused:!timerRun,
+    timerRemaining:timerLeft,
+    timerTotal:timerTotal,
+    updatedAt:new Date().toISOString()
+  };
 }
 function randomBoardCode(){return String(Math.floor(100000+Math.random()*900000))}
 async function createBoardCode(){
@@ -1162,7 +1191,7 @@ async function createBoardCode(){
   if(error)return msg('Tahta kodu oluşturulamadı: '+error.message);
   boardCodeText.textContent=activeBoardCode;
   boardCodeInfo.textContent=cls+' sınıfı için '+hours+' saat geçerli.';
-  let url=location.origin+location.pathname+'?board='+activeBoardCode;
+  let url=location.origin+'/tahta.html?code='+activeBoardCode;
   boardUrl.value=url;boardUrlBox.style.display='flex';msg('Tahta kodu oluşturuldu ✓');
 }
 async function refreshBoardSession(){
@@ -1180,6 +1209,7 @@ function scheduleBoardUpdate(){
   clearTimeout(window.boardUpdateTimer);
   window.boardUpdateTimer=setTimeout(refreshBoardSession,1200);
 }
+function setBoardView(v){boardCurrentView=v;scheduleBoardUpdate();}
 async function closeBoardSession(){
   if(!activeBoardCode)return msg('Açık tahta kodu yok');
   if(!sbUser)await getSession();if(!sb||!sbUser)return;
@@ -1188,7 +1218,7 @@ async function closeBoardSession(){
   msg('Tahta bağlantısı kapatıldı');
 }
 function copyBoardUrl(){boardUrl.select();document.execCommand('copy');msg('Tahta linki kopyalandı');}
-function enterBoardCode(){let c=(boardEnterCode.value||'').trim();if(!/^\d{6}$/.test(c))return msg('6 haneli kod girin');location.href=location.origin+location.pathname+'?board='+c;}
+function enterBoardCode(){let c=(boardEnterCode.value||'').trim();if(!/^\d{6}$/.test(c))return msg('6 haneli kod girin');window.open('/tahta.html?code='+c,'_blank');}
 function boardOnlyUI(){document.querySelector('.top').style.display='none';document.querySelector('.tabs').style.display='none';document.querySelectorAll('section').forEach(s=>s.classList.add('hide'));document.getElementById('boardView').classList.remove('hide');}
 
 function setBoardRate(ms,btn){

@@ -12,6 +12,7 @@ const SHELL = [
   '/manifest-chemclass.json',
   '/manifest-ogretmen.json',
   '/manifest-derstakip.json',
+  '/tahta.html',
   '/sw.js',
 ];
 
