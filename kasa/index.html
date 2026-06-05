@@ -21,7 +21,7 @@
   --bg:#0f0e17; --s1:#1a1933; --s2:#231f3d; --bd:#2d2952;
   --accent:#7c6fe0; --accent2:#5c4fe0; --text:#e8e6f0; --text2:#9b98b5;
   --gr:#4caf50; --re:#f44336; --ye:#ff9800;
-  --radius:14px; --radius-sm:8px; --nav-h:64px; --safe-b:env(safe-area-inset-bottom,0px);
+  --radius:14px; --radius-sm:8px; --nav-h:64px; --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
   --shadow:0 4px 24px rgba(0,0,0,.45);
 }
 [data-theme=light] {
@@ -41,7 +41,7 @@ select option{background:var(--s1)}
 a{color:var(--accent);text-decoration:none}
 /* ── LAYOUT ──────────────────────────────────────────── */
 #app{display:flex;flex-direction:column;height:100%}
-.page{display:none;flex:1;overflow-y:auto;padding:16px 16px calc(var(--nav-h) + 16px + var(--safe-b));animation:fadeIn .25s ease}
+.page{display:none;flex:1;overflow-y:auto;padding:max(var(--safe-t),16px) 16px calc(var(--nav-h) + 16px + var(--safe-b));animation:fadeIn .25s ease}
 .page.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 /* ── BOTTOM NAV ──────────────────────────────────────── */
@@ -50,7 +50,7 @@ a{color:var(--accent);text-decoration:none}
 .nav-btn .icon{font-size:22px;line-height:1}
 .nav-btn.active{color:var(--accent)}
 /* ── LOCK SCREEN ─────────────────────────────────────── */
-#lock{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:24px}
+#lock{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:max(calc(var(--safe-t) + 16px),32px) 24px 32px;gap:24px}
 #lock .logo{font-size:64px;line-height:1}
 #lock h1{font-size:28px;font-weight:700;color:var(--accent)}
 #lock p{color:var(--text2);text-align:center;font-size:14px}

@@ -55,7 +55,7 @@
     /* ── MAIN SCREEN ── */
     #mainScreen{display:flex;flex-direction:column;min-height:100vh}
     .top-bar{
-      display:flex;align-items:center;gap:8px;padding:10px 14px;
+      display:flex;align-items:center;gap:8px;padding:max(env(safe-area-inset-top),10px) 14px 10px;
       background:var(--bg2);border-bottom:1px solid var(--border);
       position:sticky;top:0;z-index:20;flex-wrap:wrap;
     }

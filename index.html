@@ -22,7 +22,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--t1);font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;transition:background .3s,color .3s}
 .wrap{max-width:960px;margin:auto;padding:16px}
-.top{display:flex;gap:10px;align-items:center;position:sticky;top:0;background:rgba(10,14,26,.97);padding:12px 0;z-index:10;flex-wrap:wrap;transition:background .3s}
+.top{display:flex;gap:10px;align-items:center;position:sticky;top:0;background:rgba(10,14,26,.97);padding:max(env(safe-area-inset-top),12px) 0 12px;z-index:10;flex-wrap:wrap;transition:background .3s}
 .logo{font-weight:900;color:var(--gr);letter-spacing:2px}.logo span{color:var(--or)}
 .pill{background:var(--s2);border:1px solid var(--bd);padding:6px 10px;border-radius:999px;color:var(--t2);font-size:12px}
 button,input,select{font:inherit}

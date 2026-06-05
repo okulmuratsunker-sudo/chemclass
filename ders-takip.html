@@ -37,7 +37,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--t1);font-family:'DM S
 
 /* LAYOUT */
 .wrap{max-width:1100px;margin:0 auto;padding:0 16px 64px}
-.header{display:flex;align-items:center;gap:10px;padding:20px 0 16px;border-bottom:1px solid var(--bd);margin-bottom:28px;flex-wrap:wrap}
+.header{display:flex;align-items:center;gap:10px;padding:max(env(safe-area-inset-top),20px) 0 16px;border-bottom:1px solid var(--bd);margin-bottom:28px;flex-wrap:wrap}
 .logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--t1);display:flex;align-items:center;gap:8px;white-space:nowrap}
 .logo span{color:var(--gr)}
 .logo-dot{width:7px;height:7px;border-radius:50%;background:var(--gr);animation:pulse 2s infinite}
