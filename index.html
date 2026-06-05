@@ -21,8 +21,18 @@ button,input,select{font:inherit}
 button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:pointer;transition:opacity .15s,transform .1s}
 button:active{transform:scale(.96)}
 .b{background:var(--gr);color:#071018}.s{background:var(--s2);color:var(--t1);border:1px solid var(--bd)}.r{background:rgba(255,68,68,.15);color:var(--re);border:1px solid rgba(255,68,68,.35)}
-.tabs{display:flex;gap:8px;overflow-x:auto;margin:12px 0;padding-bottom:4px}
-.tabs button{white-space:nowrap;transition:background .2s,color .2s}.tabs .on{background:var(--gr);color:#071018}
+.nav-fixed{display:flex;gap:6px;padding:10px 0;border-bottom:1px solid var(--bd);margin-bottom:4px}
+.nav-fixed button{flex:1;font-size:13px;padding:10px 6px;white-space:nowrap;transition:background .2s,color .2s}
+.nav-fixed .on{background:var(--gr);color:#071018}
+.hamburger{font-size:20px;padding:6px 11px;line-height:1;border-radius:10px}
+.menu-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column;overflow-y:auto;transition:background .3s}
+.menu-overlay.open{display:flex;animation:fadeIn .18s ease}
+.menu-header{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.menu-item{display:flex;align-items:center;gap:14px;padding:18px 16px;border:0;border-bottom:1px solid var(--bd);background:transparent;color:var(--t1);font-size:17px;font-weight:700;cursor:pointer;width:100%;text-align:left;transition:background .15s;border-radius:0}
+.menu-item:active{background:var(--s2)}
+.menu-item.on{color:var(--gr);background:var(--s2)}
+.mi-icon{font-size:22px;width:32px;text-align:center;flex-shrink:0}
+.menu-footer{margin-top:auto;padding:16px;border-top:1px solid var(--bd);display:flex;flex-direction:column;gap:8px;flex-shrink:0}
 .card{background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:14px;margin:12px 0;transition:background .3s,border-color .3s}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
 .inp{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px;color:var(--t1);margin:5px 0;transition:background .3s,color .3s}
@@ -109,8 +119,7 @@ button:active{transform:scale(.96)}
   .score{font-size:16px}
   .top{gap:6px;padding:8px 0}
   .top .logo{font-size:13px}
-  .tabs{gap:4px}
-  .tabs button{font-size:11px;padding:7px 9px}
+  .nav-fixed button{font-size:11px;padding:8px 4px}
   .student{flex-wrap:wrap;gap:5px}
   .student .row{width:100%;justify-content:flex-start}
   .card{padding:10px;border-radius:12px}
@@ -123,7 +132,7 @@ button:active{transform:scale(.96)}
 }
 @media(max-width:380px){
   .grid{grid-template-columns:1fr}
-  .tabs button{font-size:10px;padding:6px 7px}
+  .nav-fixed button{font-size:10px;padding:7px 3px}
 }
 </style>
 </head>
@@ -132,30 +141,39 @@ button:active{transform:scale(.96)}
 
 <!-- TOP BAR -->
 <div class="top">
-  <div>
+  <div style="flex:1">
     <div class="logo">CHEM<span>CLASS</span> <span style="font-size:11px;color:var(--t2)">v18</span></div>
-    <div class="muted"><b>Created by Murat Sünker</b></div>
   </div>
-  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀️ Açık Tema</button>
-  <button class="s small" onclick="goHome()">🏠 Ana Ekran</button>
   <span id="active" class="pill">Ana Ekran</span>
   <span id="cloudStatus" class="pill">Yerel kayıt</span>
-  <button class="s small" onclick="exportData()">💾 Yedek Al</button>
-  <label class="s small" style="cursor:pointer">📂 Yedek Yükle<input id="importJson" type="file" accept=".json" hidden onchange="importData(event)"></label>
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀️</button>
+  <button class="hamburger s" onclick="openMenu()">☰</button>
 </div>
 
-<!-- TABS -->
-<div class="tabs">
-  <button data-tab="home" class="on" onclick="tab('home',this)">🏠 Ana Ekran</button>
-  <button data-tab="pick" onclick="tab('pick',this)">🎲 Seçici</button>
-  <button data-tab="timer" onclick="tab('timer',this)">⏳ Sayaç</button>
-  <button data-tab="students" onclick="tab('students',this)">🏫 Sınıflar</button>
-  <button data-tab="attend" onclick="tab('attend',this)">📋 Yoklama</button>
-  <button data-tab="beh" onclick="tab('beh',this)">⭐ Davranış</button>
-  <button data-tab="groups" onclick="tab('groups',this)">👥 Gruplar</button>
-  <button data-tab="board" onclick="tab('board',this)">📊 Tablo</button>
-  <button data-tab="cloud" onclick="tab('cloud',this)">☁️ Bulut</button>
-  <button data-tab="boardShare" onclick="tab('boardShare',this)">🖥️ Tahta Modu</button>
+<!-- NAV FIXED -->
+<div class="nav-fixed">
+  <button data-tab="home" class="s on" onclick="tab('home')">🏠 Ana Ekran</button>
+  <button data-tab="cloud" class="s" onclick="tab('cloud')">☁️ Bulut</button>
+  <button data-tab="boardShare" class="s" onclick="tab('boardShare')">🖥️ Tahta Modu</button>
+</div>
+
+<!-- MENU OVERLAY -->
+<div class="menu-overlay" id="menuOverlay">
+  <div class="menu-header">
+    <div class="logo">CHEM<span>CLASS</span></div>
+    <button class="r small" onclick="closeMenu()">✕ Kapat</button>
+  </div>
+  <button class="menu-item" data-tab="pick" onclick="tab('pick')"><span class="mi-icon">🎲</span>Rastgele Seçici</button>
+  <button class="menu-item" data-tab="timer" onclick="tab('timer')"><span class="mi-icon">⏳</span>Geri Sayım Sayacı</button>
+  <button class="menu-item" data-tab="students" onclick="tab('students')"><span class="mi-icon">🏫</span>Sınıflar</button>
+  <button class="menu-item" data-tab="attend" onclick="tab('attend')"><span class="mi-icon">📋</span>Yoklama</button>
+  <button class="menu-item" data-tab="beh" onclick="tab('beh')"><span class="mi-icon">⭐</span>Davranış</button>
+  <button class="menu-item" data-tab="groups" onclick="tab('groups')"><span class="mi-icon">👥</span>Gruplar</button>
+  <button class="menu-item" data-tab="board" onclick="tab('board')"><span class="mi-icon">📊</span>Liderlik Tablosu</button>
+  <div class="menu-footer">
+    <button class="s small" onclick="exportData();closeMenu()">💾 Yedek Al</button>
+    <label class="s small" style="cursor:pointer;display:block;text-align:center">📂 Yedek Yükle<input id="importJson" type="file" accept=".json" hidden onchange="importData(event)"></label>
+  </div>
 </div>
 
 <!-- HOME -->
@@ -567,13 +585,13 @@ function toggleTheme(){
   let html=document.documentElement;
   let dark=html.getAttribute('data-theme')==='dark';
   html.setAttribute('data-theme',dark?'light':'dark');
-  themeBtn.textContent=dark?'🌙 Koyu Tema':'☀️ Açık Tema';
+  themeBtn.textContent=dark?'🌙':'☀️';
   localStorage.setItem('cc_theme',dark?'light':'dark');
 }
 function loadTheme(){
   let t=localStorage.getItem('cc_theme')||'dark';
   document.documentElement.setAttribute('data-theme',t);
-  themeBtn.textContent=t==='dark'?'☀️ Açık Tema':'🌙 Koyu Tema';
+  themeBtn.textContent=t==='dark'?'☀️':'🌙';
 }
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
@@ -590,22 +608,21 @@ function save(){
   renderAll();scheduleCloudSave();scheduleBoardUpdate();
 }
 
-function tab(id,btn){
-  document.querySelectorAll('section').forEach(s=>s.classList.add('hide'));
-  document.getElementById(id).classList.remove('hide');
-  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');renderAll();
-}
-function tabById(id){
+const TAB_LABELS={home:'Ana Ekran',cloud:'Bulut',boardShare:'Tahta Modu',pick:'Seçici',timer:'Sayaç',students:'Sınıflar',attend:'Yoklama',beh:'Davranış',groups:'Gruplar',board:'Tablo'};
+function tab(id){
   document.querySelectorAll('section').forEach(s=>s.classList.add('hide'));
   document.getElementById(id)?.classList.remove('hide');
-  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('on'));
-  let btn=document.querySelector(`.tabs button[data-tab="${id}"]`);
-  if(btn)btn.classList.add('on');
+  document.querySelectorAll('[data-tab]').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll(`[data-tab="${id}"]`).forEach(b=>b.classList.add('on'));
+  active.textContent=TAB_LABELS[id]||id;
   renderAll();
-  active.textContent=id==='home'?'Ana Ekran':id;
+  closeMenu();
+  window.scrollTo({top:0,behavior:'smooth'});
 }
-function goHome(){tab('home',document.querySelector('.tabs button'));window.scrollTo({top:0,behavior:'smooth'})}
+function tabById(id){tab(id);}
+function goHome(){tab('home');}
+function openMenu(){document.getElementById('menuOverlay').classList.add('open');}
+function closeMenu(){document.getElementById('menuOverlay').classList.remove('open');}
 
 // ─── SELECTS & CHIPS ──────────────────────────────────────────────────────────
 function opts(sel,all=false){
