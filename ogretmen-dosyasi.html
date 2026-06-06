@@ -322,6 +322,47 @@ select.inp{cursor:pointer}
   </div>
 </div>
 
+<!-- Add Student Modal -->
+<div class="overlay" id="mo-add-student">
+  <div class="modal">
+    <div class="modal-hd"><span>Öğrenci Ekle</span><button class="modal-close" onclick="closeModal('mo-add-student')">×</button></div>
+    <div class="field"><label class="field-label">Ad Soyad *</label>
+      <input class="inp" id="ns-name" placeholder="Ahmet Yılmaz" autocomplete="off"></div>
+    <div class="field"><label class="field-label">Öğrenci No</label>
+      <input class="inp" id="ns-number" placeholder="1001" autocomplete="off"></div>
+    <div class="field"><label class="field-label">Sınıf</label>
+      <input class="inp" id="ns-class" placeholder="9-D" autocomplete="off"></div>
+    <div class="row-btns">
+      <button class="btn btn-primary" onclick="saveNewStudent()">Kaydet</button>
+      <button class="btn btn-outline" onclick="closeModal('mo-add-student')">İptal</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import CSV Modal -->
+<div class="overlay" id="mo-import-csv">
+  <div class="modal">
+    <div class="modal-hd"><span>CSV ile Öğrenci Aktar</span><button class="modal-close" onclick="closeModal('mo-import-csv')">×</button></div>
+    <p style="font-size:.85rem;color:var(--text2);margin-bottom:12px">
+      CSV dosyası: <strong>ad soyad, numara, sınıf</strong> sütunları (virgül veya noktalı virgül ayrılmış).<br>
+      <span style="font-size:.78rem">Örnek: Ahmet Yılmaz,1001,9-D</span>
+    </p>
+    <div style="border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;margin-bottom:12px" onclick="document.getElementById('csv-file-inp').click()">
+      <div style="font-size:1.8rem;margin-bottom:6px">📄</div>
+      <div style="font-size:.88rem;color:var(--text2)">CSV dosyası seç veya buraya sürükle</div>
+      <input type="file" id="csv-file-inp" accept=".csv,.txt" style="display:none" onchange="previewCSV(this)">
+    </div>
+    <div id="csv-preview" style="display:none">
+      <div style="font-weight:700;font-size:.88rem;margin-bottom:6px" id="csv-preview-count"></div>
+      <div style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;font-size:.8rem" id="csv-preview-list"></div>
+    </div>
+    <div class="row-btns" style="margin-top:12px">
+      <button class="btn btn-primary" id="csv-import-btn" onclick="runImportCSV()" style="display:none">Aktarımı Başlat</button>
+      <button class="btn btn-outline" onclick="closeModal('mo-import-csv')">İptal</button>
+    </div>
+  </div>
+</div>
+
 <!-- Student Modal -->
 <div class="overlay" id="mo-student">
   <div class="modal modal-wide">
@@ -535,6 +576,10 @@ function renderStudents(){
   const q=searchQ.toLowerCase();
   const list=students.filter(s=>!q||s.name.toLowerCase().includes(q)||(s.student_number||'').includes(q));
   let h=`<div class="page-title">👥 Öğrenciler <span style="font-size:.83rem;font-weight:400;color:var(--text2)">${students.length} öğrenci</span></div>
+<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+  <button class="btn btn-primary btn-sm" onclick="openAddStudent()">+ Öğrenci Ekle</button>
+  <button class="btn btn-outline btn-sm" onclick="openImportCSV()">📥 CSV ile İçe Aktar</button>
+</div>
 <div class="search-wrap"><span class="search-ico">🔍</span>
 <input class="search-inp" placeholder="İsim veya numara ara…" value="${esc(searchQ)}" oninput="searchQ=this.value;render()"></div>
 <div class="s-list">`;
@@ -588,7 +633,10 @@ ${MCOLS.map(({k,l})=>`<div style="background:var(--surface2);border-radius:8px;p
   h+=`<div class="field"><label class="field-label">📝 Öğretmen Gözlem Notu</label>
   <textarea class="inp" id="st-notes-area" rows="3" placeholder="Veli görüşmesi, davranış, gelişim notları…">${esc(st.notes||'')}</textarea>
 </div>
-<div class="row-btns"><button class="btn btn-primary" onclick="saveStudentNote('${sid}')">Notu Kaydet</button></div>`;
+<div class="row-btns" style="display:flex;gap:8px">
+  <button class="btn btn-primary" onclick="saveStudentNote('${sid}')">Notu Kaydet</button>
+  <button class="btn btn-danger btn-sm" onclick="deleteStudent('${sid}')">🗑 Öğrenciyi Sil</button>
+</div>`;
   document.getElementById('mo-student-body').innerHTML=h;
   openModal('mo-student');
 }
@@ -599,6 +647,93 @@ async function saveStudentNote(sid){
   if(error){toast('Hata: '+error.message,true);return}
   const st=students.find(s=>s.id===sid);if(st)st.notes=note;
   toast('✓ Not kaydedildi');
+}
+
+async function deleteStudent(sid){
+  const st=students.find(s=>s.id===sid);
+  if(!confirm(`"${st?.name}" öğrencisini silmek istediğinize emin misiniz?\nTüm notlar ve puanlar da silinir.`)) return;
+  closeModal('mo-student');
+  const{error}=await sb.from('teacher_students').delete().eq('id',sid);
+  if(error){toast('Hata: '+error.message,true);return;}
+  students=students.filter(s=>s.id!==sid);
+  grades=grades.filter(g=>g.student_id!==sid);
+  scores=scores.filter(s=>s.student_id!==sid);
+  toast('✓ Öğrenci silindi');
+  render();
+}
+
+function openAddStudent(){
+  document.getElementById('ns-name').value='';
+  document.getElementById('ns-number').value='';
+  document.getElementById('ns-class').value='';
+  openModal('mo-add-student');
+  setTimeout(()=>document.getElementById('ns-name').focus(),100);
+}
+
+async function saveNewStudent(){
+  const name=document.getElementById('ns-name').value.trim();
+  if(!name){toast('Ad Soyad zorunludur','err');return;}
+  const num=document.getElementById('ns-number').value.trim();
+  const cls=document.getElementById('ns-class').value.trim();
+  const{data,error}=await sb.from('teacher_students').insert({name,student_number:num||null,class_name:cls||null,notes:''}).select().single();
+  if(error){toast('Hata: '+error.message,true);return;}
+  students.push(data);
+  students.sort((a,b)=>a.name.localeCompare(b.name,'tr'));
+  closeModal('mo-add-student');
+  toast('✓ Öğrenci eklendi');
+  render();
+}
+
+let _csvParsed=[];
+function openImportCSV(){
+  _csvParsed=[];
+  document.getElementById('csv-file-inp').value='';
+  document.getElementById('csv-preview').style.display='none';
+  document.getElementById('csv-import-btn').style.display='none';
+  openModal('mo-import-csv');
+}
+function previewCSV(inp){
+  const file=inp.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const text=e.target.result;
+    const sep=text.includes(';')?';':',';
+    const lines=text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+    // skip header if first line looks like a header
+    const startIdx=(lines[0]&&isNaN(lines[0].split(sep)[0])&&lines[0].toLowerCase().includes('ad'))?1:0;
+    _csvParsed=lines.slice(startIdx).map(line=>{
+      const parts=line.split(sep).map(p=>p.replace(/^["']|["']$/g,'').trim());
+      return{name:parts[0]||'',student_number:parts[1]||'',class_name:parts[2]||''};
+    }).filter(r=>r.name);
+    const count=document.getElementById('csv-preview-count');
+    count.textContent=`${_csvParsed.length} öğrenci bulundu`;
+    const listEl=document.getElementById('csv-preview-list');
+    listEl.innerHTML=_csvParsed.slice(0,20).map(r=>`<div style="padding:6px 10px;border-bottom:1px solid var(--border)">
+      <strong>${esc(r.name)}</strong>${r.student_number?' — No: '+esc(r.student_number):''}${r.class_name?' — '+esc(r.class_name):''}
+    </div>`).join('')+((_csvParsed.length>20)?`<div style="padding:8px 10px;color:var(--text2)">...ve ${_csvParsed.length-20} öğrenci daha</div>`:'');
+    document.getElementById('csv-preview').style.display='';
+    document.getElementById('csv-import-btn').style.display=_csvParsed.length?'':'none';
+  };
+  reader.readAsText(file,'UTF-8');
+}
+async function runImportCSV(){
+  if(!_csvParsed.length) return;
+  const btn=document.getElementById('csv-import-btn');
+  btn.disabled=true;btn.textContent='Aktarılıyor…';
+  // batch insert in chunks of 50
+  let added=0;
+  for(let i=0;i<_csvParsed.length;i+=50){
+    const chunk=_csvParsed.slice(i,i+50).map(r=>({name:r.name,student_number:r.student_number||null,class_name:r.class_name||null,notes:''}));
+    const{data,error}=await sb.from('teacher_students').insert(chunk).select();
+    if(error){toast('Hata: '+error.message,true);btn.disabled=false;btn.textContent='Aktarımı Başlat';return;}
+    if(data)students.push(...data);
+    added+=(data?.length||0);
+  }
+  students.sort((a,b)=>a.name.localeCompare(b.name,'tr'));
+  closeModal('mo-import-csv');
+  toast(`✓ ${added} öğrenci aktarıldı`);
+  render();
+  btn.disabled=false;btn.textContent='Aktarımı Başlat';
 }
 
 // ════════════════════════════════════════
