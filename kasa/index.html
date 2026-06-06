@@ -671,29 +671,46 @@ async function autoCloudAuth(){
   if(!url){ renderBillsNoApi(); renderIdsNoApi(); return; }
   const { email, pass } = getCloudCredentials();
   try {
+    // Health check first
+    let healthOk = false;
+    try {
+      const h = await fetch(url+'/health', {signal: AbortSignal.timeout(8000)});
+      healthOk = h.ok;
+      if(!h.ok){ const t=await h.text(); throw new Error(`Health ${h.status}: ${t.slice(0,120)}`); }
+    } catch(he){
+      throw new Error('Worker ulaşılamıyor — '+he.message);
+    }
+
     let res = await fetch(url+'/auth/login', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({email, password:pass})
+      body: JSON.stringify({email, password:pass}),
+      signal: AbortSignal.timeout(10000)
     });
     if(!res.ok){
       res = await fetch(url+'/auth/register', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({email, password:pass})
+        body: JSON.stringify({email, password:pass}),
+        signal: AbortSignal.timeout(10000)
       });
     }
-    const data = await res.json();
-    if(!res.ok) throw new Error(data.error||'Bulut hesabı açılamadı');
+    let data;
+    try { data = await res.json(); }
+    catch(_){ throw new Error(`HTTP ${res.status} — JSON parse hatası`); }
+    if(!res.ok) throw new Error(`HTTP ${res.status}: ${data.error||JSON.stringify(data)}`);
     localStorage.setItem('kasa_token', data.token);
-    localStorage.setItem('kasa_email', data.user.email);
+    localStorage.setItem('kasa_email', data.user?.email||email);
     showMainApp();
   } catch(e){
     $('app').style.display='flex';
     renderPasswords();
     renderBillsNoApi();
     renderIdsNoApi();
-    toast('Bulut bağlantısı kurulamadı: '+e.message,'error');
+    // Tam hata metnini göster — debug için
+    const msg = e.message||String(e);
+    console.error('[autoCloudAuth]', msg);
+    toast('Bağlantı hatası: '+msg, 'error', 8000);
   }
 }
 
