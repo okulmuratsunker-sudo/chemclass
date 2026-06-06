@@ -1,0 +1,1814 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#2ea043">
+<link rel="manifest" href="manifest-donusturucu.json">
+<title>Dönüştürücü</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+  --text:#e6edf3;--text2:#8b949e;--accent:#2ea043;--accent2:#3fb950;
+  --danger:#f85149;--warn:#d29922;
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-l:env(safe-area-inset-left,0px);
+  --safe-r:env(safe-area-inset-right,0px);
+}
+[data-theme="light"] {
+  --bg:#f6f8fa;--surface:#ffffff;--surface2:#f0f2f5;--border:#d0d7de;
+  --text:#1f2328;--text2:#656d76;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+button{cursor:pointer;font-family:inherit}
+
+/* ── HEADER ── */
+.app-header{
+  position:sticky;top:0;z-index:100;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:max(calc(var(--safe-t) + 10px),22px) 16px 12px;
+  display:flex;align-items:center;gap:10px;
+}
+.header-back{background:none;border:none;color:var(--text2);font-size:1.1rem;padding:4px 8px 4px 0;display:none}
+.header-back.visible{display:flex;align-items:center;gap:6px}
+.header-title{font-size:1.1rem;font-weight:700;color:var(--text);flex:1}
+.header-theme{background:none;border:none;color:var(--text2);font-size:1.2rem;padding:4px}
+
+/* ── SCREENS ── */
+.screen{display:none;padding:16px 16px calc(max(var(--safe-b),16px) + 16px);max-width:600px;margin:0 auto}
+.screen.active{display:block}
+
+/* ── HOME CARDS ── */
+.home-grid{display:grid;gap:14px;margin-top:4px}
+.cat-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:20px;cursor:pointer;transition:transform .15s,border-color .15s;
+  display:flex;align-items:center;gap:16px;
+}
+.cat-card:active{transform:scale(.97)}
+.cat-card:hover{border-color:var(--accent)}
+.cat-icon{font-size:2.2rem;line-height:1}
+.cat-info h2{font-size:1.05rem;font-weight:700;margin-bottom:3px}
+.cat-info p{font-size:.85rem;color:var(--text2)}
+
+/* ── TOOL LIST ── */
+.tool-grid{display:grid;gap:10px}
+.tool-btn{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;text-align:left;color:var(--text);
+  display:flex;align-items:center;gap:12px;font-size:.95rem;font-weight:500;
+  transition:border-color .15s,background .15s;
+}
+.tool-btn:hover{border-color:var(--accent);background:var(--surface2)}
+.tool-icon{font-size:1.4rem;width:32px;text-align:center}
+.tool-chevron{margin-left:auto;color:var(--text2)}
+
+/* ── TOOL SCREEN ── */
+.tool-section{margin-bottom:20px}
+.section-label{font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:8px}
+
+/* ── DROPZONE ── */
+.dropzone{
+  border:2px dashed var(--border);border-radius:12px;padding:32px 16px;
+  text-align:center;cursor:pointer;transition:border-color .2s;background:var(--surface)
+}
+.dropzone:hover,.dropzone.drag{border-color:var(--accent)}
+.dropzone input{display:none}
+.dropzone-icon{font-size:2.5rem;margin-bottom:8px}
+.dropzone-text{color:var(--text2);font-size:.9rem}
+.dropzone-sub{color:var(--text2);font-size:.78rem;margin-top:4px}
+
+/* ── CONTROLS ── */
+.control-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.control-label{font-size:.88rem;color:var(--text2);min-width:80px}
+select,input[type=number],input[type=text],input[type=range],input[type=color],input[type=password]{
+  background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);padding:7px 10px;font-family:inherit;font-size:.9rem;
+}
+select:focus,input:focus{outline:2px solid var(--accent);border-color:transparent}
+select{cursor:pointer;min-width:120px}
+input[type=range]{padding:4px 0;flex:1;accent-color:var(--accent)}
+input[type=color]{padding:3px;height:36px;width:48px;cursor:pointer}
+input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px;cursor:pointer}
+
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border:none;border-radius:10px;padding:11px 20px;font-size:.95rem;font-weight:600;
+  font-family:inherit;cursor:pointer;transition:opacity .15s,transform .1s;
+}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--accent)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-full{width:100%}
+.btn:disabled{opacity:.5;pointer-events:none}
+
+/* ── PREVIEW ── */
+.preview-wrap{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  overflow:hidden;position:relative;min-height:100px;
+  display:flex;align-items:center;justify-content:center;
+}
+.preview-wrap img,.preview-wrap canvas{max-width:100%;max-height:320px;display:block;object-fit:contain}
+.preview-info{font-size:.8rem;color:var(--text2);margin-top:6px;text-align:center}
+
+/* ── FILE LIST ── */
+.file-list{display:flex;flex-direction:column;gap:6px}
+.file-item{
+  background:var(--surface);border:1px solid var(--border);border-radius:8px;
+  padding:10px 12px;display:flex;align-items:center;gap:10px;
+}
+.file-item-name{flex:1;font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-item-size{font-size:.78rem;color:var(--text2);white-space:nowrap}
+.file-item-del{background:none;border:none;color:var(--danger);font-size:1rem;padding:2px 6px;cursor:pointer}
+
+/* ── PROGRESS ── */
+.progress-bar{height:4px;background:var(--surface2);border-radius:4px;overflow:hidden;margin:10px 0}
+.progress-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .3s;width:0}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:calc(max(var(--safe-b),16px) + 16px);left:50%;transform:translateX(-50%) translateY(20px);
+  background:#1c2128;color:var(--text);border:1px solid var(--border);
+  border-radius:10px;padding:10px 18px;font-size:.9rem;font-weight:500;
+  opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;z-index:9999;
+  max-width:calc(100vw - 32px);text-align:center;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.success{border-color:var(--accent)}
+#toast.error{border-color:var(--danger)}
+
+/* ── QR ── */
+#qr-canvas-out{max-width:240px;border-radius:8px}
+.qr-result{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;word-break:break-all;font-size:.9rem;margin-top:10px}
+
+/* ── LOADING ── */
+.loading{display:none;flex-direction:column;align-items:center;gap:12px;padding:24px}
+.loading.show{display:flex}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;margin-bottom:16px}
+.tab{flex:1;padding:8px;border:none;background:none;color:var(--text2);border-radius:8px;font-size:.88rem;font-weight:600;cursor:pointer;transition:.15s}
+.tab.active{background:var(--surface);color:var(--text)}
+
+/* color adjust sliders */
+.slider-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.slider-row label{font-size:.82rem;color:var(--text2);width:90px;flex-shrink:0}
+.slider-row input[type=range]{flex:1}
+.slider-row span{font-size:.8rem;color:var(--text2);width:36px;text-align:right}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <button class="header-back" id="backBtn" onclick="goBack()">&#8592; Geri</button>
+  <span class="header-title" id="headerTitle">Dönüştürücü</span>
+  <button class="header-theme" id="themeBtn" onclick="toggleTheme()" title="Tema">🌙</button>
+</header>
+
+<div id="toast"></div>
+
+<!-- ═══════════════ HOME ═══════════════ -->
+<div class="screen active" id="screen-home">
+  <div class="home-grid">
+    <div class="cat-card" onclick="showCat('img')">
+      <div class="cat-icon">🖼️</div>
+      <div class="cat-info">
+        <h2>Resim İşlemleri</h2>
+        <p>Format dönüştür, yeniden boyutlandır, arka plan kaldır ve daha fazlası</p>
+      </div>
+    </div>
+    <div class="cat-card" onclick="showCat('pdf')">
+      <div class="cat-icon">📄</div>
+      <div class="cat-info">
+        <h2>PDF İşlemleri</h2>
+        <p>Birleştir, böl, sıkıştır, döndür, filigran ekle ve daha fazlası</p>
+      </div>
+    </div>
+    <div class="cat-card" onclick="showCat('qr')">
+      <div class="cat-icon">⬛</div>
+      <div class="cat-info">
+        <h2>QR Kod</h2>
+        <p>QR kod oluştur ve oku</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ IMG CATEGORY ═══════════════ -->
+<div class="screen" id="screen-img">
+  <div class="tool-grid">
+    <button class="tool-btn" onclick="showTool('img-convert')"><span class="tool-icon">🔄</span>Format Dönüştür<span class="tool-chevron">›</span></button>
+    <button class="tool-btn" onclick="showTool('img-resize')"><span class="tool-icon">📐</span>Yeniden Boyutlandır<span class="tool-chevron">›</span></button>
+    <button class="tool-btn" onclick="showTool('img-compress')"><span class="tool-icon">🗜️</span>Sıkıştır<span class="tool-chevron">›</span></button>
+    <button class="tool-btn" onclick="showTool('img-crop')"><span class="tool-icon">✂️</span>Kırp / Döndür / Çevir<span class="tool-chevron">›</span></button>
+    <button class="tool-btn" onclick="showTool('img-bg')"><span class="tool-icon">🪄</span>Arka Plan Kaldır<span class="tool-chevron">›</span></button>
+    <button class="tool-btn" onclick="showTool('img-blur')"><span class="tool-icon">🌫️</span>Bulanıklaştır / Mozaik<span class="tool-chevron">›</span></button>
+    <button class="tool-btn" onclick="showTool('img-color')"><span class="tool-icon">🎨</span>Renk Ayarları<span class="tool-chevron">›</span></button>
+    <button class="tool-btn" onclick="showTool('img-text')"><span class="tool-icon">✍️</span>Metin Ekle<span class="tool-chevron">›</span></button>
+    <button class="tool-btn" onclick="showTool('img-batch')"><span class="tool-icon">📦</span>Toplu Dönüştür<span class="tool-chevron">›</span></button>
+  </div>
+</div>
+
+<!-- ═══════════════ PDF CATEGORY ═══════════════ -->
+<div class="screen" id="screen-pdf">
+  <div class="tool-grid">
+    <button class="tool-btn" onclick="showTool('pdf-merge')"><span class="tool-icon">🔗</span>Birleştir<span class="tool-chevron">›</span></button>
+    <button class="tool-btn" onclick="showTool('pdf-split')"><span class="tool-icon">✂️</span>Böl<span class="tool-chevron">›</span></button>
+    <button class="tool-btn" onclick="showTool('pdf-compress')"><span class="tool-icon">🗜️</span>Sıkıştır<span class="tool-chevron">›</span></button>
+    <button class="tool-btn" onclick="showTool('pdf-rotate')"><span class="tool-icon">🔃</span>Döndür<span class="tool-chevron">›</span></button>
+    <button class="tool-btn" onclick="showTool('pdf-watermark')"><span class="tool-icon">💧</span>Filigran Ekle<span class="tool-chevron">›</span></button>
+    <button class="tool-btn" onclick="showTool('pdf-to-img')"><span class="tool-icon">🖼️</span>PDF → Resim<span class="tool-chevron">›</span></button>
+    <button class="tool-btn" onclick="showTool('img-to-pdf')"><span class="tool-icon">📄</span>Resim → PDF<span class="tool-chevron">›</span></button>
+    <button class="tool-btn" onclick="showTool('pdf-password')"><span class="tool-icon">🔐</span>Şifre Ekle / Kaldır<span class="tool-chevron">›</span></button>
+  </div>
+</div>
+
+<!-- ═══════════════ QR CATEGORY ═══════════════ -->
+<div class="screen" id="screen-qr">
+  <div class="tool-grid">
+    <button class="tool-btn" onclick="showTool('qr-gen')"><span class="tool-icon">➕</span>QR Kod Oluştur<span class="tool-chevron">›</span></button>
+    <button class="tool-btn" onclick="showTool('qr-read')"><span class="tool-icon">📷</span>QR Kod Oku<span class="tool-chevron">›</span></button>
+  </div>
+</div>
+
+<!-- ═══════════════ TOOL: IMG CONVERT ═══════════════ -->
+<div class="screen" id="screen-img-convert">
+  <div class="tool-section">
+    <div class="section-label">Resim Seç</div>
+    <div class="dropzone" id="dz-convert" onclick="document.getElementById('f-convert').click()" ondragover="dzOver(event,this)" ondragleave="dzLeave(this)" ondrop="dzDrop(event,'f-convert',loadConvert)">
+      <input type="file" id="f-convert" accept="image/*,.heic,.heif" onchange="loadConvert(this.files)">
+      <div class="dropzone-icon">🖼️</div>
+      <div class="dropzone-text">Resim seçmek için dokun</div>
+      <div class="dropzone-sub">JPG, PNG, WebP, GIF, BMP, HEIC desteklenir</div>
+    </div>
+  </div>
+  <div id="convert-controls" style="display:none">
+    <div class="preview-wrap" id="convert-preview-wrap"><img id="convert-preview" alt=""></div>
+    <div class="preview-info" id="convert-info"></div>
+    <div class="tool-section" style="margin-top:16px">
+      <div class="section-label">Çıktı Formatı</div>
+      <div class="control-row">
+        <select id="convert-fmt">
+          <option value="image/jpeg">JPG</option>
+          <option value="image/png">PNG</option>
+          <option value="image/webp">WebP</option>
+          <option value="image/gif">GIF</option>
+          <option value="image/bmp">BMP</option>
+        </select>
+        <label style="font-size:.88rem;color:var(--text2)">Kalite: <span id="convert-q-val">90</span>%</label>
+        <input type="range" id="convert-q" min="10" max="100" value="90" oninput="document.getElementById('convert-q-val').textContent=this.value" style="flex:1;min-width:80px">
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="runConvert()">Dönüştür ve İndir</button>
+  </div>
+</div>
+
+<!-- ═══════════════ TOOL: IMG RESIZE ═══════════════ -->
+<div class="screen" id="screen-img-resize">
+  <div class="tool-section">
+    <div class="section-label">Resim Seç</div>
+    <div class="dropzone" id="dz-resize" onclick="document.getElementById('f-resize').click()" ondragover="dzOver(event,this)" ondragleave="dzLeave(this)" ondrop="dzDrop(event,'f-resize',loadResize)">
+      <input type="file" id="f-resize" accept="image/*,.heic,.heif" onchange="loadResize(this.files)">
+      <div class="dropzone-icon">📐</div>
+      <div class="dropzone-text">Resim seçmek için dokun</div>
+    </div>
+  </div>
+  <div id="resize-controls" style="display:none">
+    <div class="preview-wrap"><img id="resize-preview" style="max-height:200px" alt=""></div>
+    <div class="tool-section" style="margin-top:16px">
+      <div class="section-label">Boyut</div>
+      <div class="control-row">
+        <label class="control-label">Genişlik</label>
+        <input type="number" id="resize-w" min="1" max="9999" style="width:90px" oninput="syncResize('w')"> px
+      </div>
+      <div class="control-row">
+        <label class="control-label">Yükseklik</label>
+        <input type="number" id="resize-h" min="1" max="9999" style="width:90px" oninput="syncResize('h')"> px
+      </div>
+      <div class="control-row">
+        <input type="checkbox" id="resize-ratio" checked>
+        <label for="resize-ratio" style="font-size:.88rem">Oranı koru</label>
+      </div>
+    </div>
+    <div class="control-row">
+      <label class="control-label">Format</label>
+      <select id="resize-fmt">
+        <option value="image/jpeg">JPG</option>
+        <option value="image/png">PNG</option>
+        <option value="image/webp">WebP</option>
+      </select>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="runResize()">Kaydet</button>
+  </div>
+</div>
+
+<!-- ═══════════════ TOOL: IMG COMPRESS ═══════════════ -->
+<div class="screen" id="screen-img-compress">
+  <div class="tool-section">
+    <div class="section-label">Resim Seç</div>
+    <div class="dropzone" onclick="document.getElementById('f-cmp').click()">
+      <input type="file" id="f-cmp" accept="image/*" onchange="loadCompress(this.files)">
+      <div class="dropzone-icon">🗜️</div>
+      <div class="dropzone-text">Resim seçmek için dokun</div>
+    </div>
+  </div>
+  <div id="cmp-controls" style="display:none">
+    <div class="preview-wrap"><img id="cmp-preview" style="max-height:200px" alt=""></div>
+    <div class="tool-section" style="margin-top:16px">
+      <div class="slider-row">
+        <label>Kalite</label>
+        <input type="range" id="cmp-q" min="5" max="95" value="60" oninput="cmpPreview()">
+        <span id="cmp-q-val">60%</span>
+      </div>
+      <div class="preview-info" id="cmp-size-info"></div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="runCompress()">Sıkıştır ve İndir</button>
+  </div>
+</div>
+
+<!-- ═══════════════ TOOL: IMG CROP / ROTATE / FLIP ═══════════════ -->
+<div class="screen" id="screen-img-crop">
+  <div class="tool-section">
+    <div class="dropzone" onclick="document.getElementById('f-crop').click()">
+      <input type="file" id="f-crop" accept="image/*" onchange="loadCrop(this.files)">
+      <div class="dropzone-icon">✂️</div>
+      <div class="dropzone-text">Resim seçmek için dokun</div>
+    </div>
+  </div>
+  <div id="crop-controls" style="display:none">
+    <div class="preview-wrap" id="crop-canvas-wrap">
+      <canvas id="crop-canvas"></canvas>
+    </div>
+    <div class="tool-section" style="margin-top:14px">
+      <div class="section-label">Döndür / Çevir</div>
+      <div class="control-row" style="flex-wrap:wrap;gap:8px">
+        <button class="btn btn-secondary" onclick="cropTransform('rotL')">↺ 90° Sol</button>
+        <button class="btn btn-secondary" onclick="cropTransform('rotR')">↻ 90° Sağ</button>
+        <button class="btn btn-secondary" onclick="cropTransform('flipH')">↔ Yatay</button>
+        <button class="btn btn-secondary" onclick="cropTransform('flipV')">↕ Dikey</button>
+      </div>
+    </div>
+    <div class="tool-section">
+      <div class="section-label">Kırpma (piksel)</div>
+      <div class="control-row">
+        <label class="control-label">Sol</label><input type="number" id="crop-l" value="0" min="0" style="width:70px"> px
+        <label class="control-label" style="margin-left:8px">Sağ</label><input type="number" id="crop-r" value="0" min="0" style="width:70px"> px
+      </div>
+      <div class="control-row">
+        <label class="control-label">Üst</label><input type="number" id="crop-t" value="0" min="0" style="width:70px"> px
+        <label class="control-label" style="margin-left:8px">Alt</label><input type="number" id="crop-b" value="0" min="0" style="width:70px"> px
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="runCrop()">Uygula ve İndir</button>
+  </div>
+</div>
+
+<!-- ═══════════════ TOOL: BG REMOVE ═══════════════ -->
+<div class="screen" id="screen-img-bg">
+  <div class="tool-section">
+    <p style="font-size:.85rem;color:var(--text2);margin-bottom:12px">İlk kullanımda model indirilir (~50 MB). Tüm işlem cihazınızda yapılır, verileriniz paylaşılmaz.</p>
+    <div class="dropzone" onclick="document.getElementById('f-bg').click()">
+      <input type="file" id="f-bg" accept="image/*" onchange="loadBg(this.files)">
+      <div class="dropzone-icon">🪄</div>
+      <div class="dropzone-text">Resim seçmek için dokun</div>
+    </div>
+  </div>
+  <div id="bg-controls" style="display:none">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div>
+        <div class="section-label">Orijinal</div>
+        <div class="preview-wrap"><img id="bg-orig" style="max-height:180px" alt=""></div>
+      </div>
+      <div>
+        <div class="section-label">Sonuç</div>
+        <div class="preview-wrap" style="background:repeating-conic-gradient(#ccc 0% 25%,transparent 0% 50%) 0/16px 16px">
+          <img id="bg-result" style="max-height:180px" alt="">
+        </div>
+      </div>
+    </div>
+    <div class="loading" id="bg-loading"><div class="spinner"></div><span id="bg-status">Model yükleniyor…</span></div>
+    <button class="btn btn-primary btn-full" id="bg-run-btn" onclick="runBgRemove()">Arka Planı Kaldır</button>
+    <button class="btn btn-secondary btn-full" id="bg-dl-btn" style="display:none;margin-top:8px" onclick="dlBgResult()">İndir</button>
+  </div>
+</div>
+
+<!-- ═══════════════ TOOL: BLUR / MOSAIC ═══════════════ -->
+<div class="screen" id="screen-img-blur">
+  <div class="tool-section">
+    <div class="dropzone" onclick="document.getElementById('f-blur').click()">
+      <input type="file" id="f-blur" accept="image/*" onchange="loadBlur(this.files)">
+      <div class="dropzone-icon">🌫️</div>
+      <div class="dropzone-text">Resim seçmek için dokun</div>
+    </div>
+  </div>
+  <div id="blur-controls" style="display:none">
+    <div class="preview-wrap"><canvas id="blur-canvas" style="max-height:260px"></canvas></div>
+    <div class="tool-section" style="margin-top:14px">
+      <div class="tabs" id="blur-tabs">
+        <button class="tab active" onclick="setBlurMode('blur',this)">Bulanıklaştır</button>
+        <button class="tab" onclick="setBlurMode('mosaic',this)">Mozaik</button>
+      </div>
+      <div class="slider-row">
+        <label id="blur-mode-label">Yoğunluk</label>
+        <input type="range" id="blur-amount" min="1" max="40" value="10" oninput="renderBlur()">
+        <span id="blur-amt-val">10</span>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="runBlur()">İndir</button>
+  </div>
+</div>
+
+<!-- ═══════════════ TOOL: COLOR ADJUST ═══════════════ -->
+<div class="screen" id="screen-img-color">
+  <div class="tool-section">
+    <div class="dropzone" onclick="document.getElementById('f-color').click()">
+      <input type="file" id="f-color" accept="image/*" onchange="loadColor(this.files)">
+      <div class="dropzone-icon">🎨</div>
+      <div class="dropzone-text">Resim seçmek için dokun</div>
+    </div>
+  </div>
+  <div id="color-controls" style="display:none">
+    <div class="preview-wrap"><canvas id="color-canvas" style="max-height:260px"></canvas></div>
+    <div class="tool-section" style="margin-top:14px">
+      <div class="slider-row"><label>Parlaklık</label><input type="range" id="col-brightness" min="-100" max="100" value="0" oninput="renderColor()"><span id="sv-brightness">0</span></div>
+      <div class="slider-row"><label>Kontrast</label><input type="range" id="col-contrast" min="-100" max="100" value="0" oninput="renderColor()"><span id="sv-contrast">0</span></div>
+      <div class="slider-row"><label>Doygunluk</label><input type="range" id="col-saturation" min="-100" max="100" value="0" oninput="renderColor()"><span id="sv-saturation">0</span></div>
+      <div class="slider-row"><label>Ton</label><input type="range" id="col-hue" min="-180" max="180" value="0" oninput="renderColor()"><span id="sv-hue">0</span></div>
+    </div>
+    <div class="control-row">
+      <button class="btn btn-secondary" onclick="resetColorSliders()">Sıfırla</button>
+      <button class="btn btn-primary" style="flex:1" onclick="runColor()">İndir</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ TOOL: TEXT OVERLAY ═══════════════ -->
+<div class="screen" id="screen-img-text">
+  <div class="tool-section">
+    <div class="dropzone" onclick="document.getElementById('f-txt').click()">
+      <input type="file" id="f-txt" accept="image/*" onchange="loadText(this.files)">
+      <div class="dropzone-icon">✍️</div>
+      <div class="dropzone-text">Resim seçmek için dokun</div>
+    </div>
+  </div>
+  <div id="text-controls" style="display:none">
+    <div class="preview-wrap"><canvas id="text-canvas" style="max-height:260px"></canvas></div>
+    <div class="tool-section" style="margin-top:14px">
+      <div class="control-row"><label class="control-label">Metin</label><input type="text" id="txt-content" value="Metin" style="flex:1" oninput="renderText()"></div>
+      <div class="control-row">
+        <label class="control-label">Renk</label><input type="color" id="txt-color" value="#ffffff" oninput="renderText()">
+        <label class="control-label" style="margin-left:8px">Boyut</label><input type="number" id="txt-size" value="40" min="8" max="300" style="width:70px" oninput="renderText()">
+      </div>
+      <div class="control-row">
+        <label class="control-label">Konum X</label><input type="range" id="txt-x" min="0" max="100" value="50" oninput="renderText()" style="flex:1">
+      </div>
+      <div class="control-row">
+        <label class="control-label">Konum Y</label><input type="range" id="txt-y" min="0" max="100" value="80" oninput="renderText()" style="flex:1">
+      </div>
+      <div class="control-row">
+        <label class="control-label">Opaklık</label><input type="range" id="txt-opacity" min="10" max="100" value="100" oninput="renderText()" style="flex:1">
+        <span id="txt-op-val">100</span>%
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="runText()">İndir</button>
+  </div>
+</div>
+
+<!-- ═══════════════ TOOL: BATCH CONVERT ═══════════════ -->
+<div class="screen" id="screen-img-batch">
+  <div class="tool-section">
+    <div class="dropzone" onclick="document.getElementById('f-batch').click()">
+      <input type="file" id="f-batch" accept="image/*,.heic,.heif" multiple onchange="loadBatch(this.files)">
+      <div class="dropzone-icon">📦</div>
+      <div class="dropzone-text">Birden fazla resim seç</div>
+      <div class="dropzone-sub">Birden fazla dosya seçebilirsiniz</div>
+    </div>
+  </div>
+  <div id="batch-controls" style="display:none">
+    <div class="file-list" id="batch-list"></div>
+    <div class="tool-section" style="margin-top:14px">
+      <div class="control-row">
+        <label class="control-label">Format</label>
+        <select id="batch-fmt">
+          <option value="image/jpeg">JPG</option>
+          <option value="image/png">PNG</option>
+          <option value="image/webp">WebP</option>
+        </select>
+        <label style="font-size:.88rem;margin-left:8px">Kalite: <span id="batch-q-val">85</span>%</label>
+        <input type="range" id="batch-q" min="10" max="100" value="85" oninput="document.getElementById('batch-q-val').textContent=this.value" style="flex:1;min-width:60px">
+      </div>
+    </div>
+    <div class="progress-bar" id="batch-progress-bar" style="display:none"><div class="progress-fill" id="batch-progress-fill"></div></div>
+    <button class="btn btn-primary btn-full" onclick="runBatch()">Tümünü Dönüştür (ZIP)</button>
+  </div>
+</div>
+
+<!-- ═══════════════ TOOL: PDF MERGE ═══════════════ -->
+<div class="screen" id="screen-pdf-merge">
+  <div class="tool-section">
+    <div class="section-label">PDF Dosyaları Ekle</div>
+    <div class="dropzone" onclick="document.getElementById('f-pdfmerge').click()">
+      <input type="file" id="f-pdfmerge" accept=".pdf" multiple onchange="addMergeFiles(this.files)">
+      <div class="dropzone-icon">📄</div>
+      <div class="dropzone-text">PDF dosyaları seç</div>
+      <div class="dropzone-sub">Birden fazla seçebilirsiniz — sırayı listeden düzenleyin</div>
+    </div>
+  </div>
+  <div class="file-list" id="merge-list" style="margin-bottom:12px"></div>
+  <div class="loading" id="merge-loading" style="display:none"><div class="spinner"></div><span>Birleştiriliyor…</span></div>
+  <button class="btn btn-primary btn-full" id="merge-btn" onclick="runMerge()" disabled>Birleştir ve İndir</button>
+</div>
+
+<!-- ═══════════════ TOOL: PDF SPLIT ═══════════════ -->
+<div class="screen" id="screen-pdf-split">
+  <div class="tool-section">
+    <div class="dropzone" onclick="document.getElementById('f-pdfsplit').click()">
+      <input type="file" id="f-pdfsplit" accept=".pdf" onchange="loadSplit(this.files)">
+      <div class="dropzone-icon">✂️</div>
+      <div class="dropzone-text">PDF seç</div>
+    </div>
+  </div>
+  <div id="split-controls" style="display:none">
+    <div class="preview-info" id="split-info"></div>
+    <div class="tool-section" style="margin-top:14px">
+      <div class="section-label">Sayfa Aralığı</div>
+      <div class="control-row">
+        <label class="control-label">Başlangıç</label>
+        <input type="number" id="split-from" min="1" value="1" style="width:70px">
+      </div>
+      <div class="control-row">
+        <label class="control-label">Bitiş</label>
+        <input type="number" id="split-to" min="1" style="width:70px">
+      </div>
+    </div>
+    <div class="loading" id="split-loading" style="display:none"><div class="spinner"></div><span>Bölünüyor…</span></div>
+    <button class="btn btn-primary btn-full" onclick="runSplit()">Böl ve İndir</button>
+  </div>
+</div>
+
+<!-- ═══════════════ TOOL: PDF COMPRESS ═══════════════ -->
+<div class="screen" id="screen-pdf-compress">
+  <div class="tool-section">
+    <p style="font-size:.85rem;color:var(--text2);margin-bottom:12px">PDF sıkıştırma resimleri yeniden kodlayarak boyutu küçültür.</p>
+    <div class="dropzone" onclick="document.getElementById('f-pdfcmp').click()">
+      <input type="file" id="f-pdfcmp" accept=".pdf" onchange="loadPdfCompress(this.files)">
+      <div class="dropzone-icon">🗜️</div>
+      <div class="dropzone-text">PDF seç</div>
+    </div>
+  </div>
+  <div id="pdfcmp-controls" style="display:none">
+    <div class="preview-info" id="pdfcmp-info"></div>
+    <div class="tool-section" style="margin-top:14px">
+      <div class="slider-row">
+        <label>Resim Kalitesi</label>
+        <input type="range" id="pdfcmp-q" min="10" max="90" value="50" oninput="document.getElementById('pdfcmp-q-val').textContent=this.value+'%'">
+        <span id="pdfcmp-q-val">50%</span>
+      </div>
+    </div>
+    <div class="loading" id="pdfcmp-loading" style="display:none"><div class="spinner"></div><span>Sıkıştırılıyor…</span></div>
+    <button class="btn btn-primary btn-full" onclick="runPdfCompress()">Sıkıştır ve İndir</button>
+  </div>
+</div>
+
+<!-- ═══════════════ TOOL: PDF ROTATE ═══════════════ -->
+<div class="screen" id="screen-pdf-rotate">
+  <div class="tool-section">
+    <div class="dropzone" onclick="document.getElementById('f-pdfrot').click()">
+      <input type="file" id="f-pdfrot" accept=".pdf" onchange="loadPdfRotate(this.files)">
+      <div class="dropzone-icon">🔃</div>
+      <div class="dropzone-text">PDF seç</div>
+    </div>
+  </div>
+  <div id="pdfrot-controls" style="display:none">
+    <div class="preview-info" id="pdfrot-info"></div>
+    <div class="tool-section" style="margin-top:14px">
+      <div class="control-row">
+        <label class="control-label">Sayfalar</label>
+        <select id="pdfrot-pages">
+          <option value="all">Tümü</option>
+          <option value="range">Aralık</option>
+        </select>
+      </div>
+      <div id="pdfrot-range" style="display:none" class="control-row">
+        <input type="number" id="pdfrot-from" placeholder="Başlangıç" min="1" style="width:110px">
+        <span style="color:var(--text2)">—</span>
+        <input type="number" id="pdfrot-to" placeholder="Bitiş" min="1" style="width:110px">
+      </div>
+      <div class="control-row">
+        <label class="control-label">Yön</label>
+        <select id="pdfrot-dir">
+          <option value="90">90° Saat Yönü</option>
+          <option value="180">180°</option>
+          <option value="270">90° Ters</option>
+        </select>
+      </div>
+    </div>
+    <div class="loading" id="pdfrot-loading" style="display:none"><div class="spinner"></div><span>Döndürülüyor…</span></div>
+    <button class="btn btn-primary btn-full" onclick="runPdfRotate()">Döndür ve İndir</button>
+  </div>
+</div>
+
+<!-- ═══════════════ TOOL: PDF WATERMARK ═══════════════ -->
+<div class="screen" id="screen-pdf-watermark">
+  <div class="tool-section">
+    <div class="dropzone" onclick="document.getElementById('f-pdfwm').click()">
+      <input type="file" id="f-pdfwm" accept=".pdf" onchange="loadPdfWatermark(this.files)">
+      <div class="dropzone-icon">💧</div>
+      <div class="dropzone-text">PDF seç</div>
+    </div>
+  </div>
+  <div id="pdfwm-controls" style="display:none">
+    <div class="tool-section" style="margin-top:14px">
+      <div class="control-row"><label class="control-label">Metin</label><input type="text" id="wm-text" value="GİZLİ" style="flex:1"></div>
+      <div class="control-row">
+        <label class="control-label">Renk</label><input type="color" id="wm-color" value="#ff0000">
+        <label class="control-label" style="margin-left:8px">Opaklık</label>
+        <input type="range" id="wm-opacity" min="5" max="100" value="20" style="flex:1">
+        <span id="wm-op-val">20</span>%
+      </div>
+      <div class="control-row">
+        <label class="control-label">Boyut</label><input type="number" id="wm-size" value="48" min="12" max="200" style="width:70px">
+      </div>
+    </div>
+    <div class="loading" id="pdfwm-loading" style="display:none"><div class="spinner"></div><span>Ekleniyor…</span></div>
+    <button class="btn btn-primary btn-full" onclick="runPdfWatermark()">Filigran Ekle ve İndir</button>
+  </div>
+</div>
+
+<!-- ═══════════════ TOOL: PDF TO IMG ═══════════════ -->
+<div class="screen" id="screen-pdf-to-img">
+  <div class="tool-section">
+    <div class="dropzone" onclick="document.getElementById('f-pdf2img').click()">
+      <input type="file" id="f-pdf2img" accept=".pdf" onchange="loadPdf2Img(this.files)">
+      <div class="dropzone-icon">🖼️</div>
+      <div class="dropzone-text">PDF seç</div>
+    </div>
+  </div>
+  <div id="pdf2img-controls" style="display:none">
+    <div class="preview-info" id="pdf2img-info"></div>
+    <div class="tool-section" style="margin-top:14px">
+      <div class="control-row">
+        <label class="control-label">Format</label>
+        <select id="pdf2img-fmt">
+          <option value="image/jpeg">JPG</option>
+          <option value="image/png">PNG</option>
+        </select>
+        <label class="control-label" style="margin-left:8px">Ölçek</label>
+        <select id="pdf2img-scale">
+          <option value="1">1x (72 dpi)</option>
+          <option value="2" selected>2x (144 dpi)</option>
+          <option value="3">3x (216 dpi)</option>
+        </select>
+      </div>
+    </div>
+    <div class="loading" id="pdf2img-loading" style="display:none"><div class="spinner"></div><span id="pdf2img-status">Dönüştürülüyor…</span></div>
+    <button class="btn btn-primary btn-full" onclick="runPdf2Img()">Resimlere Dönüştür (ZIP)</button>
+  </div>
+</div>
+
+<!-- ═══════════════ TOOL: IMG TO PDF ═══════════════ -->
+<div class="screen" id="screen-img-to-pdf">
+  <div class="tool-section">
+    <div class="dropzone" onclick="document.getElementById('f-img2pdf').click()">
+      <input type="file" id="f-img2pdf" accept="image/*" multiple onchange="addImg2PdfFiles(this.files)">
+      <div class="dropzone-icon">📄</div>
+      <div class="dropzone-text">Resimler seç</div>
+      <div class="dropzone-sub">Birden fazla seçebilirsiniz</div>
+    </div>
+  </div>
+  <div class="file-list" id="img2pdf-list" style="margin-bottom:12px"></div>
+  <div class="tool-section">
+    <div class="control-row">
+      <label class="control-label">Sayfa Boyutu</label>
+      <select id="img2pdf-page">
+        <option value="A4">A4</option>
+        <option value="Letter">Letter</option>
+        <option value="fit">Resme Göre</option>
+      </select>
+    </div>
+  </div>
+  <div class="loading" id="img2pdf-loading" style="display:none"><div class="spinner"></div><span>Oluşturuluyor…</span></div>
+  <button class="btn btn-primary btn-full" id="img2pdf-btn" onclick="runImg2Pdf()" disabled>PDF Oluştur ve İndir</button>
+</div>
+
+<!-- ═══════════════ TOOL: PDF PASSWORD ═══════════════ -->
+<div class="screen" id="screen-pdf-password">
+  <div class="tool-section">
+    <div class="dropzone" onclick="document.getElementById('f-pdfpw').click()">
+      <input type="file" id="f-pdfpw" accept=".pdf" onchange="loadPdfPw(this.files)">
+      <div class="dropzone-icon">🔐</div>
+      <div class="dropzone-text">PDF seç</div>
+    </div>
+  </div>
+  <div id="pdfpw-controls" style="display:none">
+    <div class="tabs">
+      <button class="tab active" id="pw-add-tab" onclick="setPwMode('add',this)">Şifre Ekle</button>
+      <button class="tab" id="pw-remove-tab" onclick="setPwMode('remove',this)">Şifre Kaldır</button>
+    </div>
+    <div id="pw-add-fields">
+      <div class="control-row"><label class="control-label">Şifre</label><input type="password" id="pw-new" placeholder="Yeni şifre" style="flex:1"></div>
+      <div class="control-row"><label class="control-label">Tekrar</label><input type="password" id="pw-confirm" placeholder="Şifre tekrar" style="flex:1"></div>
+    </div>
+    <div id="pw-remove-fields" style="display:none">
+      <div class="control-row"><label class="control-label">Mevcut Şifre</label><input type="password" id="pw-existing" placeholder="Mevcut şifre" style="flex:1"></div>
+    </div>
+    <div class="loading" id="pdfpw-loading" style="display:none"><div class="spinner"></div><span>İşleniyor…</span></div>
+    <button class="btn btn-primary btn-full" onclick="runPdfPw()" style="margin-top:8px">Uygula ve İndir</button>
+  </div>
+</div>
+
+<!-- ═══════════════ TOOL: QR GENERATE ═══════════════ -->
+<div class="screen" id="screen-qr-gen">
+  <div class="tool-section">
+    <div class="tabs">
+      <button class="tab active" onclick="setQrType('url',this)">URL</button>
+      <button class="tab" onclick="setQrType('text',this)">Metin</button>
+      <button class="tab" onclick="setQrType('wifi',this)">WiFi</button>
+      <button class="tab" onclick="setQrType('contact',this)">Kişi</button>
+    </div>
+    <div id="qr-url-fields">
+      <div class="control-row"><label class="control-label">URL</label><input type="text" id="qr-url-val" placeholder="https://..." style="flex:1" oninput="renderQr()"></div>
+    </div>
+    <div id="qr-text-fields" style="display:none">
+      <div class="control-row"><label class="control-label">Metin</label><input type="text" id="qr-text-val" placeholder="İçerik..." style="flex:1" oninput="renderQr()"></div>
+    </div>
+    <div id="qr-wifi-fields" style="display:none">
+      <div class="control-row"><label class="control-label">Ağ Adı</label><input type="text" id="qr-wifi-ssid" style="flex:1" oninput="renderQr()"></div>
+      <div class="control-row"><label class="control-label">Şifre</label><input type="text" id="qr-wifi-pw" style="flex:1" oninput="renderQr()"></div>
+      <div class="control-row">
+        <label class="control-label">Güvenlik</label>
+        <select id="qr-wifi-sec" onchange="renderQr()">
+          <option value="WPA">WPA/WPA2</option>
+          <option value="WEP">WEP</option>
+          <option value="">Yok</option>
+        </select>
+      </div>
+    </div>
+    <div id="qr-contact-fields" style="display:none">
+      <div class="control-row"><label class="control-label">Ad Soyad</label><input type="text" id="qr-c-name" style="flex:1" oninput="renderQr()"></div>
+      <div class="control-row"><label class="control-label">Telefon</label><input type="text" id="qr-c-phone" style="flex:1" oninput="renderQr()"></div>
+      <div class="control-row"><label class="control-label">E-posta</label><input type="text" id="qr-c-email" style="flex:1" oninput="renderQr()"></div>
+    </div>
+  </div>
+  <div class="tool-section">
+    <div class="control-row">
+      <label class="control-label">Renk</label><input type="color" id="qr-color" value="#000000" oninput="renderQr()">
+      <label class="control-label" style="margin-left:8px">Arka Plan</label><input type="color" id="qr-bg" value="#ffffff" oninput="renderQr()">
+    </div>
+    <div class="slider-row">
+      <label>Boyut</label>
+      <input type="range" id="qr-size" min="128" max="512" value="256" step="32" oninput="renderQr()">
+      <span id="qr-size-val">256</span>px
+    </div>
+  </div>
+  <div style="display:flex;justify-content:center;margin:16px 0">
+    <canvas id="qr-canvas-out" width="256" height="256"></canvas>
+  </div>
+  <div class="control-row" style="gap:10px">
+    <button class="btn btn-secondary" style="flex:1" onclick="dlQr()">İndir</button>
+    <button class="btn btn-primary" style="flex:1" onclick="shareQr()">Paylaş</button>
+  </div>
+</div>
+
+<!-- ═══════════════ TOOL: QR READ ═══════════════ -->
+<div class="screen" id="screen-qr-read">
+  <div class="tabs">
+    <button class="tab active" onclick="setReadMode('img',this)">Resimden Oku</button>
+    <button class="tab" onclick="setReadMode('cam',this)">Kameradan Oku</button>
+  </div>
+  <div id="qr-read-img">
+    <div class="dropzone" onclick="document.getElementById('f-qrread').click()">
+      <input type="file" id="f-qrread" accept="image/*" onchange="readQrFromFile(this.files)">
+      <div class="dropzone-icon">📷</div>
+      <div class="dropzone-text">QR içeren resim seç</div>
+    </div>
+  </div>
+  <div id="qr-read-cam" style="display:none">
+    <div class="preview-wrap" style="position:relative;background:#000">
+      <video id="qr-video" autoplay playsinline style="width:100%;max-height:320px;display:block"></video>
+      <canvas id="qr-scan-canvas" style="display:none"></canvas>
+    </div>
+    <div style="text-align:center;margin-top:8px">
+      <button class="btn btn-secondary" onclick="stopQrCam()" style="margin-right:8px">Kamerayı Durdur</button>
+    </div>
+  </div>
+  <div id="qr-read-result" class="qr-result" style="display:none"></div>
+  <div id="qr-read-actions" style="display:none;margin-top:10px">
+    <div class="control-row">
+      <button class="btn btn-secondary" style="flex:1" onclick="copyQrResult()">Kopyala</button>
+      <button class="btn btn-primary" style="flex:1" onclick="shareQrResult()">Paylaş</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════ NAVIGATION ═══════════════
+let _navStack = [];
+
+function showCat(cat) {
+  _navStack = ['home'];
+  document.getElementById('headerTitle').textContent = cat === 'img' ? 'Resim İşlemleri' : cat === 'pdf' ? 'PDF İşlemleri' : 'QR Kod';
+  document.getElementById('backBtn').classList.add('visible');
+  switchScreen('screen-' + cat);
+}
+
+function showTool(toolId) {
+  const curr = document.querySelector('.screen.active');
+  if (curr) _navStack.push(curr.id.replace('screen-', ''));
+  const titles = {
+    'img-convert': 'Format Dönüştür', 'img-resize': 'Yeniden Boyutlandır',
+    'img-compress': 'Sıkıştır', 'img-crop': 'Kırp / Döndür / Çevir',
+    'img-bg': 'Arka Plan Kaldır', 'img-blur': 'Bulanıklaştır / Mozaik',
+    'img-color': 'Renk Ayarları', 'img-text': 'Metin Ekle', 'img-batch': 'Toplu Dönüştür',
+    'pdf-merge': 'PDF Birleştir', 'pdf-split': 'PDF Böl', 'pdf-compress': 'PDF Sıkıştır',
+    'pdf-rotate': 'PDF Döndür', 'pdf-watermark': 'Filigran Ekle',
+    'pdf-to-img': 'PDF → Resim', 'img-to-pdf': 'Resim → PDF', 'pdf-password': 'PDF Şifre',
+    'qr-gen': 'QR Kod Oluştur', 'qr-read': 'QR Kod Oku'
+  };
+  document.getElementById('headerTitle').textContent = titles[toolId] || toolId;
+  document.getElementById('backBtn').classList.add('visible');
+  switchScreen('screen-' + toolId);
+}
+
+function goBack() {
+  if (_navStack.length === 0) { switchScreen('screen-home'); document.getElementById('backBtn').classList.remove('visible'); document.getElementById('headerTitle').textContent = 'Dönüştürücü'; return; }
+  const prev = _navStack.pop();
+  if (prev === 'home') { switchScreen('screen-home'); document.getElementById('backBtn').classList.remove('visible'); document.getElementById('headerTitle').textContent = 'Dönüştürücü'; }
+  else { showCat(prev.replace('screen-', '')); }
+}
+
+function switchScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════ THEME ═══════════════
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('themeBtn').textContent = isDark ? '🌞' : '🌙';
+  document.querySelector('meta[name=theme-color]').content = isDark ? '#2ea043' : '#2ea043';
+}
+
+// ═══════════════ TOAST ═══════════════
+let _toastTimer;
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'show ' + type;
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.className = '', 3000);
+}
+
+// ═══════════════ DROPZONE HELPERS ═══════════════
+function dzOver(e, el) { e.preventDefault(); el.classList.add('drag'); }
+function dzLeave(el) { el.classList.remove('drag'); }
+function dzDrop(e, inputId, cb) {
+  e.preventDefault();
+  document.getElementById(inputId).classList.remove('drag');
+  cb(e.dataTransfer.files);
+}
+
+// ═══════════════ UTILS ═══════════════
+function fmtBytes(b) { if (b < 1024) return b + ' B'; if (b < 1048576) return (b / 1024).toFixed(1) + ' KB'; return (b / 1048576).toFixed(2) + ' MB'; }
+function fmtExt(mime) { return mime.split('/')[1].replace('jpeg', 'jpg'); }
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+}
+
+async function shareFile(blob, filename, title = '') {
+  const file = new File([blob], filename, { type: blob.type });
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title }); return; } catch (_) {}
+  }
+  downloadBlob(blob, filename);
+}
+
+async function loadHeic(file) {
+  if (file.name.match(/\.heic$/i) || file.type === 'image/heic' || file.type === 'image/heif') {
+    if (!window.heic2any) await loadScript('https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js');
+    const blob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.9 });
+    return blob instanceof Array ? blob[0] : blob;
+  }
+  return file;
+}
+
+function loadScript(src) {
+  return new Promise((res, rej) => {
+    if (document.querySelector('script[src="' + src + '"]')) { res(); return; }
+    const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+function fileToImageBitmap(file) {
+  return new Promise(async (res, rej) => {
+    const f = await loadHeic(file);
+    const img = new Image();
+    img.onload = () => res(img);
+    img.onerror = rej;
+    img.src = URL.createObjectURL(f);
+  });
+}
+
+// ═══════════════ IMG CONVERT ═══════════════
+let _convertImg = null;
+async function loadConvert(files) {
+  if (!files || !files[0]) return;
+  const img = await fileToImageBitmap(files[0]);
+  _convertImg = img;
+  document.getElementById('convert-preview').src = img.src;
+  document.getElementById('convert-info').textContent = files[0].name + ' — ' + img.naturalWidth + '×' + img.naturalHeight + ' — ' + fmtBytes(files[0].size);
+  document.getElementById('convert-controls').style.display = 'block';
+}
+function runConvert() {
+  if (!_convertImg) return;
+  const fmt = document.getElementById('convert-fmt').value;
+  const q = parseInt(document.getElementById('convert-q').value) / 100;
+  const c = document.createElement('canvas'); c.width = _convertImg.naturalWidth; c.height = _convertImg.naturalHeight;
+  c.getContext('2d').drawImage(_convertImg, 0, 0);
+  c.toBlob(blob => { downloadBlob(blob, 'converted.' + fmtExt(fmt)); toast('Dönüştürüldü!', 'success'); }, fmt, q);
+}
+
+// ═══════════════ IMG RESIZE ═══════════════
+let _resizeImg = null, _resizeOW = 0, _resizeOH = 0;
+async function loadResize(files) {
+  if (!files || !files[0]) return;
+  const img = await fileToImageBitmap(files[0]);
+  _resizeImg = img; _resizeOW = img.naturalWidth; _resizeOH = img.naturalHeight;
+  document.getElementById('resize-preview').src = img.src;
+  document.getElementById('resize-w').value = _resizeOW;
+  document.getElementById('resize-h').value = _resizeOH;
+  document.getElementById('resize-controls').style.display = 'block';
+}
+function syncResize(changed) {
+  if (!document.getElementById('resize-ratio').checked) return;
+  const ratio = _resizeOW / _resizeOH;
+  if (changed === 'w') { const w = parseInt(document.getElementById('resize-w').value) || 1; document.getElementById('resize-h').value = Math.round(w / ratio); }
+  else { const h = parseInt(document.getElementById('resize-h').value) || 1; document.getElementById('resize-w').value = Math.round(h * ratio); }
+}
+function runResize() {
+  if (!_resizeImg) return;
+  const w = parseInt(document.getElementById('resize-w').value), h = parseInt(document.getElementById('resize-h').value);
+  const fmt = document.getElementById('resize-fmt').value;
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  c.getContext('2d').drawImage(_resizeImg, 0, 0, w, h);
+  c.toBlob(blob => { downloadBlob(blob, 'resized.' + fmtExt(fmt)); toast('Kaydedildi!', 'success'); }, fmt, 0.92);
+}
+
+// ═══════════════ IMG COMPRESS ═══════════════
+let _cmpImg = null, _cmpOrigSize = 0;
+async function loadCompress(files) {
+  if (!files || !files[0]) return;
+  _cmpOrigSize = files[0].size;
+  const img = await fileToImageBitmap(files[0]);
+  _cmpImg = img;
+  document.getElementById('cmp-preview').src = img.src;
+  document.getElementById('cmp-controls').style.display = 'block';
+  cmpPreview();
+}
+function cmpPreview() {
+  if (!_cmpImg) return;
+  const q = parseInt(document.getElementById('cmp-q').value) / 100;
+  document.getElementById('cmp-q-val').textContent = (q * 100) + '%';
+  const c = document.createElement('canvas'); c.width = _cmpImg.naturalWidth; c.height = _cmpImg.naturalHeight;
+  c.getContext('2d').drawImage(_cmpImg, 0, 0);
+  c.toBlob(blob => {
+    document.getElementById('cmp-size-info').textContent = 'Orijinal: ' + fmtBytes(_cmpOrigSize) + ' → Tahmini: ' + fmtBytes(blob.size);
+  }, 'image/jpeg', q);
+}
+function runCompress() {
+  if (!_cmpImg) return;
+  const q = parseInt(document.getElementById('cmp-q').value) / 100;
+  const c = document.createElement('canvas'); c.width = _cmpImg.naturalWidth; c.height = _cmpImg.naturalHeight;
+  c.getContext('2d').drawImage(_cmpImg, 0, 0);
+  c.toBlob(blob => { downloadBlob(blob, 'compressed.jpg'); toast('Sıkıştırıldı!', 'success'); }, 'image/jpeg', q);
+}
+
+// ═══════════════ IMG CROP/ROTATE/FLIP ═══════════════
+let _cropImg = null, _cropRot = 0, _cropFlipH = false, _cropFlipV = false;
+async function loadCrop(files) {
+  if (!files || !files[0]) return;
+  const img = await fileToImageBitmap(files[0]);
+  _cropImg = img; _cropRot = 0; _cropFlipH = false; _cropFlipV = false;
+  document.getElementById('crop-controls').style.display = 'block';
+  renderCropPreview();
+}
+function renderCropPreview() {
+  const canvas = document.getElementById('crop-canvas');
+  const img = _cropImg;
+  const isRot90 = _cropRot % 180 !== 0;
+  const W = isRot90 ? img.naturalHeight : img.naturalWidth;
+  const H = isRot90 ? img.naturalWidth : img.naturalHeight;
+  const scale = Math.min(600 / W, 320 / H, 1);
+  canvas.width = Math.round(W * scale); canvas.height = Math.round(H * scale);
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.save();
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate(_cropRot * Math.PI / 180);
+  if (_cropFlipH) ctx.scale(-1, 1);
+  if (_cropFlipV) ctx.scale(1, -1);
+  ctx.drawImage(img, -img.naturalWidth * scale / 2, -img.naturalHeight * scale / 2, img.naturalWidth * scale, img.naturalHeight * scale);
+  ctx.restore();
+}
+function cropTransform(op) {
+  if (op === 'rotL') _cropRot = (_cropRot - 90 + 360) % 360;
+  else if (op === 'rotR') _cropRot = (_cropRot + 90) % 360;
+  else if (op === 'flipH') _cropFlipH = !_cropFlipH;
+  else if (op === 'flipV') _cropFlipV = !_cropFlipV;
+  renderCropPreview();
+}
+function runCrop() {
+  if (!_cropImg) return;
+  const img = _cropImg;
+  const isRot90 = _cropRot % 180 !== 0;
+  const W = isRot90 ? img.naturalHeight : img.naturalWidth;
+  const H = isRot90 ? img.naturalWidth : img.naturalHeight;
+  const l = parseInt(document.getElementById('crop-l').value) || 0;
+  const r = parseInt(document.getElementById('crop-r').value) || 0;
+  const t = parseInt(document.getElementById('crop-t').value) || 0;
+  const b = parseInt(document.getElementById('crop-b').value) || 0;
+  const cw = Math.max(1, W - l - r), ch = Math.max(1, H - t - b);
+  const canvas = document.createElement('canvas'); canvas.width = cw; canvas.height = ch;
+  const ctx = canvas.getContext('2d');
+  ctx.save();
+  ctx.translate(cw / 2, ch / 2);
+  ctx.rotate(_cropRot * Math.PI / 180);
+  if (_cropFlipH) ctx.scale(-1, 1);
+  if (_cropFlipV) ctx.scale(1, -1);
+  ctx.drawImage(img, -(img.naturalWidth / 2) + (isRot90 ? t : l) - l, -(img.naturalHeight / 2) + (isRot90 ? l : t) - t);
+  ctx.restore();
+  canvas.toBlob(blob => { downloadBlob(blob, 'cropped.png'); toast('Kaydedildi!', 'success'); }, 'image/png');
+}
+
+// ═══════════════ BG REMOVE ═══════════════
+let _bgOrigFile = null, _bgResultBlob = null;
+async function loadBg(files) {
+  if (!files || !files[0]) return;
+  _bgOrigFile = files[0];
+  document.getElementById('bg-orig').src = URL.createObjectURL(files[0]);
+  document.getElementById('bg-result').src = '';
+  document.getElementById('bg-dl-btn').style.display = 'none';
+  document.getElementById('bg-controls').style.display = 'block';
+}
+async function runBgRemove() {
+  if (!_bgOrigFile) return;
+  document.getElementById('bg-run-btn').disabled = true;
+  document.getElementById('bg-loading').classList.add('show');
+  document.getElementById('bg-status').textContent = 'Model yükleniyor…';
+  try {
+    if (!window.imglyRemoveBackground) {
+      document.getElementById('bg-status').textContent = 'Kütüphane yükleniyor…';
+      await loadScript('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/browser/bundle.mjs');
+    }
+    document.getElementById('bg-status').textContent = 'İşleniyor…';
+    const blob = await window.imglyRemoveBackground(_bgOrigFile, { progress: (k, c, t) => {
+      document.getElementById('bg-status').textContent = `${k} (${c}/${t})`;
+    }});
+    _bgResultBlob = blob;
+    document.getElementById('bg-result').src = URL.createObjectURL(blob);
+    document.getElementById('bg-dl-btn').style.display = '';
+    toast('Arka plan kaldırıldı!', 'success');
+  } catch (e) { toast('Hata: ' + e.message, 'error'); }
+  document.getElementById('bg-loading').classList.remove('show');
+  document.getElementById('bg-run-btn').disabled = false;
+}
+function dlBgResult() {
+  if (_bgResultBlob) shareFile(_bgResultBlob, 'bg-removed.png', 'Arka Plan Kaldırıldı');
+}
+
+// ═══════════════ BLUR / MOSAIC ═══════════════
+let _blurImg = null, _blurMode = 'blur';
+async function loadBlur(files) {
+  if (!files || !files[0]) return;
+  const img = await fileToImageBitmap(files[0]);
+  _blurImg = img;
+  document.getElementById('blur-controls').style.display = 'block';
+  renderBlur();
+}
+function setBlurMode(mode, btn) {
+  _blurMode = mode;
+  document.querySelectorAll('#blur-tabs .tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderBlur();
+}
+function renderBlur() {
+  if (!_blurImg) return;
+  const amt = parseInt(document.getElementById('blur-amount').value);
+  document.getElementById('blur-amt-val').textContent = amt;
+  const img = _blurImg;
+  const canvas = document.getElementById('blur-canvas');
+  const scale = Math.min(600 / img.naturalWidth, 320 / img.naturalHeight, 1);
+  canvas.width = Math.round(img.naturalWidth * scale);
+  canvas.height = Math.round(img.naturalHeight * scale);
+  const ctx = canvas.getContext('2d');
+  if (_blurMode === 'blur') {
+    ctx.filter = `blur(${amt}px)`;
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    ctx.filter = 'none';
+  } else {
+    // mosaic
+    const tileW = Math.max(1, Math.round(canvas.width * amt / 200));
+    const tileH = Math.max(1, Math.round(canvas.height * amt / 200));
+    const tmp = document.createElement('canvas');
+    tmp.width = Math.max(1, Math.round(canvas.width / tileW));
+    tmp.height = Math.max(1, Math.round(canvas.height / tileH));
+    const tc = tmp.getContext('2d');
+    tc.drawImage(img, 0, 0, tmp.width, tmp.height);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(tmp, 0, 0, canvas.width, canvas.height);
+  }
+}
+function runBlur() {
+  if (!_blurImg) return;
+  const img = _blurImg;
+  const amt = parseInt(document.getElementById('blur-amount').value);
+  const canvas = document.createElement('canvas');
+  canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+  const ctx = canvas.getContext('2d');
+  if (_blurMode === 'blur') {
+    ctx.filter = `blur(${amt}px)`;
+    ctx.drawImage(img, 0, 0);
+    ctx.filter = 'none';
+  } else {
+    const tileW = Math.max(1, Math.round(canvas.width * amt / 200));
+    const tileH = Math.max(1, Math.round(canvas.height * amt / 200));
+    const tmp = document.createElement('canvas');
+    tmp.width = Math.max(1, Math.round(canvas.width / tileW));
+    tmp.height = Math.max(1, Math.round(canvas.height / tileH));
+    tmp.getContext('2d').drawImage(img, 0, 0, tmp.width, tmp.height);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(tmp, 0, 0, canvas.width, canvas.height);
+  }
+  canvas.toBlob(blob => shareFile(blob, 'blurred.png', 'Bulanık Resim'), 'image/png');
+}
+
+// ═══════════════ COLOR ADJUST ═══════════════
+let _colorImg = null, _colorOrigData = null;
+async function loadColor(files) {
+  if (!files || !files[0]) return;
+  const img = await fileToImageBitmap(files[0]);
+  _colorImg = img;
+  const canvas = document.getElementById('color-canvas');
+  const scale = Math.min(600 / img.naturalWidth, 320 / img.naturalHeight, 1);
+  canvas.width = Math.round(img.naturalWidth * scale);
+  canvas.height = Math.round(img.naturalHeight * scale);
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  _colorOrigData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  document.getElementById('color-controls').style.display = 'block';
+}
+function resetColorSliders() {
+  ['brightness','contrast','saturation','hue'].forEach(id => {
+    document.getElementById('col-' + id).value = 0;
+    document.getElementById('sv-' + id).textContent = 0;
+  });
+  renderColor();
+}
+function renderColor() {
+  if (!_colorOrigData) return;
+  ['brightness','contrast','saturation','hue'].forEach(id => {
+    document.getElementById('sv-' + id).textContent = document.getElementById('col-' + id).value;
+  });
+  const brightness = parseInt(document.getElementById('col-brightness').value);
+  const contrast = parseInt(document.getElementById('col-contrast').value);
+  const saturation = parseInt(document.getElementById('col-saturation').value) / 100;
+  const hue = parseInt(document.getElementById('col-hue').value);
+  const canvas = document.getElementById('color-canvas');
+  const ctx = canvas.getContext('2d');
+  const data = new ImageData(new Uint8ClampedArray(_colorOrigData.data), _colorOrigData.width, _colorOrigData.height);
+  const d = data.data;
+  const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+  for (let i = 0; i < d.length; i += 4) {
+    let r = d[i], g = d[i + 1], b = d[i + 2];
+    // brightness
+    r += brightness; g += brightness; b += brightness;
+    // contrast
+    r = factor * (r - 128) + 128; g = factor * (g - 128) + 128; b = factor * (b - 128) + 128;
+    // saturation & hue via HSL
+    let [h, s, l] = rgbToHsl(clamp(r), clamp(g), clamp(b));
+    s = clamp01(s + saturation);
+    h = (h * 360 + hue) / 360; h = h - Math.floor(h);
+    [r, g, b] = hslToRgb(h, s, l);
+    d[i] = r; d[i + 1] = g; d[i + 2] = b;
+  }
+  ctx.putImageData(data, 0, 0);
+}
+function clamp(v) { return Math.max(0, Math.min(255, v)); }
+function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+function rgbToHsl(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h, s; const l = (max + min) / 2;
+  if (max === min) { h = s = 0; }
+  else {
+    const d = max - min; s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h /= 6;
+  }
+  return [h, s, l];
+}
+function hslToRgb(h, s, l) {
+  if (s === 0) { const v = Math.round(l * 255); return [v, v, v]; }
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+  const hue2rgb = (p, q, t) => { if (t < 0) t += 1; if (t > 1) t -= 1; if (t < 1/6) return p + (q-p)*6*t; if (t < 1/2) return q; if (t < 2/3) return p + (q-p)*(2/3-t)*6; return p; };
+  return [Math.round(hue2rgb(p, q, h + 1/3) * 255), Math.round(hue2rgb(p, q, h) * 255), Math.round(hue2rgb(p, q, h - 1/3) * 255)];
+}
+function runColor() {
+  if (!_colorImg) return;
+  const canvas = document.createElement('canvas');
+  canvas.width = _colorImg.naturalWidth; canvas.height = _colorImg.naturalHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(_colorImg, 0, 0);
+  const origData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const brightness = parseInt(document.getElementById('col-brightness').value);
+  const contrast = parseInt(document.getElementById('col-contrast').value);
+  const saturation = parseInt(document.getElementById('col-saturation').value) / 100;
+  const hue = parseInt(document.getElementById('col-hue').value);
+  const data = origData.data;
+  const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+  for (let i = 0; i < data.length; i += 4) {
+    let r = data[i] + brightness, g = data[i+1] + brightness, b = data[i+2] + brightness;
+    r = factor*(r-128)+128; g = factor*(g-128)+128; b = factor*(b-128)+128;
+    let [h2, s, l] = rgbToHsl(clamp(r), clamp(g), clamp(b));
+    s = clamp01(s + saturation);
+    h2 = ((h2 * 360 + hue) / 360) % 1; if (h2 < 0) h2 += 1;
+    [r, g, b] = hslToRgb(h2, s, l);
+    data[i] = r; data[i+1] = g; data[i+2] = b;
+  }
+  ctx.putImageData(origData, 0, 0);
+  canvas.toBlob(blob => shareFile(blob, 'adjusted.png', 'Renk Ayarlanmış'), 'image/png');
+}
+
+// ═══════════════ TEXT OVERLAY ═══════════════
+let _textImg = null;
+async function loadText(files) {
+  if (!files || !files[0]) return;
+  const img = await fileToImageBitmap(files[0]);
+  _textImg = img;
+  document.getElementById('text-controls').style.display = 'block';
+  renderText();
+}
+function renderText() {
+  if (!_textImg) return;
+  const img = _textImg;
+  const canvas = document.getElementById('text-canvas');
+  const scale = Math.min(600 / img.naturalWidth, 280 / img.naturalHeight, 1);
+  canvas.width = Math.round(img.naturalWidth * scale);
+  canvas.height = Math.round(img.naturalHeight * scale);
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  const txt = document.getElementById('txt-content').value;
+  const color = document.getElementById('txt-color').value;
+  const size = parseInt(document.getElementById('txt-size').value) * scale;
+  const xPct = parseInt(document.getElementById('txt-x').value) / 100;
+  const yPct = parseInt(document.getElementById('txt-y').value) / 100;
+  const opacity = parseInt(document.getElementById('txt-opacity').value) / 100;
+  document.getElementById('txt-op-val').textContent = document.getElementById('txt-opacity').value;
+  ctx.globalAlpha = opacity;
+  ctx.font = `bold ${size}px DM Sans, sans-serif`;
+  ctx.fillStyle = color;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(txt, canvas.width * xPct, canvas.height * yPct);
+  ctx.globalAlpha = 1;
+}
+function runText() {
+  if (!_textImg) return;
+  const img = _textImg;
+  const canvas = document.createElement('canvas');
+  canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+  const txt = document.getElementById('txt-content').value;
+  const color = document.getElementById('txt-color').value;
+  const size = parseInt(document.getElementById('txt-size').value);
+  const xPct = parseInt(document.getElementById('txt-x').value) / 100;
+  const yPct = parseInt(document.getElementById('txt-y').value) / 100;
+  const opacity = parseInt(document.getElementById('txt-opacity').value) / 100;
+  ctx.globalAlpha = opacity;
+  ctx.font = `bold ${size}px DM Sans, sans-serif`;
+  ctx.fillStyle = color;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(txt, canvas.width * xPct, canvas.height * yPct);
+  ctx.globalAlpha = 1;
+  canvas.toBlob(blob => shareFile(blob, 'text-overlay.png', 'Metin Eklenmiş Resim'), 'image/png');
+}
+
+// ═══════════════ BATCH CONVERT ═══════════════
+let _batchFiles = [];
+async function loadBatch(files) {
+  _batchFiles = Array.from(files);
+  renderBatchList();
+  document.getElementById('batch-controls').style.display = 'block';
+}
+function renderBatchList() {
+  const list = document.getElementById('batch-list');
+  list.innerHTML = _batchFiles.map((f, i) => `
+    <div class="file-item">
+      <span class="file-item-name">${f.name}</span>
+      <span class="file-item-size">${fmtBytes(f.size)}</span>
+      <button class="file-item-del" onclick="_batchFiles.splice(${i},1);renderBatchList()">✕</button>
+    </div>`).join('');
+}
+async function runBatch() {
+  if (!_batchFiles.length) return;
+  if (!window.JSZip) await loadScript('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
+  const fmt = document.getElementById('batch-fmt').value;
+  const q = parseInt(document.getElementById('batch-q').value) / 100;
+  const ext = fmtExt(fmt);
+  const zip = new JSZip();
+  const bar = document.getElementById('batch-progress-bar');
+  const fill = document.getElementById('batch-progress-fill');
+  bar.style.display = '';
+  for (let i = 0; i < _batchFiles.length; i++) {
+    fill.style.width = ((i / _batchFiles.length) * 100) + '%';
+    const file = _batchFiles[i];
+    const img = await fileToImageBitmap(file);
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+    canvas.getContext('2d').drawImage(img, 0, 0);
+    const blob = await new Promise(res => canvas.toBlob(res, fmt, q));
+    const baseName = file.name.replace(/\.[^.]+$/, '');
+    zip.file(baseName + '.' + ext, blob);
+  }
+  fill.style.width = '100%';
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  downloadBlob(zipBlob, 'batch-converted.zip');
+  toast('ZIP hazır!', 'success');
+  bar.style.display = 'none';
+}
+
+// ═══════════════ PDF HELPERS ═══════════════
+async function loadPdfLib() {
+  if (!window.PDFLib) {
+    await loadScript('https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js');
+    await loadScript('https://cdn.jsdelivr.net/npm/downloadjs@1.4.7/download.min.js');
+  }
+}
+async function loadPdfJs() {
+  if (!window.pdfjsLib) {
+    await loadScript('https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  }
+}
+function readFileAsArrayBuffer(file) {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = rej; r.readAsArrayBuffer(file); });
+}
+
+// ═══════════════ PDF MERGE ═══════════════
+let _mergeFiles = [];
+function addMergeFiles(files) {
+  _mergeFiles.push(...Array.from(files));
+  renderMergeList();
+  document.getElementById('merge-btn').disabled = _mergeFiles.length < 2;
+}
+function renderMergeList() {
+  const list = document.getElementById('merge-list');
+  list.innerHTML = _mergeFiles.map((f, i) => `
+    <div class="file-item">
+      <span class="file-item-name">${f.name}</span>
+      <span class="file-item-size">${fmtBytes(f.size)}</span>
+      <button class="file-item-del" onclick="_mergeFiles.splice(${i},1);renderMergeList();document.getElementById('merge-btn').disabled=_mergeFiles.length<2">✕</button>
+    </div>`).join('');
+}
+async function runMerge() {
+  if (_mergeFiles.length < 2) return;
+  document.getElementById('merge-loading').style.display = 'flex';
+  try {
+    await loadPdfLib();
+    const merged = await PDFLib.PDFDocument.create();
+    for (const file of _mergeFiles) {
+      const buf = await readFileAsArrayBuffer(file);
+      const pdf = await PDFLib.PDFDocument.load(buf);
+      const pages = await merged.copyPages(pdf, pdf.getPageIndices());
+      pages.forEach(p => merged.addPage(p));
+    }
+    const bytes = await merged.save();
+    downloadBlob(new Blob([bytes], { type: 'application/pdf' }), 'merged.pdf');
+    toast('PDF birleştirildi!', 'success');
+  } catch (e) { toast('Hata: ' + e.message, 'error'); }
+  document.getElementById('merge-loading').style.display = 'none';
+}
+
+// ═══════════════ PDF SPLIT ═══════════════
+let _splitFile = null, _splitPageCount = 0;
+async function loadSplit(files) {
+  if (!files || !files[0]) return;
+  _splitFile = files[0];
+  await loadPdfLib();
+  const buf = await readFileAsArrayBuffer(files[0]);
+  const pdf = await PDFLib.PDFDocument.load(buf);
+  _splitPageCount = pdf.getPageCount();
+  document.getElementById('split-info').textContent = files[0].name + ' — ' + _splitPageCount + ' sayfa';
+  document.getElementById('split-to').value = _splitPageCount;
+  document.getElementById('split-controls').style.display = 'block';
+}
+async function runSplit() {
+  if (!_splitFile) return;
+  const from = parseInt(document.getElementById('split-from').value) - 1;
+  const to = parseInt(document.getElementById('split-to').value) - 1;
+  if (from > to || from < 0 || to >= _splitPageCount) { toast('Geçersiz sayfa aralığı', 'error'); return; }
+  document.getElementById('split-loading').style.display = 'flex';
+  try {
+    const buf = await readFileAsArrayBuffer(_splitFile);
+    const src = await PDFLib.PDFDocument.load(buf);
+    const doc = await PDFLib.PDFDocument.create();
+    const pages = await doc.copyPages(src, Array.from({ length: to - from + 1 }, (_, i) => from + i));
+    pages.forEach(p => doc.addPage(p));
+    const bytes = await doc.save();
+    downloadBlob(new Blob([bytes], { type: 'application/pdf' }), `split-${from+1}-${to+1}.pdf`);
+    toast('PDF bölündü!', 'success');
+  } catch (e) { toast('Hata: ' + e.message, 'error'); }
+  document.getElementById('split-loading').style.display = 'none';
+}
+
+// ═══════════════ PDF COMPRESS ═══════════════
+let _pdfCmpFile = null;
+async function loadPdfCompress(files) {
+  if (!files || !files[0]) return;
+  _pdfCmpFile = files[0];
+  document.getElementById('pdfcmp-info').textContent = files[0].name + ' — ' + fmtBytes(files[0].size);
+  document.getElementById('pdfcmp-controls').style.display = 'block';
+}
+async function runPdfCompress() {
+  if (!_pdfCmpFile) return;
+  document.getElementById('pdfcmp-loading').style.display = 'flex';
+  try {
+    await loadPdfLib(); await loadPdfJs();
+    const buf = await readFileAsArrayBuffer(_pdfCmpFile);
+    const srcPdf = await PDFLib.PDFDocument.load(buf);
+    const pdfJsDoc = await pdfjsLib.getDocument({ data: buf }).promise;
+    const newPdf = await PDFLib.PDFDocument.create();
+    const q = parseInt(document.getElementById('pdfcmp-q').value) / 100;
+    for (let i = 0; i < pdfJsDoc.numPages; i++) {
+      const page = await pdfJsDoc.getPage(i + 1);
+      const vp = page.getViewport({ scale: 1.5 });
+      const canvas = document.createElement('canvas');
+      canvas.width = vp.width; canvas.height = vp.height;
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+      const jpgBlob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', q));
+      const jpgBuf = await jpgBlob.arrayBuffer();
+      const img = await newPdf.embedJpg(jpgBuf);
+      const newPage = newPdf.addPage([vp.width, vp.height]);
+      newPage.drawImage(img, { x: 0, y: 0, width: vp.width, height: vp.height });
+    }
+    const bytes = await newPdf.save();
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    downloadBlob(blob, 'compressed.pdf');
+    toast(`Sıkıştırıldı! ${fmtBytes(_pdfCmpFile.size)} → ${fmtBytes(bytes.length)}`, 'success');
+  } catch (e) { toast('Hata: ' + e.message, 'error'); }
+  document.getElementById('pdfcmp-loading').style.display = 'none';
+}
+
+// ═══════════════ PDF ROTATE ═══════════════
+let _pdfRotFile = null, _pdfRotCount = 0;
+async function loadPdfRotate(files) {
+  if (!files || !files[0]) return;
+  _pdfRotFile = files[0];
+  await loadPdfLib();
+  const buf = await readFileAsArrayBuffer(files[0]);
+  const pdf = await PDFLib.PDFDocument.load(buf);
+  _pdfRotCount = pdf.getPageCount();
+  document.getElementById('pdfrot-info').textContent = files[0].name + ' — ' + _pdfRotCount + ' sayfa';
+  document.getElementById('pdfrot-controls').style.display = 'block';
+}
+document.getElementById('pdfrot-pages').addEventListener('change', function() {
+  document.getElementById('pdfrot-range').style.display = this.value === 'range' ? 'flex' : 'none';
+});
+async function runPdfRotate() {
+  if (!_pdfRotFile) return;
+  document.getElementById('pdfrot-loading').style.display = 'flex';
+  try {
+    const buf = await readFileAsArrayBuffer(_pdfRotFile);
+    const pdf = await PDFLib.PDFDocument.load(buf);
+    const dir = parseInt(document.getElementById('pdfrot-dir').value);
+    let indices;
+    if (document.getElementById('pdfrot-pages').value === 'all') {
+      indices = Array.from({ length: _pdfRotCount }, (_, i) => i);
+    } else {
+      const from = parseInt(document.getElementById('pdfrot-from').value) - 1;
+      const to = parseInt(document.getElementById('pdfrot-to').value) - 1;
+      indices = Array.from({ length: to - from + 1 }, (_, i) => from + i);
+    }
+    indices.forEach(i => { const p = pdf.getPage(i); p.setRotation(PDFLib.degrees((p.getRotation().angle + dir) % 360)); });
+    const bytes = await pdf.save();
+    downloadBlob(new Blob([bytes], { type: 'application/pdf' }), 'rotated.pdf');
+    toast('Döndürüldü!', 'success');
+  } catch (e) { toast('Hata: ' + e.message, 'error'); }
+  document.getElementById('pdfrot-loading').style.display = 'none';
+}
+
+// ═══════════════ PDF WATERMARK ═══════════════
+let _pdfWmFile = null;
+async function loadPdfWatermark(files) {
+  if (!files || !files[0]) return;
+  _pdfWmFile = files[0];
+  document.getElementById('pdfwm-controls').style.display = 'block';
+}
+document.getElementById('wm-opacity').addEventListener('input', function() {
+  document.getElementById('wm-op-val').textContent = this.value;
+});
+async function runPdfWatermark() {
+  if (!_pdfWmFile) return;
+  document.getElementById('pdfwm-loading').style.display = 'flex';
+  try {
+    await loadPdfLib();
+    const buf = await readFileAsArrayBuffer(_pdfWmFile);
+    const pdf = await PDFLib.PDFDocument.load(buf);
+    const text = document.getElementById('wm-text').value || 'FILIGRAN';
+    const hexColor = document.getElementById('wm-color').value;
+    const opacity = parseInt(document.getElementById('wm-opacity').value) / 100;
+    const fontSize = parseInt(document.getElementById('wm-size').value);
+    const r = parseInt(hexColor.slice(1, 3), 16) / 255;
+    const g = parseInt(hexColor.slice(3, 5), 16) / 255;
+    const b = parseInt(hexColor.slice(5, 7), 16) / 255;
+    const font = await pdf.embedFont(PDFLib.StandardFonts.HelveticaBold);
+    for (const page of pdf.getPages()) {
+      const { width, height } = page.getSize();
+      page.drawText(text, {
+        x: width / 2 - (text.length * fontSize * 0.3),
+        y: height / 2,
+        size: fontSize,
+        font,
+        color: PDFLib.rgb(r, g, b),
+        opacity,
+        rotate: PDFLib.degrees(45),
+      });
+    }
+    const bytes = await pdf.save();
+    downloadBlob(new Blob([bytes], { type: 'application/pdf' }), 'watermarked.pdf');
+    toast('Filigran eklendi!', 'success');
+  } catch (e) { toast('Hata: ' + e.message, 'error'); }
+  document.getElementById('pdfwm-loading').style.display = 'none';
+}
+
+// ═══════════════ PDF TO IMG ═══════════════
+let _pdf2imgFile = null, _pdf2imgCount = 0;
+async function loadPdf2Img(files) {
+  if (!files || !files[0]) return;
+  _pdf2imgFile = files[0];
+  await loadPdfJs();
+  const buf = await readFileAsArrayBuffer(files[0]);
+  const doc = await pdfjsLib.getDocument({ data: buf }).promise;
+  _pdf2imgCount = doc.numPages;
+  document.getElementById('pdf2img-info').textContent = files[0].name + ' — ' + _pdf2imgCount + ' sayfa';
+  document.getElementById('pdf2img-controls').style.display = 'block';
+}
+async function runPdf2Img() {
+  if (!_pdf2imgFile) return;
+  if (!window.JSZip) await loadScript('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
+  document.getElementById('pdf2img-loading').style.display = 'flex';
+  try {
+    const buf = await readFileAsArrayBuffer(_pdf2imgFile);
+    const doc = await pdfjsLib.getDocument({ data: buf }).promise;
+    const fmt = document.getElementById('pdf2img-fmt').value;
+    const scale = parseFloat(document.getElementById('pdf2img-scale').value);
+    const ext = fmtExt(fmt);
+    const zip = new JSZip();
+    for (let i = 0; i < doc.numPages; i++) {
+      document.getElementById('pdf2img-status').textContent = `Sayfa ${i + 1}/${doc.numPages}…`;
+      const page = await doc.getPage(i + 1);
+      const vp = page.getViewport({ scale });
+      const canvas = document.createElement('canvas');
+      canvas.width = vp.width; canvas.height = vp.height;
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+      const blob = await new Promise(r => canvas.toBlob(r, fmt, 0.92));
+      zip.file(`page-${String(i + 1).padStart(3, '0')}.${ext}`, blob);
+    }
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    downloadBlob(zipBlob, 'pdf-pages.zip');
+    toast('ZIP hazır!', 'success');
+  } catch (e) { toast('Hata: ' + e.message, 'error'); }
+  document.getElementById('pdf2img-loading').style.display = 'none';
+}
+
+// ═══════════════ IMG TO PDF ═══════════════
+let _img2pdfFiles = [];
+function addImg2PdfFiles(files) {
+  _img2pdfFiles.push(...Array.from(files));
+  renderImg2PdfList();
+  document.getElementById('img2pdf-btn').disabled = _img2pdfFiles.length === 0;
+}
+function renderImg2PdfList() {
+  const list = document.getElementById('img2pdf-list');
+  list.innerHTML = _img2pdfFiles.map((f, i) => `
+    <div class="file-item">
+      <span class="file-item-name">${f.name}</span>
+      <span class="file-item-size">${fmtBytes(f.size)}</span>
+      <button class="file-item-del" onclick="_img2pdfFiles.splice(${i},1);renderImg2PdfList();document.getElementById('img2pdf-btn').disabled=!_img2pdfFiles.length">✕</button>
+    </div>`).join('');
+}
+async function runImg2Pdf() {
+  if (!_img2pdfFiles.length) return;
+  document.getElementById('img2pdf-loading').style.display = 'flex';
+  try {
+    await loadPdfLib();
+    const doc = await PDFLib.PDFDocument.create();
+    const pageSize = document.getElementById('img2pdf-page').value;
+    for (const file of _img2pdfFiles) {
+      const img = await fileToImageBitmap(file);
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+      canvas.getContext('2d').drawImage(img, 0, 0);
+      const jpgBlob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.92));
+      const jpgBuf = await jpgBlob.arrayBuffer();
+      const pdfImg = await doc.embedJpg(jpgBuf);
+      let pw, ph;
+      if (pageSize === 'A4') { pw = 595; ph = 842; }
+      else if (pageSize === 'Letter') { pw = 612; ph = 792; }
+      else { pw = pdfImg.width; ph = pdfImg.height; }
+      const page = doc.addPage([pw, ph]);
+      const scale = Math.min(pw / pdfImg.width, ph / pdfImg.height);
+      const w = pdfImg.width * scale, h = pdfImg.height * scale;
+      page.drawImage(pdfImg, { x: (pw - w) / 2, y: (ph - h) / 2, width: w, height: h });
+    }
+    const bytes = await doc.save();
+    downloadBlob(new Blob([bytes], { type: 'application/pdf' }), 'images.pdf');
+    toast('PDF oluşturuldu!', 'success');
+  } catch (e) { toast('Hata: ' + e.message, 'error'); }
+  document.getElementById('img2pdf-loading').style.display = 'none';
+}
+
+// ═══════════════ PDF PASSWORD ═══════════════
+let _pdfPwFile = null, _pdfPwMode = 'add';
+async function loadPdfPw(files) {
+  if (!files || !files[0]) return;
+  _pdfPwFile = files[0];
+  document.getElementById('pdfpw-controls').style.display = 'block';
+}
+function setPwMode(mode, btn) {
+  _pdfPwMode = mode;
+  document.querySelectorAll('#pdfpw-controls .tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('pw-add-fields').style.display = mode === 'add' ? '' : 'none';
+  document.getElementById('pw-remove-fields').style.display = mode === 'remove' ? '' : 'none';
+}
+async function runPdfPw() {
+  if (!_pdfPwFile) return;
+  document.getElementById('pdfpw-loading').style.display = 'flex';
+  try {
+    await loadPdfLib();
+    const buf = await readFileAsArrayBuffer(_pdfPwFile);
+    if (_pdfPwMode === 'add') {
+      const pw = document.getElementById('pw-new').value;
+      const pw2 = document.getElementById('pw-confirm').value;
+      if (!pw) { toast('Şifre giriniz', 'error'); return; }
+      if (pw !== pw2) { toast('Şifreler eşleşmiyor', 'error'); return; }
+      const pdf = await PDFLib.PDFDocument.load(buf);
+      const bytes = await pdf.save({ userPassword: pw, ownerPassword: pw, permissions: { printing: 'highResolution', modifying: false, copying: false } });
+      downloadBlob(new Blob([bytes], { type: 'application/pdf' }), 'protected.pdf');
+      toast('Şifre eklendi!', 'success');
+    } else {
+      const pw = document.getElementById('pw-existing').value;
+      const pdf = await PDFLib.PDFDocument.load(buf, { password: pw });
+      const bytes = await pdf.save();
+      downloadBlob(new Blob([bytes], { type: 'application/pdf' }), 'unlocked.pdf');
+      toast('Şifre kaldırıldı!', 'success');
+    }
+  } catch (e) { toast('Hata: ' + e.message, 'error'); }
+  document.getElementById('pdfpw-loading').style.display = 'none';
+}
+
+// ═══════════════ QR GENERATE ═══════════════
+let _qrType = 'url';
+function setQrType(type, btn) {
+  _qrType = type;
+  document.querySelectorAll('#screen-qr-gen .tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  ['url','text','wifi','contact'].forEach(t => {
+    document.getElementById('qr-' + t + '-fields').style.display = t === type ? '' : 'none';
+  });
+  renderQr();
+}
+async function renderQr() {
+  if (!window.QRCode) await loadScript('https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js');
+  let data = '';
+  if (_qrType === 'url') data = document.getElementById('qr-url-val').value || 'https://example.com';
+  else if (_qrType === 'text') data = document.getElementById('qr-text-val').value || 'Metin';
+  else if (_qrType === 'wifi') {
+    const ssid = document.getElementById('qr-wifi-ssid').value;
+    const pw = document.getElementById('qr-wifi-pw').value;
+    const sec = document.getElementById('qr-wifi-sec').value;
+    data = `WIFI:T:${sec};S:${ssid};P:${pw};;`;
+  } else {
+    const name = document.getElementById('qr-c-name').value;
+    const phone = document.getElementById('qr-c-phone').value;
+    const email = document.getElementById('qr-c-email').value;
+    data = `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTEL:${phone}\nEMAIL:${email}\nEND:VCARD`;
+  }
+  const size = parseInt(document.getElementById('qr-size').value);
+  document.getElementById('qr-size-val').textContent = size;
+  const color = document.getElementById('qr-color').value;
+  const bg = document.getElementById('qr-bg').value;
+  try {
+    await QRCode.toCanvas(document.getElementById('qr-canvas-out'), data, {
+      width: size, margin: 2,
+      color: { dark: color, light: bg }
+    });
+  } catch (e) { console.error(e); }
+}
+function dlQr() {
+  const canvas = document.getElementById('qr-canvas-out');
+  canvas.toBlob(blob => downloadBlob(blob, 'qrcode.png'), 'image/png');
+}
+function shareQr() {
+  const canvas = document.getElementById('qr-canvas-out');
+  canvas.toBlob(blob => shareFile(blob, 'qrcode.png', 'QR Kod'), 'image/png');
+}
+
+// ═══════════════ QR READ ═══════════════
+let _qrReadMode = 'img', _qrVideoStream = null, _qrScanInterval = null, _qrResultText = '';
+function setReadMode(mode, btn) {
+  _qrReadMode = mode;
+  document.querySelectorAll('#screen-qr-read .tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('qr-read-img').style.display = mode === 'img' ? '' : 'none';
+  document.getElementById('qr-read-cam').style.display = mode === 'cam' ? '' : 'none';
+  document.getElementById('qr-read-result').style.display = 'none';
+  document.getElementById('qr-read-actions').style.display = 'none';
+  if (mode === 'cam') startQrCam();
+  else stopQrCam();
+}
+async function readQrFromFile(files) {
+  if (!files || !files[0]) return;
+  if (!window.jsQR) await loadScript('https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js');
+  const img = await fileToImageBitmap(files[0]);
+  const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+  const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0);
+  const imageData = ctx.getImageData(0, 0, c.width, c.height);
+  const code = jsQR(imageData.data, imageData.width, imageData.height);
+  if (code) { showQrResult(code.data); }
+  else { toast('QR kod bulunamadı', 'error'); }
+}
+async function startQrCam() {
+  if (!window.jsQR) await loadScript('https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js');
+  try {
+    _qrVideoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    const video = document.getElementById('qr-video');
+    video.srcObject = _qrVideoStream;
+    _qrScanInterval = setInterval(() => scanQrFrame(video), 200);
+  } catch (e) { toast('Kamera erişilemedi: ' + e.message, 'error'); }
+}
+function stopQrCam() {
+  if (_qrVideoStream) { _qrVideoStream.getTracks().forEach(t => t.stop()); _qrVideoStream = null; }
+  if (_qrScanInterval) { clearInterval(_qrScanInterval); _qrScanInterval = null; }
+}
+function scanQrFrame(video) {
+  if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
+  const c = document.getElementById('qr-scan-canvas');
+  c.width = video.videoWidth; c.height = video.videoHeight;
+  c.getContext('2d').drawImage(video, 0, 0);
+  const imageData = c.getContext('2d').getImageData(0, 0, c.width, c.height);
+  const code = jsQR(imageData.data, imageData.width, imageData.height);
+  if (code) { showQrResult(code.data); stopQrCam(); }
+}
+function showQrResult(text) {
+  _qrResultText = text;
+  const el = document.getElementById('qr-read-result');
+  el.style.display = '';
+  el.textContent = text;
+  document.getElementById('qr-read-actions').style.display = '';
+  // auto-detect link
+  if (text.startsWith('http')) {
+    el.innerHTML = `<a href="${text}" target="_blank" rel="noopener" style="color:var(--accent)">${text}</a>`;
+  }
+}
+function copyQrResult() {
+  navigator.clipboard.writeText(_qrResultText).then(() => toast('Kopyalandı!', 'success')).catch(() => toast('Kopyalanamadı', 'error'));
+}
+function shareQrResult() {
+  if (navigator.share) navigator.share({ text: _qrResultText }).catch(() => {});
+  else copyQrResult();
+}
+
+// ═══════════════ SERVICE WORKER ═══════════════
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/donusturucu/sw.js', { scope: '/donusturucu/' }).catch(() => {});
+}
+
+// Init QR canvas
+renderQr();
+</script>
+</body>
+</html>
