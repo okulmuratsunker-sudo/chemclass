@@ -418,7 +418,7 @@ function renderDashboard(){
 
   let h='<div class="page">';
   h+='<div class="stat-grid">';
-  h+=sc('👤','Öğrenci',students.length+' kişi','blue');
+  h+=sc('👤','Öğrenci',students.length+' kişi','','blue');
   h+=sc('💰','Toplam Gelir',fmtS(total),sessions.length+' ders','green');
   h+=sc('⚠️','Ödenmedi',fmtS(unpaid),unpaidL.length+' ders bekliyor','red');
   h+=sc('📅','Toplam Ders',sessions.length,'toplam '+fmtDur(dur),'yellow');
