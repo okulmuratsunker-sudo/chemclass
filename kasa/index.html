@@ -192,23 +192,6 @@ a{color:var(--accent);text-decoration:none}
   <div id="lock-content"></div>
 </div>
 
-<!-- USER AUTH SCREEN -->
-<div id="user-auth" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:8000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:20px">
-  <div style="font-size:52px">🔐</div>
-  <h1 style="font-size:24px;font-weight:700;color:var(--accent)">Kasa</h1>
-  <div class="auth-tabs" style="display:flex;gap:0;background:var(--s2);border-radius:10px;padding:4px;width:100%;max-width:380px">
-    <button id="ua-tab-login" class="auth-tab-btn active" onclick="switchAuthTab('login')" style="flex:1;padding:9px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;background:var(--accent);color:#fff;transition:all .2s">Giriş Yap</button>
-    <button id="ua-tab-register" class="auth-tab-btn" onclick="switchAuthTab('register')" style="flex:1;padding:9px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;background:none;color:var(--text2);transition:all .2s">Kayıt Ol</button>
-  </div>
-  <div style="width:100%;max-width:380px;display:flex;flex-direction:column;gap:12px">
-    <div id="ua-msg" style="display:none;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:500"></div>
-    <input type="email" id="ua-email" placeholder="E-posta adresiniz" autocomplete="email" onkeydown="if(event.key==='Enter')doUserAuth()" />
-    <input type="password" id="ua-pass" placeholder="Şifreniz (en az 6 karakter)" autocomplete="current-password" onkeydown="if(event.key==='Enter')doUserAuth()" />
-    <button class="btn btn-primary btn-full" id="ua-btn" onclick="doUserAuth()">Giriş Yap</button>
-  </div>
-  <p style="font-size:12px;color:var(--text2);text-align:center;max-width:320px">Fatura ve kimlik verileriniz bulutta güvenli saklanır. Şifreleriniz yalnızca cihazınızda kalır.</p>
-</div>
-
 <!-- MAIN APP -->
 <div id="app" style="display:none">
   <!-- PAGES -->
@@ -253,26 +236,14 @@ a{color:var(--accent);text-decoration:none}
   <div id="page-settings" class="page">
     <div class="section-header"><h2>⚙️ Ayarlar</h2></div>
 
-    <!-- Account -->
+    <!-- File Storage -->
     <div class="settings-section">
-      <h3>👤 Hesap</h3>
-      <div id="acct-info" style="background:var(--s2);border-radius:10px;padding:14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px">
-        <div>
-          <div style="font-size:13px;color:var(--text2)">Giriş yapıldı</div>
-          <div id="acct-email" style="font-weight:600;font-size:15px"></div>
-        </div>
-        <button class="btn btn-danger btn-sm" onclick="doUserLogout()">Çıkış</button>
-      </div>
-    </div>
-
-    <!-- API Connection -->
-    <div class="settings-section">
-      <h3>🌐 API Bağlantısı</h3>
+      <h3>🌐 Dosya Depolama</h3>
       <div class="form-group">
-        <label class="form-label">Worker URL</label>
+        <label class="form-label">Dosya depolama için Worker URL (isteğe bağlı)</label>
         <input type="url" id="cfg-worker-url" placeholder="https://kasa-worker.HESAP.workers.dev" />
         <p style="font-size:12px;color:var(--text2);margin-top:6px">
-          Cloudflare Dashboard → Workers &amp; Pages → <strong>kasa-worker</strong> sayfasındaki URL'yi buraya yapıştırın.
+          Fatura ve kimlik belgelerini yüklemek için Cloudflare Worker URL'nizi girin. Boş bırakırsanız dosya ekleme özelliği devre dışı kalır.
         </p>
       </div>
       <div style="display:flex;gap:8px">
@@ -620,88 +591,6 @@ function getWorkerUrl(){
   return (getCfg().workerUrl||'').replace(/\/$/,'');
 }
 
-function getToken(){
-  return localStorage.getItem('kasa_token')||'';
-}
-
-function getUserEmail(){
-  return localStorage.getItem('kasa_email')||'';
-}
-
-// ── USER AUTH ────────────────────────────────────────────────────────────────
-let _authMode = 'login';
-
-function switchAuthTab(mode){
-  _authMode = mode;
-  const isLogin = mode === 'login';
-  $('ua-tab-login').style.background  = isLogin ? 'var(--accent)' : 'none';
-  $('ua-tab-login').style.color       = isLogin ? '#fff' : 'var(--text2)';
-  $('ua-tab-register').style.background = !isLogin ? 'var(--accent)' : 'none';
-  $('ua-tab-register').style.color      = !isLogin ? '#fff' : 'var(--text2)';
-  $('ua-btn').textContent = isLogin ? 'Giriş Yap' : 'Kayıt Ol';
-  setUaMsg('','');
-}
-
-function setUaMsg(msg, type){
-  const el = $('ua-msg');
-  el.textContent = msg;
-  el.style.display = msg ? 'block' : 'none';
-  el.style.background = type==='err' ? 'rgba(244,67,54,.12)' : 'rgba(76,175,80,.12)';
-  el.style.color      = type==='err' ? 'var(--re)' : 'var(--gr)';
-  el.style.border     = '1px solid '+(type==='err' ? 'rgba(244,67,54,.25)' : 'rgba(76,175,80,.25)');
-}
-
-async function doUserAuth(){
-  const email = $('ua-email').value.trim();
-  const pass  = $('ua-pass').value;
-  if(!email||!pass){ setUaMsg('E-posta ve şifre gerekli','err'); return; }
-  const url = getWorkerUrl();
-  if(!url){ setUaMsg('Önce Ayarlar\'dan Worker URL girin','err'); return; }
-  const btn = $('ua-btn');
-  btn.textContent='...'; btn.disabled=true;
-  try {
-    const endpoint = _authMode==='login' ? '/auth/login' : '/auth/register';
-    const res = await fetch(url+endpoint, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({email, password:pass})
-    });
-    const data = await res.json();
-    if(!res.ok){ setUaMsg(data.error||'Hata','err'); return; }
-    localStorage.setItem('kasa_token', data.token);
-    localStorage.setItem('kasa_email', data.user.email);
-    showMainApp();
-  } catch(e){
-    setUaMsg('Bağlantı hatası: '+e.message,'err');
-  } finally {
-    btn.disabled=false;
-    btn.textContent=_authMode==='login'?'Giriş Yap':'Kayıt Ol';
-  }
-}
-
-function doUserLogout(){
-  localStorage.removeItem('kasa_token');
-  localStorage.removeItem('kasa_email');
-  toast('Çıkış yapıldı');
-  setTimeout(()=>location.reload(), 800);
-}
-
-function showUserAuthScreen(){
-  $('user-auth').style.display='flex';
-  $('app').style.display='none';
-  if($('cfg-worker-url')) $('ua-email').focus();
-}
-
-function showMainApp(){
-  $('user-auth').style.display='none';
-  $('app').style.display='flex';
-  if($('acct-email')) $('acct-email').textContent = getUserEmail();
-  if($('cfg-worker-url')) $('cfg-worker-url').value = getCfg().workerUrl||'';
-  loadBills();
-  loadIds();
-  renderPasswords();
-}
-
 // ═══════════════════════════════════════════════════════════════════════════
 // CRYPTO
 // ═══════════════════════════════════════════════════════════════════════════
@@ -959,21 +848,12 @@ async function doRegisterWebAuthn(){
 
 function unlockApp(){
   $('lock').style.display = 'none';
+  $('app').style.display = 'flex';
   resetInactivityTimer();
   loadSettings();
-  // Check if user is logged in to cloud
-  if(getToken() && getWorkerUrl()){
-    showMainApp();
-  } else if(getWorkerUrl() && !getToken()){
-    // Worker configured but not logged in
-    showUserAuthScreen();
-  } else {
-    // No worker configured — show app without cloud features
-    $('app').style.display = 'flex';
-    renderPasswords();
-    renderBillsNoApi();
-    renderIdsNoApi();
-  }
+  renderPasswords();
+  loadBills();
+  loadIds();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1261,16 +1141,15 @@ function togglePasswordVisibility(inputId){
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// API HELPER
+// API HELPER (file operations only: /upload, /files/:key)
 // ═══════════════════════════════════════════════════════════════════════════
+// File operations only (/upload, /files/:key)
 async function apiCall(method, path, body=null, isFormData=false){
   const url = getWorkerUrl();
   if(!url) throw new Error('Worker URL yapılandırılmamış');
-  const token = getToken();
-  if(!token) throw new Error('Giriş yapılmamış');
   const opts = {
     method,
-    headers: { 'Authorization': `Bearer ${token}` }
+    headers: {}
   };
   if(body && !isFormData){
     opts.headers['Content-Type'] = 'application/json';
@@ -1279,12 +1158,6 @@ async function apiCall(method, path, body=null, isFormData=false){
     opts.body = body;
   }
   const res = await fetch(url + path, opts);
-  if(res.status === 401){
-    // Token expired — force re-login
-    localStorage.removeItem('kasa_token');
-    showUserAuthScreen();
-    throw new Error('Oturum süresi doldu, lütfen tekrar giriş yapın');
-  }
   if(!res.ok){
     const errData = await res.json().catch(()=>({error: res.statusText}));
     throw new Error(errData.error || `HTTP ${res.status}`);
@@ -1293,29 +1166,26 @@ async function apiCall(method, path, body=null, isFormData=false){
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// BILLS
+// BILLS (localStorage, AES-GCM encrypted)
 // ═══════════════════════════════════════════════════════════════════════════
 async function loadBills(){
   try {
-    _billsCache = await apiCall('GET', '/bills');
-    renderBills();
-  } catch(e){
-    toast('Faturalar yüklenemedi: '+e.message,'error');
-    renderBillsNoApi();
-  }
+    const raw = localStorage.getItem('kasa_bills');
+    if(!raw){ _billsCache = []; }
+    else { _billsCache = await decrypt(_kasaKey, raw); }
+  } catch(_){ _billsCache = []; }
+  renderBills();
 }
 
-function renderBillsNoApi(){
-  const msg = !getWorkerUrl() ? 'Worker URL girilmemiş. <strong>Ayarlar</strong> bölümünden yapılandırın.' : 'Hesabınıza giriş yapın.';
-  $('bill-list').innerHTML = `<div class="no-api-warning"><div class="icon">🌐</div><p>${msg}</p></div>`;
+async function saveBillsToStorage(){
+  if(!_kasaKey) throw new Error('Anahtar yok');
+  localStorage.setItem('kasa_bills', await encrypt(_kasaKey, _billsCache));
 }
 
 function renderBills(){
   const search = ($('bill-search').value||'').toLowerCase();
   const filterPaid = $('bill-filter').value;
   const container = $('bill-list');
-
-  if(!getWorkerUrl()){ renderBillsNoApi(); return; }
 
   let list = _billsCache;
   if(search) list = list.filter(b=>(b.title||'').toLowerCase().includes(search)||(b.category||'').toLowerCase().includes(search));
@@ -1361,6 +1231,10 @@ function openBillModal(id=null){
   $('bill-file-input').value='';
   $('bill-file-preview').innerHTML='';
 
+  // Show file upload section only if Worker URL is configured
+  const fileSection = $('bill-file-section');
+  if(fileSection) fileSection.style.display = getWorkerUrl() ? '' : 'none';
+
   if(id){
     const b = _billsCache.find(x=>x.id===id);
     if(b){
@@ -1393,8 +1267,6 @@ async function saveBill(){
   const title = $('bill-title').value.trim();
   if(!title){ toast('Başlık gerekli','error'); return; }
 
-  if(!getWorkerUrl()){ toast('API yapılandırılmamış','error'); return; }
-
   const btn = $('bill-save-btn');
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
 
@@ -1403,9 +1275,9 @@ async function saveBill(){
     let fileName = $('bill-file-name').value;
     let fileType = $('bill-file-type').value;
 
-    // Upload file if selected
+    // Upload file if selected and Worker URL is set
     const fileInput = $('bill-file-input');
-    if(fileInput.files.length > 0){
+    if(fileInput.files.length > 0 && getWorkerUrl()){
       const fd = new FormData();
       fd.append('file', fileInput.files[0]);
       const result = await apiCall('POST','/upload',fd,true);
@@ -1414,6 +1286,7 @@ async function saveBill(){
       fileType = result.type;
     }
 
+    const now = new Date().toISOString();
     const data = {
       title,
       category: $('bill-category').value,
@@ -1430,14 +1303,13 @@ async function saveBill(){
 
     const editId = $('bill-edit-id').value;
     if(editId){
-      const updated = await apiCall('PUT', `/bills/${editId}`, data);
-      _billsCache = _billsCache.map(b=>b.id===editId ? updated : b);
+      _billsCache = _billsCache.map(b=>b.id===editId ? {...b, ...data, updatedAt:now} : b);
       toast('Fatura güncellendi','success');
     } else {
-      const created = await apiCall('POST', '/bills', data);
-      _billsCache.unshift(created);
+      _billsCache.unshift({ id:uuid(), ...data, createdAt:now });
       toast('Fatura eklendi','success');
     }
+    await saveBillsToStorage();
     closeModal('bill-modal');
     renderBills();
   } catch(e){
@@ -1450,8 +1322,8 @@ async function saveBill(){
 async function deleteBill(id){
   showConfirm('Faturayı Sil','Bu fatura kalıcı olarak silinecek. Devam edilsin mi?', async ()=>{
     try {
-      await apiCall('DELETE',`/bills/${id}`);
       _billsCache = _billsCache.filter(b=>b.id!==id);
+      await saveBillsToStorage();
       renderBills();
       toast('Fatura silindi','success');
     } catch(e){ toast('Silinemedi: '+e.message,'error'); }
@@ -1459,21 +1331,20 @@ async function deleteBill(id){
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// IDS
+// IDS (localStorage, AES-GCM encrypted)
 // ═══════════════════════════════════════════════════════════════════════════
 async function loadIds(){
   try {
-    _idsCache = await apiCall('GET','/ids');
-    renderIds();
-  } catch(e){
-    toast('Kimlikler yüklenemedi: '+e.message,'error');
-    renderIdsNoApi();
-  }
+    const raw = localStorage.getItem('kasa_ids');
+    if(!raw){ _idsCache = []; }
+    else { _idsCache = await decrypt(_kasaKey, raw); }
+  } catch(_){ _idsCache = []; }
+  renderIds();
 }
 
-function renderIdsNoApi(){
-  const msg = !getWorkerUrl() ? 'Worker URL girilmemiş. <strong>Ayarlar</strong> bölümünden yapılandırın.' : 'Hesabınıza giriş yapın.';
-  $('id-list').innerHTML = `<div class="no-api-warning"><div class="icon">🌐</div><p>${msg}</p></div>`;
+async function saveIdsToStorage(){
+  if(!_kasaKey) throw new Error('Anahtar yok');
+  localStorage.setItem('kasa_ids', await encrypt(_kasaKey, _idsCache));
 }
 
 function expiryClass(dateStr){
@@ -1496,8 +1367,6 @@ function expiryLabel(dateStr){
 function renderIds(){
   const search = ($('id-search').value||'').toLowerCase();
   const container = $('id-list');
-
-  if(!getWorkerUrl()){ renderIdsNoApi(); return; }
 
   let list = _idsCache;
   if(search) list = list.filter(i=>(i.title||'').toLowerCase().includes(search)||(i.doc_type||'').toLowerCase().includes(search));
@@ -1541,6 +1410,10 @@ function openIdModal(id=null){
   $('id-notes').value='';
   $('id-file-input').value='';
   $('id-file-preview').innerHTML='';
+
+  // Show file upload section only if Worker URL is configured
+  const fileSection = $('id-file-section');
+  if(fileSection) fileSection.style.display = getWorkerUrl() ? '' : 'none';
 
   if(id){
     const item = _idsCache.find(x=>x.id===id);
