@@ -1,0 +1,15 @@
+name = "kasa-worker"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "kasa-db"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "kasa-files"
+
+[vars]
+# JWT_SECRET is set as a secret: wrangler secret put JWT_SECRET
