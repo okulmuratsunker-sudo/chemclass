@@ -171,11 +171,12 @@ a{color:var(--accent);text-decoration:none}
 /* ── FILE INDICATOR ──────────────────────────────────── */
 .file-chip{display:inline-flex;align-items:center;gap:5px;background:rgba(124,111,224,.12);border:1px solid rgba(124,111,224,.3);color:var(--accent);border-radius:20px;padding:2px 10px;font-size:12px;cursor:pointer}
 .file-chip:hover{background:rgba(124,111,224,.25)}
-.file-actions{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap}
+/* ── FILE PREVIEW ────────────────────────────────────── */
+.file-actions{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px}
 .file-action{display:inline-flex;align-items:center;gap:4px;background:rgba(124,111,224,.12);border:1px solid rgba(124,111,224,.3);color:var(--accent);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600;cursor:pointer}
 .file-action:hover{background:rgba(124,111,224,.25)}
 .preview-frame{width:100%;height:min(68vh,620px);border:1px solid var(--bd);border-radius:12px;background:var(--s2)}
-.preview-image{max-width:100%;max-height:68vh;border-radius:12px;display:block;margin:0 auto;background:var(--s2)}
+.preview-image{max-width:100%;max-height:68vh;border-radius:12px;display:block;margin:0 auto}
 </style>
 </head>
 <body>
@@ -269,7 +270,10 @@ a{color:var(--accent);text-decoration:none}
       <h3>🌐 API Bağlantısı</h3>
       <div class="form-group">
         <label class="form-label">Worker URL</label>
-        <input type="url" id="cfg-worker-url" placeholder="https://kasa-api.xxxxx.workers.dev" />
+        <input type="url" id="cfg-worker-url" placeholder="https://kasa-worker.HESAP.workers.dev" />
+        <p style="font-size:12px;color:var(--text2);margin-top:6px">
+          Cloudflare Dashboard → Workers &amp; Pages → <strong>kasa-worker</strong> sayfasındaki URL'yi buraya yapıştırın.
+        </p>
       </div>
       <div style="display:flex;gap:8px">
         <button class="btn btn-secondary btn-sm" onclick="saveApiConfig()">Kaydet</button>
@@ -551,10 +555,10 @@ a{color:var(--accent);text-decoration:none}
       <h2 class="modal-title" id="file-modal-title">Dosya</h2>
       <button class="modal-close" onclick="closeFileModal()">✕</button>
     </div>
-    <div id="file-modal-body"></div>
+    <div id="file-modal-body" style="min-height:120px"></div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeFileModal()">Kapat</button>
-      <button class="btn btn-primary" id="file-download-btn">İndir</button>
+      <button class="btn btn-primary" id="file-download-btn">⬇ İndir</button>
     </div>
   </div>
 </div>
@@ -568,7 +572,6 @@ let _inactivityTimer = null;
 let _clipboardTimer = null;
 let _billsCache = [];
 let _idsCache = [];
-const DEFAULT_WORKER_URL = 'https://kasa-worker.muratsunker.workers.dev';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // UTILS
@@ -614,7 +617,7 @@ function saveCfg(obj){
 }
 
 function getWorkerUrl(){
-  return (getCfg().workerUrl || DEFAULT_WORKER_URL).replace(/\/$/,'');
+  return (getCfg().workerUrl||'').replace(/\/$/,'');
 }
 
 function getToken(){
@@ -623,78 +626,6 @@ function getToken(){
 
 function getUserEmail(){
   return localStorage.getItem('kasa_email')||'';
-}
-
-const nativeBioCallbacks = {};
-window.__kasaNativeBioResolve = (id, result)=>{
-  const cb = nativeBioCallbacks[id];
-  if(!cb) return;
-  delete nativeBioCallbacks[id];
-  result?.ok ? cb.resolve(result) : cb.reject(new Error(result?.error || 'Biyometrik işlem başarısız'));
-};
-
-function nativeBio(action, secret=''){
-  if(!window.webkit?.messageHandlers?.kasaBiometric) return Promise.reject(new Error('Native biyometri yok'));
-  const id = crypto.randomUUID();
-  return new Promise((resolve,reject)=>{
-    nativeBioCallbacks[id] = {resolve,reject};
-    window.webkit.messageHandlers.kasaBiometric.postMessage({id, action, secret});
-    setTimeout(()=>{
-      if(nativeBioCallbacks[id]){
-        delete nativeBioCallbacks[id];
-        reject(new Error('Biyometrik işlem zaman aşımına uğradı'));
-      }
-    }, 65000);
-  });
-}
-
-function randomSecret(bytes=32){
-  const arr = new Uint8Array(bytes);
-  crypto.getRandomValues(arr);
-  return Array.from(arr, b=>b.toString(16).padStart(2,'0')).join('');
-}
-
-function getCloudCredentials(){
-  let email = localStorage.getItem('kasa_cloud_email');
-  let pass = localStorage.getItem('kasa_cloud_pass');
-  if(!email || !pass){
-    email = `kasa-${crypto.randomUUID()}@local.kasa`;
-    pass = randomSecret(32);
-    localStorage.setItem('kasa_cloud_email', email);
-    localStorage.setItem('kasa_cloud_pass', pass);
-  }
-  return { email, pass };
-}
-
-async function autoCloudAuth(){
-  const url = getWorkerUrl();
-  if(!url){ renderBillsNoApi(); renderIdsNoApi(); return; }
-  const { email, pass } = getCloudCredentials();
-  try {
-    let res = await fetch(url+'/auth/login', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({email, password:pass})
-    });
-    if(!res.ok){
-      res = await fetch(url+'/auth/register', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({email, password:pass})
-      });
-    }
-    const data = await res.json();
-    if(!res.ok) throw new Error(data.error||'Bulut hesabı açılamadı');
-    localStorage.setItem('kasa_token', data.token);
-    localStorage.setItem('kasa_email', data.user.email);
-    showMainApp();
-  } catch(e){
-    $('app').style.display='flex';
-    renderPasswords();
-    renderBillsNoApi();
-    renderIdsNoApi();
-    toast('Bulut bağlantısı kurulamadı: '+e.message,'error');
-  }
 }
 
 // ── USER AUTH ────────────────────────────────────────────────────────────────
@@ -765,7 +696,7 @@ function showMainApp(){
   $('user-auth').style.display='none';
   $('app').style.display='flex';
   if($('acct-email')) $('acct-email').textContent = getUserEmail();
-  if($('cfg-worker-url')) $('cfg-worker-url').value = getCfg().workerUrl || DEFAULT_WORKER_URL;
+  if($('cfg-worker-url')) $('cfg-worker-url').value = getCfg().workerUrl||'';
   loadBills();
   loadIds();
   renderPasswords();
@@ -874,37 +805,44 @@ async function doSetup(){
 
   saveCfg({ setupDone:true });
 
-  // Ask for biometric
-  await ensureBiometricForPassword(pw);
+  // Otomatik biyometrik kayıt dene (sessizce)
+  try {
+    await registerWebAuthnSilent();
+    const cred = localStorage.getItem('kasa_webauthn');
+    if(cred){ const { rawId } = JSON.parse(cred); await storeBioPw(pw, rawId); toast('Biyometrik giriş aktif','success'); }
+  } catch(_){}
 
   unlockApp();
 }
 
 function renderUnlock(container){
-  const hasBio = !!localStorage.getItem('kasa_webauthn') || localStorage.getItem('kasa_native_bio') === '1';
+  const hasBio = !!localStorage.getItem('kasa_webauthn') && !!localStorage.getItem('kasa_bio_pw');
   $('lock-subtitle').textContent = hasBio ? 'Biyometrik doğrulama ile kasanızı açın.' : 'Master şifrenizi girerek kasanızı açın.';
-  container.innerHTML = hasBio ? `
+  container.innerHTML = `
     <div class="lock-form">
-      <button class="bio-btn" onclick="biometricUnlock()">👆 Biyometrik ile Aç</button>
-      <button class="btn btn-secondary btn-full" onclick="showMasterUnlock()">Master şifre ile aç</button>
-      <div id="master-unlock-box" style="display:none;flex-direction:column;gap:12px">
+      ${hasBio ? `
+        <button class="bio-btn" id="bio-unlock-btn" onclick="biometricUnlock()">👆 Biyometrik ile Aç</button>
+        <div style="text-align:center;color:var(--text2);font-size:13px">— veya —</div>
+        <button class="btn btn-secondary btn-full" onclick="showPasswordField()">🔑 Şifre ile Aç</button>
+        <div id="pw-field-box" style="display:none;flex-direction:column;gap:12px">
+          <input type="password" id="unlock-pw" placeholder="Master şifre" onkeydown="if(event.key==='Enter') doUnlock()" />
+          <button class="btn btn-primary btn-full" onclick="doUnlock()">Kilidi Aç</button>
+        </div>
+      ` : `
         <input type="password" id="unlock-pw" placeholder="Master şifre" onkeydown="if(event.key==='Enter') doUnlock()" />
         <button class="btn btn-primary btn-full" onclick="doUnlock()">Kilidi Aç</button>
-      </div>
-    </div>` : `
-    <div class="lock-form">
-      <input type="password" id="unlock-pw" placeholder="Master şifre" onkeydown="if(event.key==='Enter') doUnlock()" />
-      <button class="btn btn-primary btn-full" onclick="doUnlock()">Kilidi Aç</button>
+      `}
     </div>`;
-  setTimeout(()=>{ if(hasBio) biometricUnlock(); else { const el = $('unlock-pw'); if(el) el.focus(); } }, 250);
+  if(hasBio){
+    setTimeout(()=>biometricUnlock(), 300);
+  } else {
+    setTimeout(()=>{ const el=$('unlock-pw'); if(el) el.focus(); }, 100);
+  }
 }
 
-function showMasterUnlock(){
-  const box = $('master-unlock-box');
-  if(box){
-    box.style.display='flex';
-    setTimeout(()=>{ const el=$('unlock-pw'); if(el) el.focus(); }, 50);
-  }
+function showPasswordField(){
+  const box = $('pw-field-box');
+  if(box){ box.style.display='flex'; setTimeout(()=>{ const el=$('unlock-pw'); if(el) el.focus(); },50); }
 }
 
 async function doUnlock(){
@@ -921,7 +859,14 @@ async function doUnlock(){
     const vObj = await decrypt(key, verifierB64);
     if(vObj.v !== 'kasa_ok_v1') throw new Error('wrong');
     _kasaKey = key;
-    await ensureBiometricForPassword(pw);
+    // İlk kez şifre ile açılıyorsa bio kayıt dene
+    if(!localStorage.getItem('kasa_bio_pw')){
+      try {
+        await registerWebAuthnSilent();
+        const cred = localStorage.getItem('kasa_webauthn');
+        if(cred){ const { rawId } = JSON.parse(cred); await storeBioPw(pw, rawId); toast('Biyometrik giriş aktif','success'); }
+      } catch(_){}
+    }
     unlockApp();
   } catch(_){
     toast('Yanlış şifre','error');
@@ -936,43 +881,7 @@ async function storeBioPw(masterPw, rawId){
   localStorage.setItem('kasa_bio_pw', await encrypt(bioKey, { pw: masterPw }));
 }
 
-async function ensureBiometricForPassword(masterPw){
-  if(localStorage.getItem('kasa_webauthn') && localStorage.getItem('kasa_bio_pw')) return;
-  if(localStorage.getItem('kasa_native_bio') === '1') return;
-  try {
-    await nativeBio('store', masterPw);
-    localStorage.setItem('kasa_native_bio','1');
-    toast('Biyometrik giriş hazır','success');
-    return;
-  } catch(e){
-    console.warn('Native biyometrik kayıt atlandı:', e.message);
-  }
-  try {
-    await doRegisterWebAuthn();
-    const cred = localStorage.getItem('kasa_webauthn');
-    if(cred){
-      const { rawId } = JSON.parse(cred);
-      await storeBioPw(masterPw, rawId);
-      toast('Biyometrik giriş hazır','success');
-    }
-  } catch(e){
-    console.warn('Biyometrik kayıt atlandı:', e.message);
-  }
-}
-
 async function biometricUnlock(){
-  if(localStorage.getItem('kasa_native_bio') === '1'){
-    try {
-      const result = await nativeBio('unlock');
-      await unlockWithMasterPassword(result.secret);
-      return;
-    } catch(e){
-      toast('Biyometrik doğrulama başarısız: ' + e.message, 'error');
-      showMasterUnlock();
-      return;
-    }
-  }
-
   const stored = localStorage.getItem('kasa_webauthn');
   if(!stored){ toast('Kayıtlı biyometrik bulunamadı','error'); return; }
   const bioPwEnc = localStorage.getItem('kasa_bio_pw');
@@ -1002,17 +911,6 @@ async function biometricUnlock(){
   }
 }
 
-async function unlockWithMasterPassword(pw){
-  const saltB64 = localStorage.getItem('kasa_salt');
-  if(!saltB64) throw new Error('Salt bulunamadı');
-  const salt = new Uint8Array(unb64(saltB64));
-  const key = await deriveKey(pw, salt);
-  const vObj = await decrypt(key, localStorage.getItem('kasa_verifier'));
-  if(vObj.v !== 'kasa_ok_v1') throw new Error('Şifre eşleşmedi');
-  _kasaKey = key;
-  unlockApp();
-}
-
 async function registerWebAuthnSilent(){
   try { await doRegisterWebAuthn(); } catch(e){ console.warn('WebAuthn skipped:', e.message); }
 }
@@ -1027,7 +925,9 @@ async function registerWebAuthn(){
     if(vObj.v !== 'kasa_ok_v1') throw new Error('Yanlış şifre');
   } catch(e){ toast('Yanlış master şifre','error'); return; }
   try {
-    await ensureBiometricForPassword(pw);
+    await doRegisterWebAuthn();
+    const cred = localStorage.getItem('kasa_webauthn');
+    if(cred){ const { rawId } = JSON.parse(cred); await storeBioPw(pw, rawId); }
     toast('Biyometrik başarıyla kaydedildi','success');
   } catch(e){
     toast('Biyometrik kayıt başarısız: ' + e.message, 'error');
@@ -1065,12 +965,8 @@ function unlockApp(){
   if(getToken() && getWorkerUrl()){
     showMainApp();
   } else if(getWorkerUrl() && !getToken()){
-    // Worker configured; create/login an internal cloud account silently.
-    $('app').style.display = 'flex';
-    renderPasswords();
-    renderBillsNoApi();
-    renderIdsNoApi();
-    autoCloudAuth();
+    // Worker configured but not logged in
+    showUserAuthScreen();
   } else {
     // No worker configured — show app without cloud features
     $('app').style.display = 'flex';
@@ -1109,23 +1005,6 @@ function switchPage(name, btn){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   $(`page-${name}`).classList.add('active');
   if(btn) btn.classList.add('active');
-}
-
-function openApiSettings(){
-  const btn = document.querySelector('.nav-btn[data-page="settings"]');
-  switchPage('settings', btn);
-  loadSettings();
-  setTimeout(()=>{
-    const input = $('cfg-worker-url');
-    if(input){ input.focus(); input.scrollIntoView({block:'center', behavior:'smooth'}); }
-  }, 80);
-}
-
-function requireApiConfig(feature){
-  toast(`${feature} için önce Worker URL ayarlanmalı`, 'warning');
-  closeModal('bill-modal');
-  closeModal('id-modal');
-  openApiSettings();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1403,7 +1282,7 @@ async function apiCall(method, path, body=null, isFormData=false){
   if(res.status === 401){
     // Token expired — force re-login
     localStorage.removeItem('kasa_token');
-    autoCloudAuth();
+    showUserAuthScreen();
     throw new Error('Oturum süresi doldu, lütfen tekrar giriş yapın');
   }
   if(!res.ok){
@@ -1428,7 +1307,7 @@ async function loadBills(){
 
 function renderBillsNoApi(){
   const msg = !getWorkerUrl() ? 'Worker URL girilmemiş. <strong>Ayarlar</strong> bölümünden yapılandırın.' : 'Hesabınıza giriş yapın.';
-  $('bill-list').innerHTML = `<div class="no-api-warning"><div class="icon">🌐</div><p>${msg}</p><button class="btn btn-primary btn-sm" onclick="openApiSettings()" style="margin-top:12px">API Ayarla</button></div>`;
+  $('bill-list').innerHTML = `<div class="no-api-warning"><div class="icon">🌐</div><p>${msg}</p></div>`;
 }
 
 function renderBills(){
@@ -1460,7 +1339,7 @@ function renderBills(){
           <div class="bill-meta">
             ${b.bill_date ? `<span style="font-size:12px;color:var(--text2)">📅 ${formatDate(b.bill_date)}</span>` : ''}
             ${b.due_date ? `<span style="font-size:12px;color:var(--text2)">⏰ Son: ${formatDate(b.due_date)}</span>` : ''}
-            ${fileActions(b.file_key, b.file_name, b.file_type)}
+            ${b.file_key ? fileActions(b.file_key, b.file_name, b.file_type) : ''}
           </div>
         </div>
         <div class="item-card-actions">
@@ -1496,7 +1375,7 @@ function openBillModal(id=null){
       $('bill-file-name').value = b.file_name||'';
       $('bill-file-type').value = b.file_type||'';
       if(b.file_key){
-        $('bill-file-preview').innerHTML = fileActions(b.file_key, b.file_name, b.file_type);
+        $('bill-file-preview').innerHTML = `<span class="file-chip" onclick="openFile('${b.file_key}')">📎 ${escHtml(b.file_name||'Dosya')}</span>`;
       }
     }
   }
@@ -1514,7 +1393,7 @@ async function saveBill(){
   const title = $('bill-title').value.trim();
   if(!title){ toast('Başlık gerekli','error'); return; }
 
-  if(!getWorkerUrl()){ requireApiConfig('Fatura ekleme'); return; }
+  if(!getWorkerUrl()){ toast('API yapılandırılmamış','error'); return; }
 
   const btn = $('bill-save-btn');
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
@@ -1594,7 +1473,7 @@ async function loadIds(){
 
 function renderIdsNoApi(){
   const msg = !getWorkerUrl() ? 'Worker URL girilmemiş. <strong>Ayarlar</strong> bölümünden yapılandırın.' : 'Hesabınıza giriş yapın.';
-  $('id-list').innerHTML = `<div class="no-api-warning"><div class="icon">🌐</div><p>${msg}</p><button class="btn btn-primary btn-sm" onclick="openApiSettings()" style="margin-top:12px">API Ayarla</button></div>`;
+  $('id-list').innerHTML = `<div class="no-api-warning"><div class="icon">🌐</div><p>${msg}</p></div>`;
 }
 
 function expiryClass(dateStr){
@@ -1640,7 +1519,7 @@ function renderIds(){
           <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
             ${id.expiry_date ? `<span class="badge ${expiryClass(id.expiry_date)}" style="font-size:12px">📅 ${expiryLabel(id.expiry_date)}</span>` : ''}
             ${id.issuer ? `<span style="font-size:12px;color:var(--text2)">${escHtml(id.issuer)}</span>` : ''}
-            ${fileActions(id.file_key, id.file_name, id.file_type)}
+            ${id.file_key ? fileActions(id.file_key, id.file_name, id.file_type) : ''}
           </div>
         </div>
         <div class="item-card-actions">
@@ -1677,7 +1556,7 @@ function openIdModal(id=null){
       $('id-file-name').value = item.file_name||'';
       $('id-file-type').value = item.file_type||'';
       if(item.file_key){
-        $('id-file-preview').innerHTML = fileActions(item.file_key, item.file_name, item.file_type);
+        $('id-file-preview').innerHTML = `<span class="file-chip" onclick="openFile('${item.file_key}')">📎 ${escHtml(item.file_name||'Dosya')}</span>`;
       }
     }
   }
@@ -1695,7 +1574,7 @@ async function saveId(){
   const title = $('id-title').value.trim();
   if(!title){ toast('Başlık gerekli','error'); return; }
 
-  if(!getWorkerUrl()){ requireApiConfig('Kimlik ekleme'); return; }
+  if(!getWorkerUrl()){ toast('API yapılandırılmamış','error'); return; }
 
   const btn = $('id-save-btn');
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
@@ -1770,28 +1649,37 @@ async function fetchFileBlob(key){
   return res.blob();
 }
 
+function escAttr(s){ return escHtml(s).replace(/'/g,'&#39;'); }
+
+function fileActions(fileKey, fileName='Dosya', fileType=''){
+  if(!fileKey) return '';
+  const k = escAttr(fileKey), n = escAttr(fileName||'Dosya'), t = escAttr(fileType||'');
+  return `<span class="file-actions">
+    <button class="file-action" onclick="previewFile('${k}','${n}','${t}')">👁 Önizle</button>
+    <button class="file-action" onclick="downloadFile('${k}','${n}')">⬇ İndir</button>
+  </span>`;
+}
+
 async function previewFile(key, name='Dosya', type=''){
   const body = $('file-modal-body');
-  $('file-modal-title').textContent = name || 'Dosya';
-  body.innerHTML = '<div class="loading"><span class="spinner"></span> Dosya yükleniyor...</div>';
+  $('file-modal-title').textContent = name||'Dosya';
+  body.innerHTML = '<div class="loading"><span class="spinner"></span> Yükleniyor...</div>';
   openModal('file-modal');
-
   try {
     const blob = await fetchFileBlob(key);
-    const effectiveType = type || blob.type || '';
+    const effectiveType = type||blob.type||'';
     const objectUrl = URL.createObjectURL(blob);
-    $('file-download-btn').onclick = ()=>downloadBlob(objectUrl, name || 'dosya');
+    $('file-download-btn').onclick = ()=>{ const a=document.createElement('a'); a.href=objectUrl; a.download=name||'dosya'; a.click(); };
     $('file-modal')._objectUrl = objectUrl;
-
     if(effectiveType.startsWith('image/')){
       body.innerHTML = `<img class="preview-image" src="${objectUrl}" alt="${escAttr(name||'Dosya')}"/>`;
-    } else if(effectiveType === 'application/pdf' || /\.pdf$/i.test(name||'')){
+    } else if(effectiveType==='application/pdf'||/\.pdf$/i.test(name||'')){
       body.innerHTML = `<iframe class="preview-frame" src="${objectUrl}" title="${escAttr(name||'PDF')}"></iframe>`;
     } else {
-      body.innerHTML = `<div class="no-api-warning"><div class="icon">📎</div><p>Bu dosya türü uygulama içinde önizlenemiyor.</p><p style="font-size:12px;margin-top:6px">${escHtml(effectiveType || 'Bilinmeyen tür')}</p></div>`;
+      body.innerHTML = `<div class="empty-state"><div class="empty-icon">📎</div><p>Bu dosya türü önizlenemiyor.</p></div>`;
     }
   } catch(e){
-    body.innerHTML = `<div class="no-api-warning"><div class="icon">⚠️</div><p>${escHtml(e.message)}</p></div>`;
+    body.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p>${escHtml(e.message)}</p></div>`;
   }
 }
 
@@ -1799,29 +1687,19 @@ async function downloadFile(key, name='dosya'){
   try {
     const blob = await fetchFileBlob(key);
     const objectUrl = URL.createObjectURL(blob);
-    downloadBlob(objectUrl, name || 'dosya');
+    const a = document.createElement('a'); a.href=objectUrl; a.download=name||'dosya'; a.click();
     setTimeout(()=>URL.revokeObjectURL(objectUrl), 30000);
-  } catch(e){
-    toast('Dosya indirilemedi: '+e.message,'error');
-  }
-}
-
-function downloadBlob(objectUrl, name){
-  const a = document.createElement('a');
-  a.href = objectUrl;
-  a.download = name || 'dosya';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+  } catch(e){ toast('Dosya indirilemedi: '+e.message,'error'); }
 }
 
 function closeFileModal(){
   const modal = $('file-modal');
-  if(modal._objectUrl){
-    URL.revokeObjectURL(modal._objectUrl);
-    modal._objectUrl = '';
-  }
+  if(modal._objectUrl){ URL.revokeObjectURL(modal._objectUrl); modal._objectUrl=''; }
   closeModal('file-modal');
+}
+
+function openFile(key){
+  previewFile(key, 'Dosya', '');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1829,7 +1707,7 @@ function closeFileModal(){
 // ═══════════════════════════════════════════════════════════════════════════
 function loadSettings(){
   const cfg = getCfg();
-  if($('cfg-worker-url')) $('cfg-worker-url').value = cfg.workerUrl || DEFAULT_WORKER_URL;
+  if($('cfg-worker-url')) $('cfg-worker-url').value = cfg.workerUrl||'';
   if($('acct-email')) $('acct-email').textContent = getUserEmail();
 
   const theme = localStorage.getItem('kasa_theme')||'dark';
@@ -1839,16 +1717,17 @@ function loadSettings(){
 }
 
 function saveApiConfig(){
-  const workerUrl = $('cfg-worker-url').value.trim() || DEFAULT_WORKER_URL;
+  const workerUrl = $('cfg-worker-url').value.trim();
   saveCfg({workerUrl});
   toast('Worker URL kaydedildi','success');
   if(workerUrl && getToken()){ loadBills(); loadIds(); }
-  else if(workerUrl){ autoCloudAuth(); }
 }
 
 async function testApiConnection(){
-  const url = ($('cfg-worker-url').value||DEFAULT_WORKER_URL).trim();
+  const url = ($('cfg-worker-url').value||'').trim();
   if(!url){ toast('Worker URL boş','error'); return; }
+  const token = getToken();
+  if(!token){ toast('Önce giriş yapın','error'); return; }
   try {
     const res = await fetch(url+'/health');
     if(res.ok) toast('Bağlantı başarılı ✓','success');
@@ -2037,21 +1916,6 @@ async function exportExcel(){
 function escHtml(s){
   if(!s) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function escAttr(s){
-  return escHtml(s).replace(/'/g,'&#39;');
-}
-
-function fileActions(fileKey, fileName='Dosya', fileType=''){
-  if(!fileKey) return '';
-  const key = escAttr(fileKey);
-  const name = escAttr(fileName || 'Dosya');
-  const type = escAttr(fileType || '');
-  return `<span class="file-actions">
-    <button class="file-action" onclick="previewFile('${key}','${name}','${type}')">👁 Önizle</button>
-    <button class="file-action" onclick="downloadFile('${key}','${name}')">⬇ İndir</button>
-  </span>`;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
