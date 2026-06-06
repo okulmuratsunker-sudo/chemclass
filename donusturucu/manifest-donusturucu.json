@@ -2,8 +2,8 @@
   "name": "Dönüştürücü",
   "short_name": "Dönüştür",
   "description": "Resim, PDF ve QR kod dönüştürücü",
-  "start_url": "/donusturucu/",
-  "scope": "/donusturucu/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0d1117",
@@ -25,8 +25,8 @@
     }
   ],
   "shortcuts": [
-    { "name": "Resim İşlemleri", "url": "/donusturucu/#img" },
-    { "name": "PDF İşlemleri", "url": "/donusturucu/#pdf" },
-    { "name": "QR Kod", "url": "/donusturucu/#qr" }
+    { "name": "Resim İşlemleri", "url": "/#img" },
+    { "name": "PDF İşlemleri", "url": "/#pdf" },
+    { "name": "QR Kod", "url": "/#qr" }
   ]
 }

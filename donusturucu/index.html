@@ -1074,12 +1074,10 @@ async function runBgRemove() {
   document.getElementById('bg-loading').classList.add('show');
   document.getElementById('bg-status').textContent = 'Model yükleniyor…';
   try {
-    if (!window.imglyRemoveBackground) {
-      document.getElementById('bg-status').textContent = 'Kütüphane yükleniyor…';
-      await loadScript('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/browser/bundle.mjs');
-    }
+    document.getElementById('bg-status').textContent = 'Kütüphane yükleniyor…';
+    const { removeBackground } = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/browser/bundle.mjs');
     document.getElementById('bg-status').textContent = 'İşleniyor…';
-    const blob = await window.imglyRemoveBackground(_bgOrigFile, { progress: (k, c, t) => {
+    const blob = await removeBackground(_bgOrigFile, { progress: (k, c, t) => {
       document.getElementById('bg-status').textContent = `${k} (${c}/${t})`;
     }});
     _bgResultBlob = blob;
@@ -1804,7 +1802,7 @@ function shareQrResult() {
 
 // ═══════════════ SERVICE WORKER ═══════════════
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/donusturucu/sw.js', { scope: '/donusturucu/' }).catch(() => {});
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
 
 // Init QR canvas
