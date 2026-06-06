@@ -837,10 +837,7 @@ async function biometricUnlock(){
   const stored = localStorage.getItem('kasa_webauthn');
   if(!stored){ toast('Kayıtlı biyometrik bulunamadı','error'); return; }
   const bioPwEnc = localStorage.getItem('kasa_bio_pw');
-  if(!bioPwEnc){
-    toast('Biyometrik verisi eksik — Ayarlar\'dan yeniden kaydedin','error');
-    return;
-  }
+  if(!bioPwEnc){ toast('Biyometrik verisi eksik — Ayarlar\'dan yeniden kaydedin','error'); return; }
   try {
     const { rawId } = JSON.parse(stored);
     const challenge = crypto.getRandomValues(new Uint8Array(32));
@@ -867,11 +864,7 @@ async function biometricUnlock(){
 }
 
 async function registerWebAuthnSilent(){
-  try {
-    await doRegisterWebAuthn();
-  } catch(e){
-    console.warn('WebAuthn registration skipped:', e.message);
-  }
+  try { await doRegisterWebAuthn(); } catch(e){ console.warn('WebAuthn skipped:', e.message); }
 }
 
 async function registerWebAuthn(){
@@ -881,7 +874,7 @@ async function registerWebAuthn(){
     const salt = new Uint8Array(unb64(localStorage.getItem('kasa_salt')));
     const key = await deriveKey(pw, salt);
     const vObj = await decrypt(key, localStorage.getItem('kasa_verifier'));
-    if(vObj.v !== 'kasa_ok_v1') throw new Error('Yanlış master şifre');
+    if(vObj.v !== 'kasa_ok_v1') throw new Error('Yanlış şifre');
   } catch(e){ toast('Yanlış master şifre','error'); return; }
   try {
     await doRegisterWebAuthn();
