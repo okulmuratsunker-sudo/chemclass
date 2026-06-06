@@ -783,7 +783,7 @@ function renderClasses(){
 // ─── SCORE ────────────────────────────────────────────────────────────────────
 function getByClass(c){return data.students.filter(s=>!c||s.className===c)}
 function pointText(d,label){return label||(d===1?'Katılım':d===2?'Doğru cevap':d===3?'Grup liderliği':d===-1?'Uyarı':(d>0?'Puan eklendi':'Puan düşürüldü'))}
-function changeScore(id,d,label){
+async function changeScore(id,d,label){
   let s=data.students.find(x=>x.id===id);if(!s)return;
   s.score=(s.score||0)+d;s.history=s.history||[];
   let n=(document.getElementById('note')?.value||'').trim();
@@ -795,6 +795,7 @@ function changeScore(id,d,label){
     el.classList.remove('score-pop');void el.offsetWidth;el.classList.add('score-pop');
   }
   save();
+  syncScoreToTeacher(s.no, d, n||pointText(d,label));
 }
 
 // ─── PICK ─────────────────────────────────────────────────────────────────────
@@ -1316,10 +1317,35 @@ function loadLocal(){
   try{let d=JSON.parse(raw);data.classes=d.classes||[];data.students=d.students||[];data.attendance=d.attendance||{};data.customBtns=d.customBtns||[];data._modified=d._modified||0;}catch(e){}
 }
 
+// ─── ÖĞRETMENIM PUAN SYNC ─────────────────────────────────────────────────────
+const OF_URL='https://yqyrhuednyhirgcghexe.supabase.co';
+const OF_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxeXJodWVkbnloaXJnY2doZXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzQ5MTgsImV4cCI6MjA5NTM1MDkxOH0.bPaF2xWNL4k4eZhhQpzYpaCojqSVIYe4sqM-atpoDJM';
+let sbOf=null;
+function initTeacherSync(){
+  if(!window.supabase)return;
+  try{sbOf=window.supabase.createClient(OF_URL,OF_KEY);}catch(e){sbOf=null;}
+}
+async function syncScoreToTeacher(studentNo,delta,note){
+  if(!sbOf||!studentNo)return;
+  try{
+    const{data:st}=await sbOf.from('teacher_students').select('id').eq('student_number',String(studentNo)).maybeSingle();
+    if(!st)return;
+    const sid=st.id;
+    const{data:ex}=await sbOf.from('student_scores').select('id,score').eq('student_id',sid).maybeSingle();
+    if(ex){
+      await sbOf.from('student_scores').update({score:(ex.score||0)+delta,updated_at:new Date().toISOString()}).eq('id',ex.id);
+    }else{
+      await sbOf.from('student_scores').insert({student_id:sid,score:delta});
+    }
+    await sbOf.from('score_history').insert({student_id:sid,delta,note:note||''});
+  }catch(e){}
+}
+
 loadLocal();loadTheme();loadSnd();loadCloudSettings();
 try{if(attDate)attDate.value=todayStr();}catch(e){}
 renderAll();drawTimer();checkBoardUrl();
 getSession().then(async()=>{renderCloud();if(sbUser)await loadFromCloud();});
+initTeacherSync();
 if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}
 window.addEventListener('online',async()=>{
   renderCloud();
