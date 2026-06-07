@@ -169,7 +169,7 @@ body{margin:0;background:var(--bg);color:var(--t1);font-family:system-ui,-apple-
     <div class="login-sub">Öğrenci Girişi</div>
     <div class="login-card">
       <h2>🔐 Giriş Yap</h2>
-      <input id="inpClassCode" class="inp" placeholder="Sınıf Kodu (örn: 9A)" autocomplete="off" autocapitalize="characters">
+      <input id="inpClassCode" class="inp" placeholder="Sınıf Kodu (öğretmeninizden alın)" autocomplete="off" autocapitalize="characters">
       <input id="inpSchoolNo" class="inp" placeholder="Okul Numaranız" type="number" inputmode="numeric">
       <button class="btn b" onclick="doLogin()">Devam Et →</button>
     </div>
@@ -356,11 +356,14 @@ async function doLogin() {
   if (error) return msg('Bağlantı hatası: ' + error.message);
   if (!rows || !rows.length) return msg('Veri bulunamadı.');
 
+  const codeUpper = classCode.toUpperCase();
   let found = null, teacherId = null;
   for (const row of rows) {
     const students = row.app_data?.students || [];
+    const classCodes = row.app_data?.classCodes || {};
     const student = students.find(s =>
-      s.className === classCode &&
+      classCodes[s.className] &&
+      classCodes[s.className].toUpperCase() === codeUpper &&
       String(s.no) === String(schoolNo)
     );
     if (student) { found = student; teacherId = row.user_id; break; }

@@ -665,7 +665,7 @@ button:active{transform:scale(.96)}
 
 <script>
 const KEY='chemclass_v18_data',CLOUDKEY='chemclass_v15_cloud_settings';
-let data={classes:[],students:[],attendance:{},customBtns:[]};
+let data={classes:[],students:[],attendance:{},customBtns:[],classCodes:{}};
 let picked=[],lastPick=null,groups=[];
 let timerTotal=300,timerLeft=300,timerRun=null;
 let sb=null,sbUser=null,syncTimer=null;
@@ -778,11 +778,27 @@ function pickColor(i){
 }
 
 // ─── CLASSES & STUDENTS ───────────────────────────────────────────────────────
+function genClassCode(){let c='ABCDEFGHJKMNPQRSTUVWXYZ23456789',s='';for(let i=0;i<6;i++)s+=c[Math.floor(Math.random()*c.length)];return s}
+function getClassCode(cls){
+  data.classCodes=data.classCodes||{};
+  if(!data.classCodes[cls]){data.classCodes[cls]=genClassCode();save();}
+  return data.classCodes[cls];
+}
+function regenClassCode(cls){
+  if(!confirm(esc(cls)+' sınıfı için yeni kod üretilsin mi? Eski kodu kullanan öğrenciler tekrar giriş yapamaz.'))return;
+  data.classCodes=data.classCodes||{};
+  data.classCodes[cls]=genClassCode();save();msg('Yeni kod üretildi: '+data.classCodes[cls]);
+}
+function copyClassCode(cls){
+  let code=getClassCode(cls);
+  if(navigator.clipboard?.writeText)navigator.clipboard.writeText(code).then(()=>msg('Kod kopyalandı: '+code)).catch(()=>msg('Kod: '+code));
+  else msg('Kod: '+code);
+}
 function addClass(){
   let c=newClass.value.trim();
   if(!c)return msg('Sınıf adı girin');
   if(data.classes.includes(c))return msg('Bu sınıf zaten var');
-  data.classes.push(c);data.classes.sort();newClass.value='';save();msg('Sınıf eklendi');
+  data.classes.push(c);data.classes.sort();getClassCode(c);newClass.value='';save();msg('Sınıf eklendi');
 }
 function addStudent(cls){
   let n=document.getElementById('name_'+cls).value.trim(),no=document.getElementById('no_'+cls).value.trim();
@@ -791,7 +807,7 @@ function addStudent(cls){
   document.getElementById('name_'+cls).value='';document.getElementById('no_'+cls).value='';
   save();msg('Öğrenci eklendi');
 }
-function delClass(c){if(!confirm(c+' sınıfı ve tüm öğrencileri silinsin mi?'))return;data.classes=data.classes.filter(x=>x!==c);data.students=data.students.filter(s=>s.className!==c);save()}
+function delClass(c){if(!confirm(c+' sınıfı ve tüm öğrencileri silinsin mi?'))return;data.classes=data.classes.filter(x=>x!==c);data.students=data.students.filter(s=>s.className!==c);if(data.classCodes)delete data.classCodes[c];save()}
 function clearClass(c){if(!confirm(c+' sınıfındaki öğrenciler silinsin mi?'))return;data.students=data.students.filter(s=>s.className!==c);save();msg('Sınıf temizlendi')}
 function delStudent(id){if(!confirm('Öğrenci silinsin mi?'))return;data.students=data.students.filter(s=>s.id!==id);save()}
 
@@ -846,6 +862,12 @@ function renderClasses(){
         <h3 class="grow">${esc(c)} <span class="muted">${all.length} öğrenci • Toplam: ${total>0?'+':''}${total}</span></h3>
         <button class="s small" onclick="clearClass('${esc(c)}')">Temizle</button>
         <button class="r small" onclick="delClass('${esc(c)}')">Sil</button>
+      </div>
+      <div class="row" style="align-items:center;gap:8px">
+        <span class="muted">Öğrenci giriş kodu:</span>
+        <code style="font-weight:800;letter-spacing:3px;font-size:16px;color:var(--gr)">${esc(getClassCode(c))}</code>
+        <button class="s small" onclick="copyClassCode('${esc(c)}')">📋 Kopyala</button>
+        <button class="s small" onclick="regenClassCode('${esc(c)}')">🔄 Yenile</button>
       </div>
       <div class="row">
         <input id="name_${esc(c)}" class="inp" style="max-width:260px" placeholder="Ad Soyad">
@@ -1345,7 +1367,7 @@ async function signOut(){
   try{if(sb)await sb.auth.signOut();}catch(e){}
   sbUser=null;
   ['chemclass_v18_data','chemclass_v17_data','chemclass_v16_data','chemclass_v15_data','chemclass_v14_data','chemclass_v13_data'].forEach(k=>localStorage.removeItem(k));
-  sessionStorage.clear();data={classes:[],students:[],attendance:{},customBtns:[]};
+  sessionStorage.clear();data={classes:[],students:[],attendance:{},customBtns:[],classCodes:{}};
   msg('Çıkış yapıldı. Veriler temizleniyor...');setTimeout(()=>location.reload(),600);
 }
 async function getSession(){if(!sb)return null;let{data:res}=await sb.auth.getSession();sbUser=res.session?.user||null;return sbUser;}
