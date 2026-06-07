@@ -666,7 +666,13 @@ function getCloudCredentials(){
   return { email, pass };
 }
 
-async function autoCloudAuth(){
+let _autoCloudAuthPromise = null;
+function autoCloudAuth(){
+  if(_autoCloudAuthPromise) return _autoCloudAuthPromise;
+  _autoCloudAuthPromise = _autoCloudAuthRun().finally(()=>{ _autoCloudAuthPromise = null; });
+  return _autoCloudAuthPromise;
+}
+async function _autoCloudAuthRun(){
   const url = getWorkerUrl();
   if(!url){ renderBillsNoApi(); renderIdsNoApi(); return; }
   const { email, pass } = getCloudCredentials();
