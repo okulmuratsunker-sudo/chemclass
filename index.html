@@ -58,6 +58,12 @@ button:active{transform:scale(.96)}
 .msg-row .dir{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
 .msg-row .dir.out{background:rgba(0,212,170,.14)}
 .msg-row .dir.in{background:rgba(255,107,53,.14)}
+.msg-row.clickable{cursor:pointer}
+.msg-row.clickable:hover{border-color:var(--gr)}
+.bubble{max-width:80%;padding:8px 12px;border-radius:14px;font-size:14px;line-height:1.4}
+.bubble.out{align-self:flex-end;background:rgba(0,212,170,.16);border:1px solid rgba(0,212,170,.3);border-bottom-right-radius:4px}
+.bubble.in{align-self:flex-start;background:var(--s2);border:1px solid var(--bd);border-bottom-left-radius:4px}
+.bubble .t{font-size:11px;color:var(--t2);margin-top:4px}
 .av{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;font-weight:800;font-size:15px;flex-shrink:0}
 .grow{flex:1;min-width:0}
 .muted{color:var(--t2);font-size:12px}
@@ -427,6 +433,21 @@ button:active{transform:scale(.96)}
     <div id="msgHistoryList"></div>
   </div>
 </section>
+
+<!-- MODAL: Conversation -->
+<div id="convModal" class="modal-bg" onclick="if(event.target===this)closeModal('convModal')">
+  <div class="modal" style="display:flex;flex-direction:column;max-height:80vh">
+    <div class="row" style="margin-bottom:10px">
+      <h3 class="grow" id="convTitle">Konuşma</h3>
+      <button class="r small" onclick="closeModal('convModal')">✕</button>
+    </div>
+    <div id="convMessages" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:4px"></div>
+    <div class="row" style="margin-top:10px;align-items:flex-end">
+      <textarea id="convBody" class="inp" rows="2" placeholder="Yanıt yazın…" style="resize:vertical"></textarea>
+      <button class="b" onclick="sendConversationReply()">Gönder</button>
+    </div>
+  </div>
+</div>
 
 <!-- BOARD SHARE -->
 <section id="boardShare" class="hide">
@@ -1536,15 +1557,50 @@ function renderMsgHistory(){
     return{...m,_who:who,_out:out};
   });
   if(q)rows=rows.filter(m=>m._who.toLocaleLowerCase('tr-TR').includes(q)||(m.body||'').toLocaleLowerCase('tr-TR').includes(q));
-  el.innerHTML=rows.map(m=>`
-    <div class="msg-row">
+  el.innerHTML=rows.map(m=>{
+    const clickable=!!m.student_id;
+    return `
+    <div class="msg-row${clickable?' clickable':''}"${clickable?` onclick="openConversation('${esc(m.student_id)}')"`:''}>
       <div class="dir ${m._out?'out':'in'}">${m._out?'➡️':'⬅️'}</div>
       <div class="grow">
         <b>${m._out?'Siz → ':''}${esc(m._who)}${!m._out?' → Siz':''}</b>
         <div class="muted">${esc(m.body)}</div>
-        <div class="muted" style="margin-top:2px">${new Date(m.created_at).toLocaleString('tr-TR')}</div>
+        <div class="muted" style="margin-top:2px">${new Date(m.created_at).toLocaleString('tr-TR')}${clickable?' • Konuşmayı aç ↗':''}</div>
       </div>
-    </div>`).join('')||'<div class="muted" style="text-align:center;padding:24px">Henüz mesaj yok.</div>';
+    </div>`;
+  }).join('')||'<div class="muted" style="text-align:center;padding:24px">Henüz mesaj yok.</div>';
+}
+
+let convStudentId=null;
+function openConversation(studentId){
+  const s=data.students.find(x=>x.id===studentId);
+  if(!s)return msg('Öğrenci bulunamadı (silinmiş olabilir)');
+  convStudentId=studentId;
+  convTitle.textContent='💬 '+s.name+' ('+s.className+')';
+  renderConversation();
+  openModal('convModal');
+  setTimeout(()=>{const el=document.getElementById('convMessages');if(el)el.scrollTop=el.scrollHeight;},50);
+}
+function renderConversation(){
+  const el=document.getElementById('convMessages');if(!el||!convStudentId)return;
+  const thread=teacherMessages.filter(m=>m.student_id===convStudentId).slice().sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+  el.innerHTML=thread.map(m=>{
+    const out=m.sender==='teacher';
+    return `<div class="bubble ${out?'out':'in'}">${esc(m.body)}<div class="t">${new Date(m.created_at).toLocaleString('tr-TR')}</div></div>`;
+  }).join('')||'<div class="muted" style="text-align:center;padding:24px">Henüz mesaj yok.</div>';
+}
+async function sendConversationReply(){
+  if(!sbUser)return msg('Önce bulut hesabına giriş yapmalısınız');
+  const s=data.students.find(x=>x.id===convStudentId);
+  if(!s)return msg('Öğrenci bulunamadı');
+  const body=convBody.value.trim();
+  if(!body)return msg('Mesaj yazın');
+  const{error}=await sb.from('chemclass_messages').insert({teacher_id:sbUser.id,student_id:s.id,class_name:s.className,sender:'teacher',sender_name:'Öğretmen',body});
+  if(error)return msg('Gönderilemedi: '+error.message);
+  convBody.value='';
+  await loadTeacherMessages();
+  renderConversation();
+  const el=document.getElementById('convMessages');if(el)el.scrollTop=el.scrollHeight;
 }
 
 // Öğrenciler yeni mesaj gönderdiğinde öğretmeni anında haberdar et
@@ -1556,7 +1612,12 @@ function setupTeacherRealtime(){
       const m=payload.new;
       if(m.sender!=='student')return;
       msg('💬 '+(m.sender_name||'Bir öğrenci')+': '+m.body,3000);
-      if(document.querySelector('section:not(.hide)')?.id==='messages')loadTeacherMessages();
+      if(document.querySelector('section:not(.hide)')?.id==='messages')loadTeacherMessages().then(()=>{
+        if(document.getElementById('convModal')?.classList.contains('open')&&m.student_id===convStudentId){
+          renderConversation();
+          const el=document.getElementById('convMessages');if(el)el.scrollTop=el.scrollHeight;
+        }
+      });
     })
     .subscribe();
 }
