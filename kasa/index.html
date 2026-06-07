@@ -568,6 +568,8 @@ let _inactivityTimer = null;
 let _clipboardTimer = null;
 let _billsCache = [];
 let _idsCache = [];
+let _authRetryCount = 0;
+const MAX_AUTH_RETRIES = 2;
 const DEFAULT_WORKER_URL = 'https://kasaapi.muratsunker.workers.dev';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1428,9 +1430,19 @@ async function apiCall(method, path, body=null, isFormData=false){
     // token: concurrent requests may have already refreshed it, and clearing
     // a freshly-issued token here would trigger an endless re-auth loop.
     if(getToken() === token) localStorage.removeItem('kasa_token');
-    autoCloudAuth();
+    // Circuit breaker: autoCloudAuth() re-runs showMainApp() on success, which
+    // re-fires loadBills/loadIds — if the server keeps rejecting fresh tokens
+    // (e.g. a backend bug), that becomes a self-sustaining infinite loop. Cap
+    // the number of silent retries; beyond that, stop and surface the login screen.
+    if(_authRetryCount < MAX_AUTH_RETRIES){
+      _authRetryCount++;
+      autoCloudAuth();
+    } else {
+      showUserAuthScreen();
+    }
     throw new Error('Oturum süresi doldu, lütfen tekrar giriş yapın');
   }
+  _authRetryCount = 0;
   if(!res.ok){
     const errData = await res.json().catch(()=>({error: res.statusText}));
     throw new Error(errData.error || `HTTP ${res.status}`);

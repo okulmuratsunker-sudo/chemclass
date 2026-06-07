@@ -1,4 +1,4 @@
-const CACHE = 'kasa_v8';
+const CACHE = 'kasa_v9';
 const SHELL = ['/', '/index.html', '/manifest-kasa.json', '/sw.js'];
 const CDN_HOSTS = [
   'cdn.jsdelivr.net',
