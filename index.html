@@ -47,6 +47,17 @@ button:active{transform:scale(.96)}
 .inp:focus{outline:none;border-color:var(--gr)}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .student,.group{background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:10px;margin:8px 0;display:flex;gap:10px;align-items:center;animation:fadeIn .22s ease;transition:background .3s,border-color .3s}
+.type-badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;margin-bottom:6px}
+.type-odev{background:rgba(0,212,170,.14);color:var(--gr);border:1px solid rgba(0,212,170,.3)}
+.type-duyuru{background:rgba(255,107,53,.14);color:var(--or);border:1px solid rgba(255,107,53,.3)}
+.type-gorev{background:rgba(167,139,250,.14);color:#a78bfa;border:1px solid rgba(167,139,250,.3)}
+.assign-card{background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:12px;margin:8px 0}
+.assign-card .ttl{font-weight:700;font-size:15px;margin:2px 0 4px}
+.assign-card .desc{color:var(--t2);font-size:13px;margin-bottom:6px;white-space:pre-wrap}
+.msg-row{display:flex;gap:10px;align-items:flex-start;background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:10px;margin:6px 0}
+.msg-row .dir{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.msg-row .dir.out{background:rgba(0,212,170,.14)}
+.msg-row .dir.in{background:rgba(255,107,53,.14)}
 .av{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;font-weight:800;font-size:15px;flex-shrink:0}
 .grow{flex:1;min-width:0}
 .muted{color:var(--t2);font-size:12px}
@@ -178,6 +189,8 @@ button:active{transform:scale(.96)}
   <button class="menu-item" data-tab="beh" onclick="tab('beh')"><span class="mi-icon">⭐</span>Davranış</button>
   <button class="menu-item" data-tab="groups" onclick="tab('groups')"><span class="mi-icon">👥</span>Gruplar</button>
   <button class="menu-item" data-tab="board" onclick="tab('board')"><span class="mi-icon">📊</span>Liderlik Tablosu</button>
+  <button class="menu-item" data-tab="assignments" onclick="tab('assignments')"><span class="mi-icon">📚</span>Ödevler</button>
+  <button class="menu-item" data-tab="messages" onclick="tab('messages')"><span class="mi-icon">💬</span>Mesajlar</button>
   <div class="menu-footer">
     <button class="s small" onclick="exportData();closeMenu()">💾 Yedek Al</button>
     <label class="s small" style="cursor:pointer;display:block;text-align:center">📂 Yedek Yükle<input id="importJson" type="file" accept=".json" hidden onchange="importData(event)"></label>
@@ -375,6 +388,46 @@ button:active{transform:scale(.96)}
   </div>
 </section>
 
+<!-- ASSIGNMENTS -->
+<section id="assignments" class="hide">
+  <div class="card">
+    <div class="row">
+      <h2 class="grow">📚 Ödevler, Duyurular ve Görevler</h2>
+      <button class="b" onclick="openAssignModal()">+ Yeni Gönder</button>
+    </div>
+    <p class="muted">Öğrencilerinize ödev, duyuru veya görev paylaşın — dilerseniz dosya da ekleyin (kota dolmasın diye yalnızca son 3 dosyanız saklanır, eskiler otomatik silinir).</p>
+    <div class="row">
+      <select id="asgFilterClass" class="inp" style="max-width:220px" onchange="renderTeacherAssignments()"></select>
+    </div>
+    <div id="assignTeacherList"></div>
+  </div>
+</section>
+
+<!-- MESSAGES -->
+<section id="messages" class="hide">
+  <div class="card">
+    <h2>✉️ Mesaj Gönder</h2>
+    <div class="row">
+      <select id="msgScope" class="inp" style="max-width:170px" onchange="renderMsgScope()">
+        <option value="student">Tek Öğrenciye</option>
+        <option value="class">Sınıfa (toplu)</option>
+        <option value="all">Herkese (toplu)</option>
+      </select>
+      <select id="msgClass" class="inp" style="max-width:180px" onchange="renderMsgStudents()"></select>
+      <select id="msgStudent" class="inp" style="max-width:240px"></select>
+    </div>
+    <textarea id="msgBody" class="inp" rows="3" placeholder="Mesajınızı yazın…" style="resize:vertical;margin-top:6px"></textarea>
+    <button class="b" style="margin-top:8px" onclick="sendTeacherMessage()">Gönder</button>
+  </div>
+  <div class="card">
+    <div class="row">
+      <h2 class="grow">📨 Mesaj Geçmişi</h2>
+      <input id="msgSearch" class="search-inp" placeholder="🔍 Ara…" oninput="renderMsgHistory()">
+    </div>
+    <div id="msgHistoryList"></div>
+  </div>
+</section>
+
 <!-- BOARD SHARE -->
 <section id="boardShare" class="hide">
   <div class="card">
@@ -569,6 +622,36 @@ button:active{transform:scale(.96)}
   </div>
 </div>
 
+<!-- MODAL: New Assignment -->
+<div id="assignModal" class="modal-bg" onclick="if(event.target===this)closeModal('assignModal')">
+  <div class="modal">
+    <div class="row" style="margin-bottom:10px">
+      <h3 class="grow">📚 Yeni Ödev / Duyuru / Görev</h3>
+      <button class="r small" onclick="closeModal('assignModal')">✕</button>
+    </div>
+    <label class="muted">Sınıf</label>
+    <select id="asgFormClass" class="inp"></select>
+    <label class="muted">Tür</label>
+    <select id="asgFormType" class="inp">
+      <option value="odev">📘 Ödev</option>
+      <option value="duyuru">📢 Duyuru</option>
+      <option value="gorev">✅ Görev</option>
+    </select>
+    <label class="muted">Başlık</label>
+    <input id="asgFormTitle" class="inp" placeholder="Başlık">
+    <label class="muted">Açıklama (opsiyonel)</label>
+    <textarea id="asgFormBody" class="inp" rows="3" placeholder="Açıklama" style="resize:vertical"></textarea>
+    <label class="muted">Son Tarih (opsiyonel)</label>
+    <input id="asgFormDue" class="inp" type="date">
+    <label class="muted">Dosya Ekle (opsiyonel — yalnızca son 3 dosya saklanır)</label>
+    <input id="asgFormFile" class="inp" type="file">
+    <div class="row" style="margin-top:10px">
+      <button class="b" onclick="saveAssignment()">Gönder</button>
+      <button class="s" onclick="closeModal('assignModal')">İptal</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: Attendance Stats -->
 <div id="attStatsModal" class="modal-bg" onclick="if(event.target===this)closeModal('attStatsModal')">
   <div class="modal">
@@ -628,7 +711,7 @@ function save(){
   renderAll();scheduleCloudSave();scheduleBoardUpdate();
 }
 
-const TAB_LABELS={home:'Ana Ekran',cloud:'Bulut',boardShare:'Tahta Modu',pick:'Seçici',timer:'Sayaç',students:'Sınıflar',attend:'Yoklama',beh:'Davranış',groups:'Gruplar',board:'Tablo'};
+const TAB_LABELS={home:'Ana Ekran',cloud:'Bulut',boardShare:'Tahta Modu',pick:'Seçici',timer:'Sayaç',students:'Sınıflar',attend:'Yoklama',beh:'Davranış',groups:'Gruplar',board:'Tablo',assignments:'Ödevler',messages:'Mesajlar'};
 function tab(id){
   document.querySelectorAll('section').forEach(s=>s.classList.add('hide'));
   document.getElementById(id)?.classList.remove('hide');
@@ -636,6 +719,8 @@ function tab(id){
   document.querySelectorAll(`[data-tab="${id}"]`).forEach(b=>b.classList.add('on'));
   active.textContent=TAB_LABELS[id]||id;
   renderAll();
+  if(id==='assignments')enterAssignmentsTab();
+  if(id==='messages')enterMessagesTab();
   closeMenu();
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -1255,7 +1340,7 @@ function loadCloudSettings(){try{let c=JSON.parse(localStorage.getItem(CLOUDKEY)
 function saveCloudSettings(){localStorage.setItem(CLOUDKEY,JSON.stringify({url:sbUrl?.value?.trim(),key:sbKey?.value?.trim()}));initSupabase();msg('Bulut ayarları kaydedildi');}
 function initSupabase(){let c={url:sbUrl?.value?.trim(),key:sbKey?.value?.trim()};if(!c.url||!c.key||!window.supabase){sb=null;return false;}try{sb=window.supabase.createClient(c.url,c.key);return true;}catch(e){sb=null;msg('Supabase bağlantısı kurulamadı');return false;}}
 async function signUp(){if(!initSupabase())return msg('Önce Supabase ayarlarını girin');let email=loginEmail?.value?.trim(),password=loginPass?.value;if(!email||!password)return msg('E-posta ve şifre girin');let{data:res,error}=await sb.auth.signUp({email,password});if(error)return msg(error.message);sbUser=res.user||null;renderCloud();msg('Hesap oluşturuldu. E-posta onayı gerekebilir.');}
-async function signIn(){if(!initSupabase())return msg('Önce Supabase ayarlarını girin');let email=loginEmail?.value?.trim(),password=loginPass?.value;if(!email||!password)return msg('E-posta ve şifre girin');let{data:res,error}=await sb.auth.signInWithPassword({email,password});if(error)return msg(error.message);sbUser=res.user;renderCloud();await loadFromCloud();msg('Giriş yapıldı ✓');}
+async function signIn(){if(!initSupabase())return msg('Önce Supabase ayarlarını girin');let email=loginEmail?.value?.trim(),password=loginPass?.value;if(!email||!password)return msg('E-posta ve şifre girin');let{data:res,error}=await sb.auth.signInWithPassword({email,password});if(error)return msg(error.message);sbUser=res.user;renderCloud();await loadFromCloud();setupTeacherRealtime();msg('Giriş yapıldı ✓');}
 async function signOut(){
   try{if(sb)await sb.auth.signOut();}catch(e){}
   sbUser=null;
@@ -1264,6 +1349,195 @@ async function signOut(){
   msg('Çıkış yapıldı. Veriler temizleniyor...');setTimeout(()=>location.reload(),600);
 }
 async function getSession(){if(!sb)return null;let{data:res}=await sb.auth.getSession();sbUser=res.session?.user||null;return sbUser;}
+
+// ─── ÖDEVLER / DUYURULAR / GÖREVLER (öğrenci modülü) ─────────────────────────
+let teacherAssignments=[];
+const ASG_TYPE_LABEL={odev:'📘 Ödev',duyuru:'📢 Duyuru',gorev:'✅ Görev'};
+const ASG_TYPE_CLASS={odev:'type-odev',duyuru:'type-duyuru',gorev:'type-gorev'};
+
+function enterAssignmentsTab(){
+  if(!sbUser){msg('Ödevler için önce bulut hesabına giriş yapmalısınız');return;}
+  if(asgFilterClass){let old=asgFilterClass.value;asgFilterClass.innerHTML='<option value="">Tüm Sınıflar</option>'+data.classes.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');if(data.classes.includes(old))asgFilterClass.value=old;}
+  loadTeacherAssignments();
+}
+
+function openAssignModal(){
+  if(!sbUser)return msg('Önce bulut hesabına giriş yapmalısınız');
+  if(!data.classes.length)return msg('Önce en az bir sınıf oluşturun');
+  asgFormClass.innerHTML=data.classes.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  asgFormType.value='odev';asgFormTitle.value='';asgFormBody.value='';asgFormDue.value='';asgFormFile.value='';
+  openModal('assignModal');
+}
+
+async function saveAssignment(){
+  const class_name=asgFormClass.value,type=asgFormType.value,title=asgFormTitle.value.trim(),body=asgFormBody.value.trim(),due_date=asgFormDue.value||null;
+  if(!class_name)return msg('Sınıf seçin');
+  if(!title)return msg('Başlık girin');
+
+  let fileInfo=null;
+  const file=asgFormFile.files[0];
+  if(file){fileInfo=await uploadClassFile(file);if(fileInfo===false)return;}
+
+  const{error}=await sb.from('chemclass_assignments').insert({
+    teacher_id:sbUser.id,class_name,type,title,body,due_date,
+    file_url:fileInfo?.url||null,file_name:fileInfo?.name||null,file_path:fileInfo?.path||null
+  });
+  if(error)return msg('Gönderilemedi: '+error.message);
+  closeModal('assignModal');
+  msg('Öğrencilere gönderildi ✓');
+  loadTeacherAssignments();
+}
+
+async function loadTeacherAssignments(){
+  if(!sbUser)return;
+  const{data:rows,error}=await sb.from('chemclass_assignments').select('*').eq('teacher_id',sbUser.id).order('created_at',{ascending:false}).limit(150);
+  if(error)return;
+  teacherAssignments=rows||[];
+  renderTeacherAssignments();
+}
+
+function renderTeacherAssignments(){
+  const el=document.getElementById('assignTeacherList');if(!el)return;
+  const cls=asgFilterClass?.value;
+  let rows=teacherAssignments;
+  if(cls)rows=rows.filter(a=>a.class_name===cls);
+  el.innerHTML=rows.map(a=>{
+    const due=a.due_date?`<span class="muted">⏰ Son: ${esc(new Date(a.due_date).toLocaleDateString('tr-TR'))}</span>`:'';
+    const file=a.file_url?`<a class="s small" href="${esc(a.file_url)}" target="_blank" rel="noopener">📎 ${esc(a.file_name||'Dosya')}</a>`:'';
+    return `<div class="assign-card">
+      <span class="type-badge ${ASG_TYPE_CLASS[a.type]||''}">${ASG_TYPE_LABEL[a.type]||esc(a.type)}</span>
+      <span class="muted"> • ${esc(a.class_name)}</span>
+      <div class="ttl">${esc(a.title)}</div>
+      ${a.body?`<div class="desc">${esc(a.body)}</div>`:''}
+      <div class="row">${due}${file}<span class="muted" style="margin-left:auto">${new Date(a.created_at).toLocaleString('tr-TR')}</span>
+        <button class="r small" onclick="deleteAssignment('${a.id}')">Sil</button>
+      </div>
+    </div>`;
+  }).join('')||'<div class="muted" style="text-align:center;padding:24px">Henüz gönderdiğiniz bir ödev/duyuru/görev yok.</div>';
+}
+
+async function deleteAssignment(id){
+  if(!confirm('Bu kayıt silinsin mi?'))return;
+  const a=teacherAssignments.find(x=>x.id===id);
+  const{error}=await sb.from('chemclass_assignments').delete().eq('id',id).eq('teacher_id',sbUser.id);
+  if(error)return msg('Silinemedi: '+error.message);
+  if(a?.file_path){try{await sb.storage.from('chemclass-files').remove([a.file_path]);}catch(e){}}
+  msg('Silindi');
+  loadTeacherAssignments();
+}
+
+// Dosyayı Storage'a yükler; kotayı doldurmamak için yalnızca son 3 dosya saklanır,
+// daha eskileri yükleme sonrası otomatik olarak silinir.
+async function uploadClassFile(file){
+  if(!sbUser)return null;
+  const ext=(file.name.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'')||'bin';
+  const path=`${sbUser.id}/${uid()}.${ext}`;
+  const{error}=await sb.storage.from('chemclass-files').upload(path,file,{contentType:file.type||'application/octet-stream'});
+  if(error){msg('Dosya yüklenemedi: '+error.message);return false;}
+  await cleanupOldFiles();
+  const{data:pub}=sb.storage.from('chemclass-files').getPublicUrl(path);
+  return{url:pub.publicUrl,path,name:file.name};
+}
+
+async function cleanupOldFiles(){
+  if(!sbUser)return;
+  try{
+    const{data:list}=await sb.storage.from('chemclass-files').list(sbUser.id,{sortBy:{column:'created_at',order:'desc'}});
+    if(!list||list.length<=3)return;
+    const old=list.slice(3).map(f=>`${sbUser.id}/${f.name}`);
+    if(old.length)await sb.storage.from('chemclass-files').remove(old);
+  }catch(e){}
+}
+
+// ─── MESAJLAR (öğretmen ↔ öğrenci) ───────────────────────────────────────────
+let teacherMessages=[],teacherMsgChannel=null;
+
+function enterMessagesTab(){
+  if(!sbUser){msg('Mesajlaşma için önce bulut hesabına giriş yapmalısınız');return;}
+  if(msgClass)msgClass.innerHTML=data.classes.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  renderMsgScope();
+  loadTeacherMessages();
+}
+
+function renderMsgScope(){
+  if(!msgScope)return;
+  const scope=msgScope.value;
+  msgClass.style.display=(scope==='all')?'none':'';
+  msgStudent.style.display=(scope==='student')?'':'none';
+  if(scope==='student')renderMsgStudents();
+}
+
+function renderMsgStudents(){
+  const cls=msgClass.value;
+  const list=data.students.filter(s=>!cls||s.className===cls).sort((a,b)=>a.name.localeCompare(b.name,'tr-TR'));
+  msgStudent.innerHTML=list.map(s=>`<option value="${s.id}">${esc(s.name)} (No:${esc(s.no||'-')})</option>`).join('')||'<option value="">Bu sınıfta öğrenci yok</option>';
+}
+
+async function sendTeacherMessage(){
+  if(!sbUser)return msg('Önce bulut hesabına giriş yapmalısınız');
+  const scope=msgScope.value,body=msgBody.value.trim();
+  if(!body)return msg('Mesaj yazın');
+  let student_id=null,class_name=null,label='';
+  if(scope==='student'){
+    const s=data.students.find(x=>x.id===msgStudent.value);
+    if(!s)return msg('Öğrenci seçin');
+    student_id=s.id;class_name=s.className;label=s.name;
+  }else if(scope==='class'){
+    class_name=msgClass.value;
+    if(!class_name)return msg('Sınıf seçin');
+    label=class_name+' sınıfının tamamı (toplu)';
+  }else{
+    label='Tüm öğrencileriniz (toplu)';
+  }
+  const{error}=await sb.from('chemclass_messages').insert({teacher_id:sbUser.id,student_id,class_name,sender:'teacher',sender_name:'Öğretmen',body});
+  if(error)return msg('Gönderilemedi: '+error.message);
+  msgBody.value='';
+  msg('Gönderildi → '+label);
+  loadTeacherMessages();
+}
+
+async function loadTeacherMessages(){
+  if(!sbUser)return;
+  const{data:rows,error}=await sb.from('chemclass_messages').select('*').eq('teacher_id',sbUser.id).order('created_at',{ascending:false}).limit(300);
+  if(error)return;
+  teacherMessages=rows||[];
+  renderMsgHistory();
+}
+
+function renderMsgHistory(){
+  const el=document.getElementById('msgHistoryList');if(!el)return;
+  const q=(msgSearch?.value||'').trim().toLocaleLowerCase('tr-TR');
+  const stuName=id=>data.students.find(s=>s.id===id)?.name;
+  let rows=teacherMessages.map(m=>{
+    const out=m.sender==='teacher';
+    const who=out?(m.student_id?(stuName(m.student_id)||'Öğrenci'):('📢 '+(m.class_name||'Herkes'))):(m.sender_name||stuName(m.student_id)||'Öğrenci');
+    return{...m,_who:who,_out:out};
+  });
+  if(q)rows=rows.filter(m=>m._who.toLocaleLowerCase('tr-TR').includes(q)||(m.body||'').toLocaleLowerCase('tr-TR').includes(q));
+  el.innerHTML=rows.map(m=>`
+    <div class="msg-row">
+      <div class="dir ${m._out?'out':'in'}">${m._out?'➡️':'⬅️'}</div>
+      <div class="grow">
+        <b>${m._out?'Siz → ':''}${esc(m._who)}${!m._out?' → Siz':''}</b>
+        <div class="muted">${esc(m.body)}</div>
+        <div class="muted" style="margin-top:2px">${new Date(m.created_at).toLocaleString('tr-TR')}</div>
+      </div>
+    </div>`).join('')||'<div class="muted" style="text-align:center;padding:24px">Henüz mesaj yok.</div>';
+}
+
+// Öğrenciler yeni mesaj gönderdiğinde öğretmeni anında haberdar et
+function setupTeacherRealtime(){
+  if(!sb||!sbUser)return;
+  if(teacherMsgChannel){try{sb.removeChannel(teacherMsgChannel);}catch(e){}}
+  teacherMsgChannel=sb.channel('chemclass-teacher-'+sbUser.id)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'chemclass_messages',filter:`teacher_id=eq.${sbUser.id}`},payload=>{
+      const m=payload.new;
+      if(m.sender!=='student')return;
+      msg('💬 '+(m.sender_name||'Bir öğrenci')+': '+m.body,3000);
+      if(document.querySelector('section:not(.hide)')?.id==='messages')loadTeacherMessages();
+    })
+    .subscribe();
+}
 function renderCloud(){
   if(!document.getElementById('cloudStatus'))return;
   const pending=localStorage.getItem('cc_pending')==='1';
@@ -1344,7 +1618,7 @@ async function syncScoreToTeacher(studentNo,delta,note){
 loadLocal();loadTheme();loadSnd();loadCloudSettings();
 try{if(attDate)attDate.value=todayStr();}catch(e){}
 renderAll();drawTimer();checkBoardUrl();
-getSession().then(async()=>{renderCloud();if(sbUser)await loadFromCloud();});
+getSession().then(async()=>{renderCloud();if(sbUser){await loadFromCloud();setupTeacherRealtime();}});
 initTeacherSync();
 if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}
 window.addEventListener('online',async()=>{

@@ -1,8 +1,9 @@
-const CACHE = 'v2';
+const CACHE = 'v3';
 const SHELL = [
   '/index.html',
   '/ogretmen-dosyasi.html',
   '/ders-takip.html',
+  '/chemclass-student.html',
   '/icon-chemclass-192.png',
   '/icon-chemclass-512.png',
   '/icon-ogretmen-192.png',
@@ -12,6 +13,7 @@ const SHELL = [
   '/manifest-chemclass.json',
   '/manifest-ogretmen.json',
   '/manifest-derstakip.json',
+  '/manifest-chemclass-student.json',
   '/tahta.html',
   '/sw.js',
 ];
@@ -62,4 +64,30 @@ self.addEventListener('fetch', e => {
       })
     );
   }
+});
+
+// ChemClass Öğrenci — arka planda gelen push bildirimlerini göster
+self.addEventListener('push', e => {
+  let data = {};
+  try { data = e.data ? e.data.json() : {}; } catch(_) { data = { title: 'ChemClass', body: e.data ? e.data.text() : '' }; }
+  const title = data.title || 'ChemClass';
+  const body = data.body || '';
+  e.waitUntil(self.registration.showNotification(title, {
+    body,
+    icon: '/icon-chemclass-192.png',
+    badge: '/icon-chemclass-192.png',
+    tag: data.tag || ('cc-' + Date.now()),
+    data: { url: data.url || '/chemclass-student.html' },
+  }));
+});
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = e.notification.data?.url || '/chemclass-student.html';
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for (const c of list) { if (c.url.includes(url) && 'focus' in c) return c.focus(); }
+      if (clients.openWindow) return clients.openWindow(url);
+    })
+  );
 });
