@@ -1424,8 +1424,10 @@ async function apiCall(method, path, body=null, isFormData=false){
   }
   const res = await fetch(url + path, opts);
   if(res.status === 401){
-    // Token expired — force re-login
-    localStorage.removeItem('kasa_token');
+    // Token expired — force re-login. Only clear it if it's still the active
+    // token: concurrent requests may have already refreshed it, and clearing
+    // a freshly-issued token here would trigger an endless re-auth loop.
+    if(getToken() === token) localStorage.removeItem('kasa_token');
     autoCloudAuth();
     throw new Error('Oturum süresi doldu, lütfen tekrar giriş yapın');
   }
