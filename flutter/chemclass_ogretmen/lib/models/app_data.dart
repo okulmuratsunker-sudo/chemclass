@@ -26,10 +26,9 @@ class ScoreHistoryEntry {
 
   factory ScoreHistoryEntry.fromJson(Map<String, dynamic> j) =>
       ScoreHistoryEntry(
-        delta: (j['d'] as num?)?.toInt() ?? 0,
-        note: j['n'] as String? ?? '',
-        timestamp: (j['t'] as num?)?.toInt() ??
-            DateTime.now().millisecondsSinceEpoch,
+        delta: j['d'] is num ? (j['d'] as num).toInt() : int.tryParse('${j['d']}') ?? 0,
+        note: '${j['n'] ?? ''}',
+        timestamp: j['t'] is num ? (j['t'] as num).toInt() : int.tryParse('${j['t']}') ?? DateTime.now().millisecondsSinceEpoch,
       );
 
   Map<String, dynamic> toJson() => {'d': delta, 'n': note, 't': timestamp};
