@@ -91,19 +91,7 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Column(
             children: [
-              Row(
-                children: [
-                  // Code + QR
-                  Expanded(child: _SessionCode(code: _sessionCode!)),
-                  // End session
-                  TextButton.icon(
-                    icon: const Icon(Icons.stop_circle, size: 18),
-                    label: const Text('Bitir'),
-                    style: TextButton.styleFrom(foregroundColor: kRed),
-                    onPressed: _endSession,
-                  ),
-                ],
-              ),
+              _SessionHeader(code: _sessionCode!, onEnd: _endSession),
               const SizedBox(height: 8),
               // View switcher
               Align(
@@ -208,65 +196,91 @@ class _InactiveBoard extends StatelessWidget {
   }
 }
 
-class _SessionCode extends StatelessWidget {
+class _SessionHeader extends StatelessWidget {
   final String code;
-  const _SessionCode({required this.code});
+  final VoidCallback onEnd;
+  const _SessionHeader({required this.code, required this.onEnd});
 
   String get _boardUrl => 'https://chemclass.muratsunker.workers.dev/tahta.html?code=$code';
 
+  void _copy(BuildContext context, String text, String message) {
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: kSurface2, duration: const Duration(seconds: 2)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _showQr(context),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: QrImageView(
-              data: _boardUrl,
-              version: QrVersions.auto,
-              size: 48,
-              backgroundColor: Colors.white,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Kod:', style: TextStyle(color: kTextSecondary, fontSize: 11)),
-              Row(
-                children: [
-                  Text(
-                    code,
-                    style: TextStyle(
-                      color: kAccent,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 4,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  GestureDetector(
-                    onTap: () {
-                      Clipboard.setData(ClipboardData(text: code));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Kod kopyalandı'), backgroundColor: kSurface2, duration: const Duration(seconds: 2)),
-                      );
-                    },
-                    child: Icon(Icons.copy, color: kTextSecondary, size: 16),
-                  ),
-                ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text('Kod:', style: TextStyle(color: kTextSecondary, fontSize: 11)),
+            const SizedBox(width: 6),
+            Text(
+              code,
+              style: TextStyle(
+                color: kAccent,
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 4,
               ),
-            ],
-          ),
-        ],
-      ),
+            ),
+            const SizedBox(width: 6),
+            GestureDetector(
+              onTap: () => _copy(context, code, 'Kod kopyalandı'),
+              child: Icon(Icons.copy, color: kTextSecondary, size: 16),
+            ),
+            const Spacer(),
+            TextButton.icon(
+              icon: const Icon(Icons.stop_circle, size: 18),
+              label: const Text('Bitir'),
+              style: TextButton.styleFrom(
+                foregroundColor: kRed,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+              ),
+              onPressed: onEnd,
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () => _copy(context, _boardUrl, 'Bağlantı kopyalandı'),
+                child: Row(
+                  children: [
+                    Icon(Icons.link, color: kTextSecondary, size: 14),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        _boardUrl,
+                        style: TextStyle(color: kTextSecondary, fontSize: 12),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Icon(Icons.copy, color: kTextSecondary, size: 14),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: () => _showQr(context),
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(color: kSurface2, borderRadius: BorderRadius.circular(8)),
+                child: Icon(Icons.qr_code, color: kAccent, size: 18),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -290,8 +304,14 @@ class _SessionCode extends StatelessWidget {
               style: TextStyle(color: kAccent, fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 4),
             ),
             const SizedBox(height: 8),
+            SelectableText(
+              _boardUrl,
+              style: TextStyle(color: kAccent, fontSize: 12),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
             Text(
-              'Öğrenciler bu kodu girerek\nderse bağlanabilir',
+              'Öğrenciler bu kodu girerek\nveya bağlantıyı açarak derse bağlanabilir',
               style: TextStyle(color: kTextSecondary, fontSize: 13),
               textAlign: TextAlign.center,
             ),
@@ -492,14 +512,20 @@ class _GroupMaker extends StatefulWidget {
 }
 
 class _GroupMakerState extends State<_GroupMaker> {
+  String _mode = 'count'; // 'count' = grup sayısı, 'size' = kişi sayısı
   int _groupCount = 4;
+  int _groupSize = 4;
   List<List<Student>>? _groups;
 
   void _makeGroups() {
+    if (widget.students.isEmpty) return;
+    final count = _mode == 'count'
+        ? _groupCount
+        : (widget.students.length / _groupSize).ceil();
     final shuffled = [...widget.students]..shuffle();
-    final groups = List.generate(_groupCount, (i) => <Student>[]);
+    final groups = List.generate(count.clamp(1, widget.students.length), (i) => <Student>[]);
     for (var i = 0; i < shuffled.length; i++) {
-      groups[i % _groupCount].add(shuffled[i]);
+      groups[i % groups.length].add(shuffled[i]);
     }
     setState(() => _groups = groups);
   }
@@ -509,29 +535,12 @@ class _GroupMakerState extends State<_GroupMaker> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Row(
             children: [
-              Text('Grup Sayısı:', style: TextStyle(color: kTextSecondary)),
-              const SizedBox(width: 12),
-              ...List.generate(6, (i) => i + 2).map((n) => GestureDetector(
-                onTap: () => setState(() => _groupCount = n),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  width: 36,
-                  height: 36,
-                  margin: const EdgeInsets.only(right: 6),
-                  decoration: BoxDecoration(
-                    color: _groupCount == n ? kAccent : kSurface2,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text('$n', style: TextStyle(
-                    color: _groupCount == n ? kBg : kTextSecondary,
-                    fontWeight: FontWeight.w700,
-                  )),
-                ),
-              )),
+              _ModeChip(label: 'Grup Sayısı', selected: _mode == 'count', onTap: () => setState(() => _mode = 'count')),
+              const SizedBox(width: 8),
+              _ModeChip(label: 'Kişi Sayısı', selected: _mode == 'size', onTap: () => setState(() => _mode = 'size')),
               const Spacer(),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(backgroundColor: kAccent, foregroundColor: kBg),
@@ -542,11 +551,46 @@ class _GroupMakerState extends State<_GroupMaker> {
             ],
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                Text(
+                  _mode == 'count' ? 'Grup sayısı:' : 'Grupta kişi sayısı:',
+                  style: TextStyle(color: kTextSecondary),
+                ),
+                const SizedBox(width: 12),
+                if (_mode == 'count')
+                  ...List.generate(6, (i) => i + 2).map((n) => _NumChip(
+                    value: n,
+                    selected: _groupCount == n,
+                    onTap: () => setState(() => _groupCount = n),
+                  ))
+                else ...[
+                  ...List.generate(5, (i) => i + 2).map((n) => _NumChip(
+                    value: n,
+                    selected: _groupSize == n,
+                    onTap: () => setState(() => _groupSize = n),
+                  )),
+                  const SizedBox(width: 8),
+                  Text(
+                    widget.students.isEmpty
+                        ? '→ - grup'
+                        : '→ ${(widget.students.length / _groupSize).ceil()} grup',
+                    style: TextStyle(color: kAccent, fontWeight: FontWeight.w600, fontSize: 13),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
         if (_groups != null) Expanded(
           child: GridView.builder(
             padding: const EdgeInsets.all(12),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: _groupCount <= 3 ? _groupCount : 3,
+              crossAxisCount: _groups!.length <= 3 ? _groups!.length : 3,
               childAspectRatio: 1.2,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
@@ -589,6 +633,63 @@ class _GroupMakerState extends State<_GroupMaker> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ModeChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _ModeChip({required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: selected ? kAccent.withOpacity(0.2) : kSurface2,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: selected ? kAccent : Colors.transparent),
+        ),
+        child: Text(label, style: TextStyle(
+          color: selected ? kAccent : kTextSecondary,
+          fontSize: 13,
+          fontWeight: selected ? FontWeight.w700 : FontWeight.normal,
+        )),
+      ),
+    );
+  }
+}
+
+class _NumChip extends StatelessWidget {
+  final int value;
+  final bool selected;
+  final VoidCallback onTap;
+  const _NumChip({required this.value, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        width: 36,
+        height: 36,
+        margin: const EdgeInsets.only(right: 6),
+        decoration: BoxDecoration(
+          color: selected ? kAccent : kSurface2,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        alignment: Alignment.center,
+        child: Text('$value', style: TextStyle(
+          color: selected ? kBg : kTextSecondary,
+          fontWeight: FontWeight.w700,
+        )),
+      ),
     );
   }
 }
