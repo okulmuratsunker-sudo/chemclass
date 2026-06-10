@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/constants.dart';
 import '../providers/app_provider.dart';
 import '../services/supabase_service.dart';
+import 'dashboard_screen.dart';
 import 'students_screen.dart';
 import 'attendance_screen.dart';
 import 'scores_screen.dart';
@@ -23,19 +24,21 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedIndex = 0;
 
-  final _pages = const [
-    StudentsScreen(),
-    AttendanceScreen(),
-    ScoresScreen(),
-    AssignmentsScreen(),
-    MessagesScreen(),
-    GradebookScreen(),
-    ScheduleScreen(),
-    BoardScreen(),
-    ToolsScreen(),
+  List<Widget> get _pages => [
+    DashboardScreen(onNavigate: (i) => setState(() => _selectedIndex = i)),
+    const StudentsScreen(),
+    const AttendanceScreen(),
+    const ScoresScreen(),
+    const AssignmentsScreen(),
+    const MessagesScreen(),
+    const GradebookScreen(),
+    const ScheduleScreen(),
+    const BoardScreen(),
+    const ToolsScreen(),
   ];
 
   final _navItems = const [
+    _NavItem(Icons.home_outlined, Icons.home, 'Ana Sayfa'),
     _NavItem(Icons.people_outline, Icons.people, 'Sınıflar'),
     _NavItem(Icons.how_to_reg_outlined, Icons.how_to_reg, 'Yoklama'),
     _NavItem(Icons.star_outline, Icons.star, 'Puanlar'),
@@ -137,7 +140,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       backgroundColor: kSurface,
       selectedItemColor: kAccent,
       unselectedItemColor: kTextSecondary,
-      currentIndex: _selectedIndex < 5 ? _selectedIndex : 0,
+      currentIndex: _selectedIndex < 4 ? _selectedIndex : 4,
       type: BottomNavigationBarType.fixed,
       selectedFontSize: 11,
       unselectedFontSize: 11,
