@@ -70,7 +70,7 @@
     font-size:8.5pt;
     color:#9a9a9a;
   }
-  .page-foot::after{ content:"Sayfa " counter(pagenum) " / 13"; }
+  .page-foot::after{ content:"Sayfa " counter(pagenum) " / 20"; }
 
   /* ---------- bullet notes ---------- */
   ul.notes{
@@ -420,6 +420,33 @@
     margin-top:1mm;
     text-align:center;
   }
+
+  /* ---------- standard hydrogen electrode (S.H.E.) diagram ---------- */
+  .she{ width:38%; margin:1mm auto; }
+  .she-diagram{ position:relative; width:100%; aspect-ratio:360/320; }
+  .she-diagram svg{ position:absolute; inset:0; width:100%; height:100%; }
+  .she-overlay{ position:absolute; inset:0; }
+  .she-overlay span{
+    position:absolute;
+    font-size:8.5pt;
+    font-weight:600;
+    white-space:nowrap;
+    transform:translate(-50%,-50%);
+    text-align:center;
+  }
+
+  /* ---------- inline fraction (Nernst denklemi) ---------- */
+  .frac{
+    display:inline-flex;
+    flex-direction:column;
+    vertical-align:middle;
+    text-align:center;
+    margin:0 1mm;
+    line-height:1.15;
+    font-size:.82em;
+  }
+  .frac .num{ border-bottom:1.2px solid var(--ink); padding:0 1mm; }
+  .frac .den{ padding:0 1mm; }
 </style>
 </head>
 <body>
@@ -1222,6 +1249,626 @@
       <div class="stmt"><span class="num">III.</span><span>Pilin net tepkimesi Al<sub>(k)</sub> + 3Ag<sup>+</sup><sub>(suda)</sub> ⇌ Al<sup>+3</sup><sub>(suda)</sub> + 3Ag<sub>(k)</sub></span></div>
     </div>
     <p>Hangileri doğrudur?</p>
+    <div class="answer-lines short"></div>
+  </div>
+
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 14 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik · Elektrokimya</div>
+  <h1 class="page-title">Galvanik Hücre – Örnekler</h1>
+
+  <div class="example" style="border-top:none; padding-top:0; margin-top:0">
+    <p><strong>Örnek 13:</strong></p>
+    <div class="eqn-block">
+      <div class="half-row"><div class="half-eqn">A<sup>+2</sup><sub>(suda)</sub> + 2e<sup>-</sup> → A<sub>(k)</sub></div><div class="half-note">E° = -0,14 V</div></div>
+      <div class="half-row" style="margin-top:1.5mm"><div class="half-eqn">B<sup>+2</sup><sub>(suda)</sub> + 2e<sup>-</sup> → B<sub>(k)</sub></div><div class="half-note">E° = -2,37 V</div></div>
+    </div>
+    <p>Yukarıda verilen yarı pil tepkimelerine göre B–A pili ile ilgili aşağıdakilerden hangisi <strong>doğrudur</strong>?</p>
+    <div class="options">
+      <span>A) A elektrodu yükseltgenir.</span>
+      <span>B) Pil gerilimi 2,51 V'dur.</span>
+      <span>C) Zamanla A elektrot aşınır.</span>
+      <span>D) Tuz köprüsünden anyonlar B elektrodun bulunduğu kaba göçer.</span>
+      <span>E) Dış devreden e<sup>-</sup>'lar A'dan B'ye göçer.</span>
+    </div>
+  </div>
+
+  <div class="example">
+    <p><strong>Örnek 14:</strong> Yukarıdaki pilde elektronlar dış devrede ok yönünde hareket etmektedir.</p>
+
+    <div class="cell">
+      <div class="cell-labels">
+        <div>X elektrot</div>
+        <div>Y elektrot</div>
+      </div>
+      <div class="cell-diagram">
+        <svg viewBox="0 0 720 320" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="liquid4" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="8" height="8" fill="#fdeaea"/>
+              <line x1="0" y1="0" x2="0" y2="8" stroke="#f3c9c7" stroke-width="4"/>
+            </pattern>
+            <pattern id="rodhatch4" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="6" height="6" fill="#eee"/>
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#999" stroke-width="3"/>
+            </pattern>
+          </defs>
+
+          <!-- salt bridge -->
+          <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#1c1c1c" stroke-width="14" stroke-linecap="round"/>
+          <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+
+          <!-- wire + meter -->
+          <line x1="162" y1="20" x2="328" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="372" y1="20" x2="538" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+          <circle cx="350" cy="20" r="22" fill="#fff" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="350" y1="20" x2="362" y2="8" stroke="#1c1c1c" stroke-width="2"/>
+          <line x1="162" y1="20" x2="162" y2="30" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="538" y1="20" x2="538" y2="30" stroke="#1c1c1c" stroke-width="2.5"/>
+
+          <!-- electrodes -->
+          <rect x="150" y="30" width="24" height="160" fill="url(#rodhatch4)" stroke="#888" stroke-width="1.5" rx="2"/>
+          <rect x="526" y="30" width="24" height="160" fill="url(#rodhatch4)" stroke="#888" stroke-width="1.5" rx="2"/>
+
+          <!-- beakers -->
+          <path d="M60,100 L60,280 Q60,300 80,300 L260,300 Q280,300 280,280 L280,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+          <path d="M440,100 L440,280 Q440,300 460,300 L640,300 Q660,300 660,280 L660,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+
+          <!-- liquid fill -->
+          <path d="M62,170 L62,279 Q62,298 80,298 L260,298 Q278,298 278,279 L278,170 Z" fill="url(#liquid4)"/>
+          <path d="M442,170 L442,279 Q442,298 460,298 L640,298 Q658,298 658,279 L658,170 Z" fill="url(#liquid4)"/>
+
+          <!-- liquid surface -->
+          <line x1="60" y1="170" x2="280" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+          <line x1="440" y1="170" x2="660" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+        </svg>
+        <div class="cell-overlay">
+          <span style="left:34%; top:2.5%">← e<sup>-</sup></span>
+          <span style="left:63.2%; top:2.5%">← e<sup>-</sup></span>
+        </div>
+      </div>
+      <div class="cell-captions">
+        <span>1M X<sup>+2</sup><sub>(suda)</sub></span>
+        <span>1M Y<sup>+2</sup><sub>(suda)</sub></span>
+      </div>
+    </div>
+
+    <p>Buna göre hangisi <strong>yanlıştır</strong>?</p>
+    <div class="options" style="grid-template-columns:1fr">
+      <span>A) Y elektrot anottur.</span>
+      <span>B) Katot tepkimesi X<sup>+2</sup><sub>(suda)</sub> + 2e<sup>-</sup> ⇌ X<sub>(k)</sub> dir.</span>
+      <span>C) X<sup>+2</sup><sub>(suda)</sub> iyonu indirgenir.</span>
+      <span>D) Zamanla Y<sup>+2</sup> iyonları derişimi artar.</span>
+      <span>E) Y'nin yükseltgenme potansiyeli X'den büyüktür.</span>
+    </div>
+  </div>
+
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 15 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik · Elektrokimya</div>
+  <h1 class="page-title">Galvanik Hücre – Örnekler</h1>
+
+  <div class="example" style="border-top:none; padding-top:0; margin-top:0">
+    <p><strong>Örnek 15:</strong></p>
+    <div class="eqn-block">
+      <div class="half-row"><div class="half-eqn">Ag<sub>(k)</sub> ⇌ Ag<sup>+</sup><sub>(suda)</sub> + e<sup>-</sup></div><div class="half-note">E° = -0,80 V</div></div>
+      <div class="half-row" style="margin-top:1.5mm"><div class="half-eqn">Pb<sub>(k)</sub> ⇌ Pb<sup>+2</sup><sub>(suda)</sub> + 2e<sup>-</sup></div><div class="half-note">E° = 0,13 V</div></div>
+    </div>
+    <div class="statements">
+      <div class="stmt"><span class="num">I.</span><span>Anotta 0,2 mol Ag<sup>+</sup> iyonu oluştuğu anda katotta 0,1 mol Pb katısı oluşur.</span></div>
+      <div class="stmt"><span class="num">II.</span><span>Pil gerilimi 0,93 V'dur.</span></div>
+      <div class="stmt"><span class="num">III.</span><span>Zamanla Pb elektrodun kütlesi azalır.</span></div>
+    </div>
+    <p>Hangileri doğrudur?</p>
+    <div class="answer-lines short"></div>
+  </div>
+
+  <h2 class="section-title" style="color:var(--red); margin-top:5mm">Standart Hidrojen Elektrodu (S.H.E.)</h2>
+
+  <div class="she">
+    <div class="she-diagram">
+      <svg viewBox="0 0 360 320" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <pattern id="liquidshe" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="8" height="8" fill="#fdeaea"/>
+            <line x1="0" y1="0" x2="0" y2="8" stroke="#f3c9c7" stroke-width="4"/>
+          </pattern>
+          <pattern id="rodhatchshe" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="6" height="6" fill="#eee"/>
+            <line x1="0" y1="0" x2="0" y2="6" stroke="#999" stroke-width="3"/>
+          </pattern>
+        </defs>
+
+        <!-- beaker -->
+        <path d="M50,90 L50,280 Q50,300 70,300 L290,300 Q310,300 310,280 L310,90" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+        <!-- liquid fill -->
+        <path d="M52,165 L52,279 Q52,298 70,298 L290,298 Q308,298 308,279 L308,165 Z" fill="url(#liquidshe)"/>
+        <!-- liquid surface -->
+        <line x1="50" y1="165" x2="310" y2="165" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+
+        <!-- glass tube (test-tube, open bottom) -->
+        <path d="M130,278 L130,55 Q130,35 150,35 L210,35 Q230,35 230,55 L230,278" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+        <path d="M138,275 L138,58 Q138,43 152,43 L208,43 Q222,43 222,58 L222,275" fill="none" stroke="#1c1c1c" stroke-width="1.2"/>
+
+        <!-- gas inlet pipe + arrowhead -->
+        <path d="M25,80 L130,80 M118,73 L131,80 L118,87 Z" stroke="#1c1c1c" stroke-width="2" fill="#1c1c1c"/>
+
+        <!-- Pt electrode plate -->
+        <rect x="155" y="245" width="50" height="10" fill="url(#rodhatchshe)" stroke="#888" stroke-width="1.5" rx="1"/>
+
+        <!-- Pt wire -->
+        <path d="M180,245 L180,15 L335,15" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+
+        <!-- H2 gas bubbles -->
+        <circle cx="165" cy="225" r="4" fill="none" stroke="#1c1c1c" stroke-width="1"/>
+        <circle cx="197" cy="208" r="3.5" fill="none" stroke="#1c1c1c" stroke-width="1"/>
+        <circle cx="172" cy="190" r="3" fill="none" stroke="#1c1c1c" stroke-width="1"/>
+        <circle cx="192" cy="172" r="3" fill="none" stroke="#1c1c1c" stroke-width="1"/>
+      </svg>
+      <div class="she-overlay">
+        <span style="left:88%; top:4%">Pt tel</span>
+        <span style="left:14%; top:18%">H<sub>2(g)</sub><br>1 atm</span>
+        <span style="left:75%; top:68%">1M H<sup>+</sup></span>
+        <span style="left:50%; top:84%">Pt elektrot</span>
+        <span style="left:20%; top:60%">H<sub>2(g)</sub><br>kabarcıkları</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="note-block" style="margin-bottom:2mm; padding:2mm 4mm">
+    <p>Standart hidrojen yarı pili, <strong>1M H<sup>+</sup></strong> iyonu içeren bir asit çözeltisine daldırılmış Pt levha bulunan bir tüpe, <strong>1 atm</strong> basınç altında H<sub>2</sub> gönderilerek hazırlanır.</p>
+  </div>
+
+  <ul class="notes compact" style="margin-bottom:2mm">
+    <li>Hidrojenin yükseltgenme ve indirgenme yarı pil potansiyeli, oda şartlarında (25°C ve 1 atm) <strong>sıfır</strong> kabul edilir.</li>
+  </ul>
+
+  <div class="eqn-block" style="margin:2mm 0">
+    <div class="half-row">
+      <div class="half-eqn">H<sub>2(g)</sub> → 2H<sup>+</sup><sub>(suda)</sub> + 2e<sup>-</sup></div>
+      <div class="half-note">E° = 0,00 V</div>
+    </div>
+  </div>
+
+  <ul class="notes compact" style="margin-bottom:0">
+    <li>Diğer maddelerin pil potansiyelleri, standart hidrojen yarı pilinden yararlanılarak bulunur.</li>
+  </ul>
+
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 16 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik · Elektrokimya</div>
+  <h1 class="page-title">Standart Hidrojen Elektrodu – Örnekler</h1>
+
+  <div class="example" style="border-top:none; padding-top:0; margin-top:0">
+    <p><strong>Örnek 16:</strong></p>
+    <div class="eqn-block" style="margin:2mm 0">
+      <div class="half-row"><div class="half-eqn">Zn<sub>(k)</sub> → Zn<sup>+2</sup><sub>(suda)</sub> + 2e<sup>-</sup></div><div class="half-note">E° = +0,76 V</div></div>
+      <div class="half-row" style="margin-top:1.5mm"><div class="half-eqn">H<sub>2(g)</sub> → 2H<sup>+</sup><sub>(suda)</sub> + 2e<sup>-</sup></div><div class="half-note">E° = 0,00 V</div></div>
+    </div>
+    <p>Standart Zn–H<sub>2</sub> pilinde;</p>
+    <div class="statements">
+      <div class="stmt"><span class="num">I.</span><span>Zn elektrodun kütlesi zamanla azalır.</span></div>
+      <div class="stmt"><span class="num">II.</span><span>Katot elektrodun bulunduğu çözeltinin pH'ı artar.</span></div>
+      <div class="stmt"><span class="num">III.</span><span>Pil gerilimi 0,76 volttur.</span></div>
+    </div>
+    <p>Hangileri doğrudur?</p>
+    <div class="answer-lines short"></div>
+  </div>
+
+  <div class="example" style="margin-top:2mm; padding-top:1.5mm">
+    <p><strong>Örnek 17:</strong></p>
+    <div class="eqn-block" style="margin:2mm 0">
+      <div class="half-row"><div class="half-eqn">Cu<sub>(k)</sub> → Cu<sup>+2</sup><sub>(suda)</sub> + 2e<sup>-</sup></div><div class="half-note">E° = -0,34 V</div></div>
+      <div class="half-row" style="margin-top:1.5mm"><div class="half-eqn">H<sub>2(g)</sub> → 2H<sup>+</sup><sub>(suda)</sub> + 2e<sup>-</sup></div><div class="half-note">E° = 0,00 V</div></div>
+    </div>
+
+    <div class="cell" style="margin:0.5mm auto 1mm auto">
+      <div class="cell-labels">
+        <div>Cu elektrot</div>
+        <div>Pt elektrot (H<sub>2</sub>)</div>
+      </div>
+      <div class="cell-diagram">
+        <svg viewBox="0 0 720 320" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="liquid6" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="8" height="8" fill="#fdeaea"/>
+              <line x1="0" y1="0" x2="0" y2="8" stroke="#f3c9c7" stroke-width="4"/>
+            </pattern>
+            <pattern id="rodhatch6" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="6" height="6" fill="#eee"/>
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#999" stroke-width="3"/>
+            </pattern>
+          </defs>
+
+          <!-- salt bridge -->
+          <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#1c1c1c" stroke-width="14" stroke-linecap="round"/>
+          <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+
+          <!-- wire + meter -->
+          <line x1="162" y1="20" x2="328" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="372" y1="20" x2="550" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+          <circle cx="350" cy="20" r="22" fill="#fff" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="350" y1="20" x2="362" y2="8" stroke="#1c1c1c" stroke-width="2"/>
+          <line x1="162" y1="20" x2="162" y2="30" stroke="#1c1c1c" stroke-width="2.5"/>
+
+          <!-- Cu electrode -->
+          <rect x="150" y="30" width="24" height="160" fill="url(#rodhatch6)" stroke="#888" stroke-width="1.5" rx="2"/>
+
+          <!-- beakers -->
+          <path d="M60,100 L60,280 Q60,300 80,300 L260,300 Q280,300 280,280 L280,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+          <path d="M440,100 L440,280 Q440,300 460,300 L640,300 Q660,300 660,280 L660,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+
+          <!-- liquid fill -->
+          <path d="M62,170 L62,279 Q62,298 80,298 L260,298 Q278,298 278,279 L278,170 Z" fill="url(#liquid6)"/>
+          <path d="M442,170 L442,279 Q442,298 460,298 L640,298 Q658,298 658,279 L658,170 Z" fill="url(#liquid6)"/>
+
+          <!-- liquid surface -->
+          <line x1="60" y1="170" x2="280" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+          <line x1="440" y1="170" x2="660" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+
+          <!-- glass tube (H2/Pt) in right beaker -->
+          <path d="M515,275 L515,75 Q515,55 535,55 L565,55 Q585,55 585,75 L585,275" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+          <path d="M523,272 L523,80 Q523,67 537,67 L563,67 Q577,67 577,80 L577,272" fill="none" stroke="#1c1c1c" stroke-width="1.2"/>
+
+          <!-- gas inlet pipe + arrowhead -->
+          <path d="M660,90 L585,90 M597,83 L584,90 L597,97 Z" stroke="#1c1c1c" stroke-width="2" fill="#1c1c1c"/>
+
+          <!-- Pt electrode plate -->
+          <rect x="530" y="245" width="40" height="10" fill="url(#rodhatch6)" stroke="#888" stroke-width="1.5" rx="1"/>
+
+          <!-- Pt wire -->
+          <line x1="550" y1="20" x2="550" y2="245" stroke="#1c1c1c" stroke-width="2.5"/>
+
+          <!-- H2 gas bubbles -->
+          <circle cx="540" cy="225" r="4" fill="none" stroke="#1c1c1c" stroke-width="1"/>
+          <circle cx="565" cy="208" r="3.5" fill="none" stroke="#1c1c1c" stroke-width="1"/>
+          <circle cx="545" cy="192" r="3" fill="none" stroke="#1c1c1c" stroke-width="1"/>
+          <circle cx="560" cy="175" r="3" fill="none" stroke="#1c1c1c" stroke-width="1"/>
+        </svg>
+        <div class="cell-overlay">
+          <span style="left:87.5%; top:28%">H<sub>2(g)</sub><br>1 atm</span>
+        </div>
+      </div>
+      <div class="cell-captions">
+        <span>1M CuSO<sub>4</sub></span>
+        <span>1M HCl</span>
+      </div>
+    </div>
+
+    <p>Yukarıdaki hücre için (1. kap: CuSO<sub>4</sub>, 2. kap: HCl) hangisi <strong>yanlıştır</strong>?</p>
+    <div class="options" style="margin-top:1.5mm">
+      <span>A) 2. kapta H<sub>2</sub> yükseltgenmiştir.</span>
+      <span>B) Cu elektrot katottur.</span>
+      <span>C) 2. kapta H<sup>+</sup> derişimi artar.</span>
+      <span>D) 2. kapta pH artar.</span>
+      <span>E) 1. kapta Cu<sup>+2</sup> derişimi azalır.</span>
+    </div>
+  </div>
+
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 17 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik · Elektrokimya</div>
+  <h1 class="page-title">Standart Hidrojen Elektrodu – Örnekler</h1>
+
+  <div class="example" style="border-top:none; padding-top:0; margin-top:0">
+    <p><strong>Örnek 18:</strong></p>
+    <p>Pil potansiyelinin, elektrotlardan birinin yükseltgenme yarı pil potansiyeline eşit olduğu bilinen bir pil ile ilgili;</p>
+    <div class="statements">
+      <div class="stmt"><span class="num">I.</span><span>Net tepkimede ürünlerden biri H<sub>2</sub> gazıdır.</span></div>
+      <div class="stmt"><span class="num">II.</span><span>Elektrotların ikisi de soy metaldir.</span></div>
+      <div class="stmt"><span class="num">III.</span><span>Elektronlar dış devrede anottan katota akar.</span></div>
+    </div>
+    <p>yargılarından hangileri doğru olabilir?</p>
+    <div class="answer-lines" style="height:10mm"></div>
+  </div>
+
+  <div class="example" style="margin-top:2mm; padding-top:1.5mm">
+    <p><strong>Örnek 19:</strong></p>
+    <div class="eqn-block" style="margin:2mm 0">
+      <div class="eqn">
+        Zn<sub>(k)</sub> | Zn<sup>+2</sup><sub>(suda)</sub>(1M) ‖ (1M)H<sup>+</sup><sub>(suda)</sub> | H<sub>2(g)</sub>(1atm), Pt<sub>(k)</sub>
+      </div>
+    </div>
+    <div class="statements" style="margin:2mm 0">
+      <div class="stmt"><span class="num">I.</span><span>Zn elektrot anottur.</span></div>
+      <div class="stmt"><span class="num">II.</span><span>Pilin gerilimi, Zn metalinin yükseltgenme yarı pil potansiyeline eşittir.</span></div>
+      <div class="stmt"><span class="num">III.</span><span>Katotta H<sub>2</sub> gazı açığa çıkar.</span></div>
+    </div>
+    <p>Hangileri doğrudur?</p>
+    <div class="answer-lines" style="height:10mm"></div>
+  </div>
+
+  <h2 class="section-title" style="color:var(--red); margin-top:3mm">Nernst Denklemi</h2>
+  <ul class="notes compact" style="margin-bottom:2mm">
+    <li>Galvanik hücrelerde derişim 1M, gaz basıncı 1 atm ve sıcaklık 25°C ise hücre <strong>standart koşullardadır</strong> ve hücre potansiyeli <strong>E°</strong> ile gösterilir.</li>
+    <li>Derişim, basınç ya da sıcaklık standart değerlerden farklı ise hücre potansiyeli <strong>E</strong> ile gösterilir ve <strong>Nernst denklemi</strong> ile hesaplanır.</li>
+  </ul>
+
+  <div class="eqn-block" style="margin:2mm 0">
+    <div class="eqn">
+      E<sub>hücre</sub> = E°<sub>hücre</sub> − <span class="frac"><span class="num">0,0592</span><span class="den">n</span></span> · log K
+      &nbsp;&nbsp;&nbsp; (K = <span class="frac"><span class="num">[Ürün]</span><span class="den">[Giren]</span></span>)
+    </div>
+  </div>
+
+  <div class="two-col" style="margin-bottom:0">
+    <div class="col">
+      <ul class="notes compact">
+        <li><strong>E°<sub>hücre</sub></strong>: Standart koşullardaki hücre potansiyeli</li>
+        <li><strong>E<sub>hücre</sub></strong>: Standart olmayan koşullardaki hücre potansiyeli</li>
+      </ul>
+    </div>
+    <div class="col">
+      <ul class="notes compact">
+        <li><strong>n</strong>: Yarı tepkimelerde alınıp verilen elektron sayısı</li>
+        <li><strong>K</strong>: Net tepkimenin denge ifadesi (derişimler oranı)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 18 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik · Elektrokimya</div>
+  <h1 class="page-title">Nernst Denklemi – Örnekler</h1>
+
+  <div class="example" style="border-top:none; padding-top:0; margin-top:0">
+    <p><strong>Örnek 20:</strong></p>
+    <div class="eqn-block">
+      <div class="half-row"><div class="half-eqn">Zn<sup>+2</sup><sub>(suda)</sub> + 2e<sup>-</sup> → Zn<sub>(k)</sub></div><div class="half-note">E° = -0,76 V</div></div>
+      <div class="half-row" style="margin-top:1.5mm"><div class="half-eqn">Ag<sup>+</sup><sub>(suda)</sub> + e<sup>-</sup> → Ag<sub>(k)</sub></div><div class="half-note">E° = +0,80 V</div></div>
+    </div>
+
+    <div class="cell">
+      <div class="cell-labels">
+        <div>Zn elektrot</div>
+        <div>Ag elektrot</div>
+      </div>
+      <div class="cell-diagram">
+        <svg viewBox="0 0 720 320" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="liquid7" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="8" height="8" fill="#fdeaea"/>
+              <line x1="0" y1="0" x2="0" y2="8" stroke="#f3c9c7" stroke-width="4"/>
+            </pattern>
+            <pattern id="rodhatch7" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="6" height="6" fill="#eee"/>
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#999" stroke-width="3"/>
+            </pattern>
+          </defs>
+
+          <!-- salt bridge -->
+          <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#1c1c1c" stroke-width="14" stroke-linecap="round"/>
+          <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+
+          <!-- wire + meter -->
+          <line x1="162" y1="20" x2="328" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="372" y1="20" x2="538" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+          <circle cx="350" cy="20" r="22" fill="#fff" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="350" y1="20" x2="362" y2="8" stroke="#1c1c1c" stroke-width="2"/>
+          <line x1="162" y1="20" x2="162" y2="30" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="538" y1="20" x2="538" y2="30" stroke="#1c1c1c" stroke-width="2.5"/>
+
+          <!-- electrodes -->
+          <rect x="150" y="30" width="24" height="160" fill="url(#rodhatch7)" stroke="#888" stroke-width="1.5" rx="2"/>
+          <rect x="526" y="30" width="24" height="160" fill="url(#rodhatch7)" stroke="#888" stroke-width="1.5" rx="2"/>
+
+          <!-- beakers -->
+          <path d="M60,100 L60,280 Q60,300 80,300 L260,300 Q280,300 280,280 L280,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+          <path d="M440,100 L440,280 Q440,300 460,300 L640,300 Q660,300 660,280 L660,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+
+          <!-- liquid fill -->
+          <path d="M62,170 L62,279 Q62,298 80,298 L260,298 Q278,298 278,279 L278,170 Z" fill="url(#liquid7)"/>
+          <path d="M442,170 L442,279 Q442,298 460,298 L640,298 Q658,298 658,279 L658,170 Z" fill="url(#liquid7)"/>
+
+          <!-- liquid surface -->
+          <line x1="60" y1="170" x2="280" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+          <line x1="440" y1="170" x2="660" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+        </svg>
+        <div class="cell-overlay">
+          <span style="left:50%; top:14.1%">KCl</span>
+        </div>
+      </div>
+      <div class="cell-captions">
+        <span>0,1M Zn<sup>+2</sup><sub>(suda)</sub></span>
+        <span>0,01M Ag<sup>+</sup><sub>(suda)</sub></span>
+      </div>
+    </div>
+
+    <p>Standart dışı koşullarda hazırlanan yukarıdaki galvanik hücrenin gerilimi kaç V olur?</p>
+    <div class="answer-box">Cevap: 1,47 V</div>
+  </div>
+
+  <div class="example" style="margin-top:2mm; padding-top:1.5mm">
+    <p><strong>Örnek 21:</strong></p>
+    <div class="eqn-block">
+      <div class="eqn">
+        Zn<sub>(k)</sub> | Zn<sup>+2</sup><sub>(suda)</sub>(10<sup>-1</sup>M) ‖ Cl<sub>2(g)</sub>(1atm) | Cl<sup>-</sup><sub>(suda)</sub>(10<sup>-2</sup>M), Pt<sub>(k)</sub>
+      </div>
+      <div class="ann">E°(Zn<sup>+2</sup>/Zn) = -0,76 V &nbsp;&nbsp;&nbsp; E°(Cl<sub>2</sub>/Cl<sup>-</sup>) = +1,36 V</div>
+    </div>
+    <p>Yukarıdaki hücrenin 25°C'deki gerilimi kaç volttur?</p>
+    <div class="answer-box">Cevap: 2,26 V</div>
+  </div>
+
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 19 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik · Elektrokimya</div>
+  <h1 class="page-title">Nernst Denklemi – Örnekler</h1>
+
+  <div class="example" style="border-top:none; padding-top:0; margin-top:0">
+    <p><strong>Örnek 22:</strong></p>
+    <div class="eqn-block" style="margin:2mm 0">
+      <div class="half-row"><div class="half-eqn">Ni<sub>(k)</sub> → Ni<sup>+2</sup><sub>(suda)</sub> + 2e<sup>-</sup></div><div class="half-note">E° = 0,25 V</div></div>
+      <div class="half-row" style="margin-top:1.5mm"><div class="half-eqn">Cr<sub>(k)</sub> → Cr<sup>+3</sup><sub>(suda)</sub> + 3e<sup>-</sup></div><div class="half-note">E° = 0,75 V</div></div>
+    </div>
+
+    <div class="cell" style="width:42%; margin:0.5mm auto 1mm auto">
+      <div class="cell-labels">
+        <div>Cr elektrot</div>
+        <div>Ni elektrot</div>
+      </div>
+      <div class="cell-diagram">
+        <svg viewBox="0 0 720 320" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="liquid8" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="8" height="8" fill="#fdeaea"/>
+              <line x1="0" y1="0" x2="0" y2="8" stroke="#f3c9c7" stroke-width="4"/>
+            </pattern>
+            <pattern id="rodhatch8" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="6" height="6" fill="#eee"/>
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#999" stroke-width="3"/>
+            </pattern>
+          </defs>
+
+          <!-- salt bridge -->
+          <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#1c1c1c" stroke-width="14" stroke-linecap="round"/>
+          <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+
+          <!-- wire + meter -->
+          <line x1="162" y1="20" x2="328" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="372" y1="20" x2="538" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+          <circle cx="350" cy="20" r="22" fill="#fff" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="350" y1="20" x2="362" y2="8" stroke="#1c1c1c" stroke-width="2"/>
+          <line x1="162" y1="20" x2="162" y2="30" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="538" y1="20" x2="538" y2="30" stroke="#1c1c1c" stroke-width="2.5"/>
+
+          <!-- electrodes -->
+          <rect x="150" y="30" width="24" height="160" fill="url(#rodhatch8)" stroke="#888" stroke-width="1.5" rx="2"/>
+          <rect x="526" y="30" width="24" height="160" fill="url(#rodhatch8)" stroke="#888" stroke-width="1.5" rx="2"/>
+
+          <!-- beakers -->
+          <path d="M60,100 L60,280 Q60,300 80,300 L260,300 Q280,300 280,280 L280,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+          <path d="M440,100 L440,280 Q440,300 460,300 L640,300 Q660,300 660,280 L660,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+
+          <!-- liquid fill -->
+          <path d="M62,170 L62,279 Q62,298 80,298 L260,298 Q278,298 278,279 L278,170 Z" fill="url(#liquid8)"/>
+          <path d="M442,170 L442,279 Q442,298 460,298 L640,298 Q658,298 658,279 L658,170 Z" fill="url(#liquid8)"/>
+
+          <!-- liquid surface -->
+          <line x1="60" y1="170" x2="280" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+          <line x1="440" y1="170" x2="660" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+        </svg>
+        <div class="cell-overlay">
+          <span style="left:50%; top:14.1%">KCl</span>
+        </div>
+      </div>
+      <div class="cell-captions">
+        <span>0,01M Cr<sup>+3</sup><sub>(suda)</sub></span>
+        <span>1M Ni<sup>+2</sup><sub>(suda)</sub></span>
+      </div>
+    </div>
+
+    <p>Yukarıdaki hücrenin gerilimi kaç volttur? (Sabiti 0,06 alınız.)</p>
+    <div class="answer-box" style="margin-top:1mm">Cevap: 0,54 V</div>
+  </div>
+
+  <div class="example" style="margin-top:2mm; padding-top:1.5mm">
+    <p><strong>Örnek 23:</strong></p>
+    <div class="eqn-block" style="margin:2mm 0">
+      <div class="half-row"><div class="half-eqn">Zn<sup>+2</sup><sub>(suda)</sub> + 2e<sup>-</sup> → Zn<sub>(k)</sub></div><div class="half-note">E° = -0,76 V</div></div>
+      <div class="half-row" style="margin-top:1.5mm"><div class="half-eqn">Mg<sup>+2</sup><sub>(suda)</sub> + 2e<sup>-</sup> → Mg<sub>(k)</sub></div><div class="half-note">E° = -2,37 V</div></div>
+    </div>
+
+    <div class="cell" style="width:42%; margin:0.5mm auto 1mm auto">
+      <div class="cell-labels">
+        <div>Mg elektrot</div>
+        <div>Zn elektrot</div>
+      </div>
+      <div class="cell-diagram">
+        <svg viewBox="0 0 720 320" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="liquid9" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="8" height="8" fill="#fdeaea"/>
+              <line x1="0" y1="0" x2="0" y2="8" stroke="#f3c9c7" stroke-width="4"/>
+            </pattern>
+            <pattern id="rodhatch9" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="6" height="6" fill="#eee"/>
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#999" stroke-width="3"/>
+            </pattern>
+          </defs>
+
+          <!-- salt bridge -->
+          <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#1c1c1c" stroke-width="14" stroke-linecap="round"/>
+          <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+
+          <!-- wire + meter -->
+          <line x1="162" y1="20" x2="328" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="372" y1="20" x2="538" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+          <circle cx="350" cy="20" r="22" fill="#fff" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="350" y1="20" x2="362" y2="8" stroke="#1c1c1c" stroke-width="2"/>
+          <line x1="162" y1="20" x2="162" y2="30" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="538" y1="20" x2="538" y2="30" stroke="#1c1c1c" stroke-width="2.5"/>
+
+          <!-- electrodes -->
+          <rect x="150" y="30" width="24" height="160" fill="url(#rodhatch9)" stroke="#888" stroke-width="1.5" rx="2"/>
+          <rect x="526" y="30" width="24" height="160" fill="url(#rodhatch9)" stroke="#888" stroke-width="1.5" rx="2"/>
+
+          <!-- beakers -->
+          <path d="M60,100 L60,280 Q60,300 80,300 L260,300 Q280,300 280,280 L280,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+          <path d="M440,100 L440,280 Q440,300 460,300 L640,300 Q660,300 660,280 L660,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+
+          <!-- liquid fill -->
+          <path d="M62,170 L62,279 Q62,298 80,298 L260,298 Q278,298 278,279 L278,170 Z" fill="url(#liquid9)"/>
+          <path d="M442,170 L442,279 Q442,298 460,298 L640,298 Q658,298 658,279 L658,170 Z" fill="url(#liquid9)"/>
+
+          <!-- liquid surface -->
+          <line x1="60" y1="170" x2="280" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+          <line x1="440" y1="170" x2="660" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+        </svg>
+        <div class="cell-overlay">
+          <span style="left:50%; top:14.1%">KCl</span>
+        </div>
+      </div>
+      <div class="cell-captions">
+        <span>1M Mg<sup>+2</sup><sub>(suda)</sub></span>
+        <span>0,1M Zn<sup>+2</sup><sub>(suda)</sub></span>
+      </div>
+    </div>
+
+    <div class="statements" style="margin:2mm 0">
+      <div class="stmt"><span class="num">I.</span><span>Mg elektrot anottur.</span></div>
+      <div class="stmt"><span class="num">II.</span><span>Pil potansiyeli 1,61 V'dur.</span></div>
+      <div class="stmt"><span class="num">III.</span><span>Zn<sup>+2</sup> iyonları indirgenir.</span></div>
+    </div>
+    <p>Hangileri doğrudur?</p>
+    <div class="answer-lines" style="height:10mm"></div>
+  </div>
+
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 20 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik · Elektrokimya</div>
+  <h1 class="page-title">Nernst Denklemi – Örnekler</h1>
+
+  <div class="example" style="border-top:none; padding-top:0; margin-top:0">
+    <p><strong>Örnek 24:</strong></p>
+    <p>X ve Y metalleri arasında oluşan pil sisteminde tepkimenin denge bağıntısı K = <span class="frac"><span class="num">[Y<sup>+3</sup>]</span><span class="den">[X<sup>+2</sup>]</span></span> şeklindedir. Buna göre;</p>
+    <div class="statements">
+      <div class="stmt"><span class="num">I.</span><span>X anot, Y katottur.</span></div>
+      <div class="stmt"><span class="num">II.</span><span>Y elektrodun kütlesi zamanla azalır.</span></div>
+      <div class="stmt"><span class="num">III.</span><span>Pil çalışırken zamanla X<sup>+2</sup> iyon derişimi artar.</span></div>
+    </div>
+    <p>Yargılarından hangileri doğrudur?</p>
     <div class="answer-lines short"></div>
   </div>
 
