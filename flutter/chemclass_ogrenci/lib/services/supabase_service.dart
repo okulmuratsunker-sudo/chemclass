@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/student_session.dart';
 import '../models/message.dart';
@@ -233,6 +234,26 @@ class SupabaseService {
       leaderboard: leaderboard,
       history: myHistory,
     );
+  }
+
+  // Push bildirim cihaz token kaydı (FCM)
+  static Future<void> registerDeviceToken(
+      StudentSession session, String token) async {
+    await _sb.from('chemclass_device_tokens').upsert({
+      'teacher_id': session.teacherId,
+      'student_id': session.studentId,
+      'class_name': session.className,
+      'role': 'student',
+      'token': token,
+      'platform':
+          defaultTargetPlatform == TargetPlatform.iOS ? 'ios' : 'android',
+      'updated_at': DateTime.now().toIso8601String(),
+    }, onConflict: 'token');
+  }
+
+  // Çıkış yapılırken cihaz token kaydını sil
+  static Future<void> removeDeviceToken(String token) async {
+    await _sb.from('chemclass_device_tokens').delete().eq('token', token);
   }
 
   // Realtime mesaj aboneliği
