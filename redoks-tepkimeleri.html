@@ -70,7 +70,7 @@
     font-size:8.5pt;
     color:#9a9a9a;
   }
-  .page-foot::after{ content:"Sayfa " counter(pagenum) " / 27"; }
+  .page-foot::after{ content:"Sayfa " counter(pagenum) " / 29"; }
 
   /* ---------- bullet notes ---------- */
   ul.notes{
@@ -2701,6 +2701,174 @@
       <div class="stmt"><span class="num">III.</span><span>Zn<sup>+2</sup> iyon derişimi zamanla azalır.</span></div>
     </div>
     <p style="margin-bottom:1mm">Yargılarından hangileri doğrudur?</p>
+    <div class="answer-lines short"></div>
+  </div>
+
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 28 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik · Elektroliz</div>
+  <h1 class="page-title">Elektroliz – Örnekler</h1>
+
+  <div class="example" style="border-top:none; padding-top:0; margin-top:0">
+    <p><strong>Örnek 33:</strong></p>
+
+    <div class="cell" style="width:40%; margin:1mm auto 2mm auto">
+      <div class="cell-labels">
+        <div>Zn<sub>(k)</sub></div>
+        <div>Ag<sub>(k)</sub></div>
+      </div>
+      <div class="cell-diagram">
+        <svg viewBox="0 0 720 320" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="liquid17" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="8" height="8" fill="#dff3fb"/>
+              <line x1="0" y1="0" x2="0" y2="8" stroke="#8fd3ec" stroke-width="4"/>
+            </pattern>
+            <pattern id="rodhatch20" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="6" height="6" fill="#eee"/>
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#999" stroke-width="3"/>
+            </pattern>
+          </defs>
+
+          <!-- salt bridge -->
+          <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#1c1c1c" stroke-width="14" stroke-linecap="round"/>
+          <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+
+          <!-- wire + battery (- solda, + sağda) -->
+          <line x1="162" y1="20" x2="328" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="372" y1="20" x2="538" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="328" y1="11" x2="328" y2="29" stroke="#1c1c1c" stroke-width="5"/>
+          <line x1="372" y1="6" x2="372" y2="34" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="162" y1="20" x2="162" y2="30" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="538" y1="20" x2="538" y2="30" stroke="#1c1c1c" stroke-width="2.5"/>
+
+          <!-- electrodes -->
+          <rect x="150" y="30" width="24" height="160" fill="url(#rodhatch20)" stroke="#888" stroke-width="1.5" rx="2"/>
+          <rect x="526" y="30" width="24" height="160" fill="url(#rodhatch20)" stroke="#888" stroke-width="1.5" rx="2"/>
+
+          <!-- beakers -->
+          <path d="M60,100 L60,280 Q60,300 80,300 L260,300 Q280,300 280,280 L280,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+          <path d="M440,100 L440,280 Q440,300 460,300 L640,300 Q660,300 660,280 L660,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+
+          <!-- liquid fill -->
+          <path d="M62,170 L62,279 Q62,298 80,298 L260,298 Q278,298 278,279 L278,170 Z" fill="url(#liquid17)"/>
+          <path d="M442,170 L442,279 Q442,298 460,298 L640,298 Q658,298 658,279 L658,170 Z" fill="url(#liquid17)"/>
+
+          <!-- liquid surface -->
+          <line x1="60" y1="170" x2="280" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+          <line x1="440" y1="170" x2="660" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+        </svg>
+        <div class="cell-overlay">
+          <span style="left:45.6%; top:1.5%">−</span>
+          <span style="left:51.7%; top:1.5%">+</span>
+        </div>
+      </div>
+      <div class="cell-captions">
+        <span>1m Zn<sup>+2</sup><br>1.kap</span>
+        <span>1m Ag<sup>+</sup><br>2.kap</span>
+      </div>
+    </div>
+
+    <div class="eqn-block">
+      <div class="half-row"><div class="half-eqn">Zn<sub>(k)</sub> → Zn<sup>+2</sup><sub>(suda)</sub> + 2e<sup>-</sup></div><div class="half-note">E° = 0,76 V</div></div>
+      <div class="half-row" style="margin-top:1.5mm"><div class="half-eqn">Ag<sub>(k)</sub> → Ag<sup>+</sup><sub>(suda)</sub> + e<sup>-</sup></div><div class="half-note">E° = -0,80 V</div></div>
+    </div>
+
+    <p style="margin-bottom:1mm">Yandaki elektroliz düzeneği için hangisi yanlıştır?</p>
+    <div class="options" style="grid-template-columns:1fr; margin-top:1mm">
+      <span>A) Elektroliz devresinin istemli olması için 1,56 V'den büyük bir gerilim bağlanmalı.</span>
+      <span>B) Zamanla Ag<sub>(k)</sub> elektrot aşınır.</span>
+      <span>C) 1.kapta zamanla Zn<sup>+2</sup> konsantrasyonu artar.</span>
+      <span>D) Tuz köprüsünde katyonlar 1.kaba göçer.</span>
+      <span>E) Dış devrede elektronlar Ag'den Zn'ye akar.</span>
+    </div>
+    <div class="answer-lines short"></div>
+  </div>
+
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 29 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik · Elektroliz</div>
+  <h1 class="page-title">Elektroliz – Örnekler</h1>
+
+  <div class="example" style="border-top:none; padding-top:0; margin-top:0">
+    <p><strong>Örnek 34:</strong></p>
+
+    <div class="cell" style="width:40%; margin:1mm auto 2mm auto">
+      <div class="cell-labels">
+        <div>Zn<sub>(k)</sub></div>
+        <div>Fe<sub>(k)</sub></div>
+      </div>
+      <div class="cell-diagram">
+        <svg viewBox="0 0 720 320" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="liquid18" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="8" height="8" fill="#dff3fb"/>
+              <line x1="0" y1="0" x2="0" y2="8" stroke="#8fd3ec" stroke-width="4"/>
+            </pattern>
+            <pattern id="rodhatch21" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="6" height="6" fill="#eee"/>
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#999" stroke-width="3"/>
+            </pattern>
+          </defs>
+
+          <!-- salt bridge -->
+          <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#1c1c1c" stroke-width="14" stroke-linecap="round"/>
+          <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+
+          <!-- wire + battery (- solda, + sağda) -->
+          <line x1="162" y1="20" x2="328" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="372" y1="20" x2="538" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="328" y1="11" x2="328" y2="29" stroke="#1c1c1c" stroke-width="5"/>
+          <line x1="372" y1="6" x2="372" y2="34" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="162" y1="20" x2="162" y2="30" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="538" y1="20" x2="538" y2="30" stroke="#1c1c1c" stroke-width="2.5"/>
+
+          <!-- electrodes -->
+          <rect x="150" y="30" width="24" height="160" fill="url(#rodhatch21)" stroke="#888" stroke-width="1.5" rx="2"/>
+          <rect x="526" y="30" width="24" height="160" fill="url(#rodhatch21)" stroke="#888" stroke-width="1.5" rx="2"/>
+
+          <!-- beakers -->
+          <path d="M60,100 L60,280 Q60,300 80,300 L260,300 Q280,300 280,280 L280,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+          <path d="M440,100 L440,280 Q440,300 460,300 L640,300 Q660,300 660,280 L660,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+
+          <!-- liquid fill -->
+          <path d="M62,170 L62,279 Q62,298 80,298 L260,298 Q278,298 278,279 L278,170 Z" fill="url(#liquid18)"/>
+          <path d="M442,170 L442,279 Q442,298 460,298 L640,298 Q658,298 658,279 L658,170 Z" fill="url(#liquid18)"/>
+
+          <!-- liquid surface -->
+          <line x1="60" y1="170" x2="280" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+          <line x1="440" y1="170" x2="660" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+        </svg>
+        <div class="cell-overlay">
+          <span style="left:45.6%; top:1.5%">−</span>
+          <span style="left:51.7%; top:1.5%">+</span>
+        </div>
+      </div>
+      <div class="cell-captions">
+        <span>1m Zn<sup>+2</sup><br>1.kap</span>
+        <span>1m Fe<sup>+2</sup><br>2.kap</span>
+      </div>
+    </div>
+
+    <div class="eqn-block">
+      <div class="half-row"><div class="half-eqn">Zn<sub>(k)</sub> → Zn<sup>+2</sup><sub>(suda)</sub> + 2e<sup>-</sup></div><div class="half-note">E° = 0,76 V</div></div>
+      <div class="half-row" style="margin-top:1.5mm"><div class="half-eqn">Fe<sub>(k)</sub> → Fe<sup>+2</sup><sub>(suda)</sub> + 2e<sup>-</sup></div><div class="half-note">E° = 0,44 V</div></div>
+    </div>
+
+    <p style="margin-bottom:1mm">Yandaki elektroliz düzeneği için hangisi yanlıştır?</p>
+    <div class="options" style="grid-template-columns:1fr; margin-top:1mm">
+      <span>A) 1.kapta Zn<sup>+2</sup> derişimi azalır.</span>
+      <span>B) Fe<sub>(k)</sub> çubuk aşınır.</span>
+      <span>C) Tuz köprüsünden anot bölmesine (+) yüklü iyon akar.</span>
+      <span>D) Elektrolizin istemliliği için dışarıdan 0,33 V gerilim yeterlidir.</span>
+      <span>E) Elektroliz denklemi: Zn<sup>+2</sup><sub>(suda)</sub> + Fe<sub>(k)</sub> ⇌ Zn<sub>(k)</sub> + Fe<sup>+2</sup><sub>(suda)</sub>'dır.</span>
+    </div>
     <div class="answer-lines short"></div>
   </div>
 
