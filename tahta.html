@@ -317,7 +317,7 @@ function disconnectBoard(){
 }
 
 // ── POLLING ─────────────────────────────────────────────────────────────────
-function startPolling(){pollTimer = setInterval(poll, 2000);}
+function startPolling(){pollTimer = setInterval(poll, 1000);}
 function stopPolling(){
   clearInterval(pollTimer); pollTimer = null;
   clearInterval(localTimerIv); localTimerIv = null;

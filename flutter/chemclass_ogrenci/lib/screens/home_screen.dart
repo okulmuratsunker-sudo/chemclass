@@ -79,36 +79,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
-      body: IndexedStack(index: _tab, children: _tabs),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: kSurface,
-          border: Border(top: BorderSide(color: kSurface2)),
-        ),
-        child: SafeArea(
-          child: Row(
-            children: [
-              _NavItem(
-                icon: Icons.emoji_events_rounded,
-                label: 'Puanım',
-                active: _tab == 0,
-                onTap: () => setState(() => _tab = 0),
-              ),
-              _NavItem(
-                icon: Icons.assignment_rounded,
-                label: 'Ödevler',
-                active: _tab == 1,
-                onTap: () => setState(() => _tab = 1),
-              ),
-              _NavItem(
-                icon: Icons.chat_rounded,
-                label: 'Mesajlar',
-                active: _tab == 2,
-                onTap: () => setState(() => _tab = 2),
-              ),
-            ],
+      body: Column(
+        children: [
+          // Sekme menüsü (üstte - klavye açıkken kapanmaması için)
+          Container(
+            decoration: const BoxDecoration(
+              color: kSurface,
+              border: Border(bottom: BorderSide(color: kSurface2)),
+            ),
+            child: Row(
+              children: [
+                _NavItem(
+                  icon: Icons.emoji_events_rounded,
+                  label: 'Puanım',
+                  active: _tab == 0,
+                  onTap: () => setState(() => _tab = 0),
+                ),
+                _NavItem(
+                  icon: Icons.assignment_rounded,
+                  label: 'Ödevler',
+                  active: _tab == 1,
+                  onTap: () => setState(() => _tab = 1),
+                ),
+                _NavItem(
+                  icon: Icons.chat_rounded,
+                  label: 'Mesajlar',
+                  active: _tab == 2,
+                  onTap: () => setState(() => _tab = 2),
+                ),
+              ],
+            ),
           ),
-        ),
+          Expanded(child: IndexedStack(index: _tab, children: _tabs)),
+        ],
       ),
     );
   }
@@ -161,13 +164,21 @@ class _NavItem extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: Padding(
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: active ? kAccent : Colors.transparent,
+                width: 2,
+              ),
+            ),
+          ),
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon,
-                  color: active ? kAccent : kTextSecondary, size: 24),
+                  color: active ? kAccent : kTextSecondary, size: 22),
               const SizedBox(height: 3),
               Text(
                 label,

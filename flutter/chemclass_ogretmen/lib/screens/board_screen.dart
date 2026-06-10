@@ -40,7 +40,7 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
       return;
     }
     _selectedClass ??= data.classes.first;
-    final snapshot = data.toJson();
+    final snapshot = _snapshot(data);
     final code = await SupabaseService.createBoardSession(
       className: _selectedClass!,
       snapshot: snapshot,
@@ -49,13 +49,19 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
       _sessionCode = code;
       _isActive = true;
     });
-    // Sync every 10 seconds
-    _syncTimer = Timer.periodic(const Duration(seconds: 10), (_) => _sync());
+    // Anlık değişiklikler dışında, yedek olarak periyodik senkronizasyon
+    _syncTimer = Timer.periodic(const Duration(seconds: 4), (_) => _sync());
   }
+
+  Map<String, dynamic> _snapshot(AppData data) => {
+        ...data.toJson(),
+        'view': _boardView,
+        'className': _selectedClass,
+      };
 
   Future<void> _sync() async {
     if (_sessionCode == null) return;
-    final snapshot = ref.read(appDataProvider).toJson();
+    final snapshot = _snapshot(ref.read(appDataProvider));
     await SupabaseService.updateBoardSession(_sessionCode!, snapshot);
   }
 
@@ -73,6 +79,11 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
   @override
   Widget build(BuildContext context) {
     final data = ref.watch(appDataProvider);
+
+    // Veriler değişir değişmez (puan, öğrenci vb.) tahtaya anında yansıt
+    ref.listen<AppData>(appDataProvider, (previous, next) {
+      if (_isActive) _sync();
+    });
 
     if (!_isActive) {
       return _InactiveBoard(
@@ -98,7 +109,10 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
                 alignment: Alignment.centerLeft,
                 child: _ViewSwitcher(
                   current: _boardView,
-                  onChanged: (v) => setState(() => _boardView = v),
+                  onChanged: (v) {
+                    setState(() => _boardView = v);
+                    _sync();
+                  },
                 ),
               ),
             ],
