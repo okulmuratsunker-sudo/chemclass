@@ -88,24 +88,30 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
         // Session header
         Container(
           color: kSurface,
-          padding: const EdgeInsets.all(16),
-          child: Row(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Column(
             children: [
-              // Code + QR
-              _SessionCode(code: _sessionCode!),
-              const Spacer(),
-              // View switcher
-              _ViewSwitcher(
-                current: _boardView,
-                onChanged: (v) => setState(() => _boardView = v),
+              Row(
+                children: [
+                  // Code + QR
+                  Expanded(child: _SessionCode(code: _sessionCode!)),
+                  // End session
+                  TextButton.icon(
+                    icon: const Icon(Icons.stop_circle, size: 18),
+                    label: const Text('Bitir'),
+                    style: TextButton.styleFrom(foregroundColor: kRed),
+                    onPressed: _endSession,
+                  ),
+                ],
               ),
-              const SizedBox(width: 12),
-              // End session
-              TextButton.icon(
-                icon: const Icon(Icons.stop_circle, size: 18),
-                label: const Text('Bitir'),
-                style: TextButton.styleFrom(foregroundColor: kRed),
-                onPressed: _endSession,
+              const SizedBox(height: 8),
+              // View switcher
+              Align(
+                alignment: Alignment.centerLeft,
+                child: _ViewSwitcher(
+                  current: _boardView,
+                  onChanged: (v) => setState(() => _boardView = v),
+                ),
               ),
             ],
           ),

@@ -221,6 +221,7 @@ class _PlanSheetState extends State<_PlanSheet> {
         left: 20, right: 20, top: 20,
         bottom: MediaQuery.of(context).viewInsets.bottom + 20,
       ),
+      child: SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -307,6 +308,7 @@ class _PlanSheetState extends State<_PlanSheet> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

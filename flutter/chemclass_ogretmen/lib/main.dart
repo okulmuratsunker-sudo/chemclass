@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'config/constants.dart';
 import 'providers/app_provider.dart';
 import 'screens/login_screen.dart';
@@ -8,6 +9,7 @@ import 'screens/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('tr_TR', null);
   await Supabase.initialize(
     url: kSupabaseUrl,
     // ignore: deprecated_member_use

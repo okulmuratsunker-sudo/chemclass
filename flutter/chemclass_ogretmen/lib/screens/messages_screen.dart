@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/constants.dart';
+import '../models/app_data.dart';
 import '../models/message.dart';
 import '../providers/app_provider.dart';
 import '../services/supabase_service.dart';
@@ -20,7 +21,9 @@ class MessagesScreen extends ConsumerStatefulWidget {
 
 class _MessagesScreenState extends ConsumerState<MessagesScreen> {
   RealtimeChannel? _channel;
-  String? _selectedConversation; // null = all
+  String? _selectedClass; // null = "Tümü" (genel bakış)
+  String? _selectedStudentId; // null = sınıf geneli duyuru
+
   final _scrollCtrl = ScrollController();
   final _msgCtrl = TextEditingController();
 
@@ -40,123 +43,183 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
     super.dispose();
   }
 
+  List<TeacherMessage> _filter(List<TeacherMessage> messages) {
+    if (_selectedClass == null) return messages;
+    if (_selectedStudentId == null) {
+      return messages
+          .where((m) => m.className == _selectedClass && m.studentId == null)
+          .toList();
+    }
+    return messages.where((m) => m.studentId == _selectedStudentId).toList();
+  }
+
+  String _hintText(AppData appData) {
+    if (_selectedClass == null) return 'Mesaj göndermek için bir sınıf seçin';
+    if (_selectedStudentId == null) return '$_selectedClass sınıfına duyuru yaz...';
+    final student = appData.findStudent(_selectedStudentId!);
+    return student != null ? '${student.name} kişisine mesaj yaz...' : 'Mesaj yaz...';
+  }
+
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(_messagesProvider);
     final appData = ref.watch(appDataProvider);
+    final canSend = _selectedClass != null;
 
-    return Column(
-      children: [
-        // Conversation selector
-        Container(
-          color: kSurface,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Column(
+        children: [
+          // Class selector
+          Container(
+            color: kSurface,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+              child: Row(
+                children: [
+                  _ConvChip(
+                    label: '📢 Tümü',
+                    selected: _selectedClass == null,
+                    onTap: () => setState(() {
+                      _selectedClass = null;
+                      _selectedStudentId = null;
+                    }),
+                  ),
+                  const SizedBox(width: 8),
+                  ...appData.classes.map((cls) => Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: _ConvChip(
+                      label: cls,
+                      selected: _selectedClass == cls,
+                      onTap: () => setState(() {
+                        _selectedClass = cls;
+                        _selectedStudentId = null;
+                      }),
+                    ),
+                  )),
+                ],
+              ),
+            ),
+          ),
+          // Student selector (within the selected class)
+          if (_selectedClass != null)
+            Container(
+              color: kSurface,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                child: Row(
+                  children: [
+                    _ConvChip(
+                      label: '📢 Sınıfa Duyuru',
+                      selected: _selectedStudentId == null,
+                      compact: true,
+                      onTap: () => setState(() => _selectedStudentId = null),
+                    ),
+                    const SizedBox(width: 8),
+                    ...appData.studentsOf(_selectedClass!).map((s) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: _ConvChip(
+                        label: '👤 ${s.name}',
+                        selected: _selectedStudentId == s.id,
+                        compact: true,
+                        onTap: () => setState(() => _selectedStudentId = s.id),
+                      ),
+                    )),
+                  ],
+                ),
+              ),
+            ),
+          Container(height: 1, color: kSurface2),
+          // Messages
+          Expanded(
+            child: async.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text('Hata: $e', style: TextStyle(color: kRed))),
+              data: (messages) {
+                final filtered = _filter(messages);
+                if (filtered.isEmpty) {
+                  return Center(child: Text('Henüz mesaj yok.', style: TextStyle(color: kTextSecondary)));
+                }
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (_scrollCtrl.hasClients) {
+                    _scrollCtrl.animateTo(
+                      _scrollCtrl.position.maxScrollExtent,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOut,
+                    );
+                  }
+                });
+                return ListView.builder(
+                  controller: _scrollCtrl,
+                  padding: const EdgeInsets.all(12),
+                  itemCount: filtered.length,
+                  itemBuilder: (_, i) => _MessageBubble(
+                    message: filtered[i],
+                    appData: appData,
+                    showRecipient: _selectedClass == null,
+                  ),
+                );
+              },
+            ),
+          ),
+          // Compose
+          Container(
+            color: kSurface,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Row(
               children: [
-                _ConvChip(
-                  label: '📢 Tümü',
-                  selected: _selectedConversation == null,
-                  onTap: () => setState(() => _selectedConversation = null),
+                Expanded(
+                  child: TextField(
+                    controller: _msgCtrl,
+                    enabled: canSend,
+                    style: TextStyle(color: kTextPrimary),
+                    decoration: InputDecoration(
+                      hintText: _hintText(appData),
+                      hintStyle: TextStyle(color: kTextSecondary),
+                      filled: true,
+                      fillColor: kSurface2,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    ),
+                    maxLines: null,
+                    textInputAction: TextInputAction.newline,
+                  ),
                 ),
                 const SizedBox(width: 8),
-                ...appData.classes.map((cls) => Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: _ConvChip(
-                    label: cls,
-                    selected: _selectedConversation == cls,
-                    onTap: () => setState(() => _selectedConversation = cls),
+                GestureDetector(
+                  onTap: canSend ? _sendMessage : null,
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: canSend ? kAccent : kSurface2,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.send, color: canSend ? kBg : kTextSecondary, size: 20),
                   ),
-                )),
+                ),
               ],
             ),
           ),
-        ),
-        // Messages
-        Expanded(
-          child: async.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('Hata: $e', style: TextStyle(color: kRed))),
-            data: (messages) {
-              final filtered = _selectedConversation == null
-                  ? messages
-                  : messages.where((m) => m.className == _selectedConversation).toList();
-              if (filtered.isEmpty) {
-                return Center(child: Text('Henüz mesaj yok.', style: TextStyle(color: kTextSecondary)));
-              }
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (_scrollCtrl.hasClients) {
-                  _scrollCtrl.animateTo(
-                    _scrollCtrl.position.maxScrollExtent,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOut,
-                  );
-                }
-              });
-              return ListView.builder(
-                controller: _scrollCtrl,
-                padding: const EdgeInsets.all(12),
-                itemCount: filtered.length,
-                itemBuilder: (_, i) => _MessageBubble(message: filtered[i]),
-              );
-            },
-          ),
-        ),
-        // Compose
-        Container(
-          color: kSurface,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _msgCtrl,
-                  style: TextStyle(color: kTextPrimary),
-                  decoration: InputDecoration(
-                    hintText: _selectedConversation != null
-                        ? '$_selectedConversation sınıfına mesaj...'
-                        : 'Mesaj yaz...',
-                    hintStyle: TextStyle(color: kTextSecondary),
-                    filled: true,
-                    fillColor: kSurface2,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  ),
-                  maxLines: null,
-                  textInputAction: TextInputAction.newline,
-                ),
-              ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: _sendMessage,
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: kAccent,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.send, color: kBg, size: 20),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Future<void> _sendMessage() async {
+    if (_selectedClass == null) return;
     final body = _msgCtrl.text.trim();
     if (body.isEmpty) return;
     _msgCtrl.clear();
     await SupabaseService.sendMessage(
-      studentId: null,
-      className: _selectedConversation ?? '',
+      studentId: _selectedStudentId,
+      className: _selectedClass!,
       body: body,
     );
     ref.invalidate(_messagesProvider);
@@ -167,7 +230,13 @@ class _ConvChip extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  const _ConvChip({required this.label, required this.selected, required this.onTap});
+  final bool compact;
+  const _ConvChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.compact = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +244,7 @@ class _ConvChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        padding: EdgeInsets.symmetric(horizontal: compact ? 12 : 14, vertical: compact ? 6 : 7),
         decoration: BoxDecoration(
           color: selected ? kAccent : kSurface2,
           borderRadius: BorderRadius.circular(20),
@@ -183,7 +252,7 @@ class _ConvChip extends StatelessWidget {
         child: Text(label, style: TextStyle(
           color: selected ? kBg : kTextSecondary,
           fontWeight: selected ? FontWeight.w700 : FontWeight.normal,
-          fontSize: 13,
+          fontSize: compact ? 12 : 13,
         )),
       ),
     );
@@ -192,11 +261,33 @@ class _ConvChip extends StatelessWidget {
 
 class _MessageBubble extends StatelessWidget {
   final TeacherMessage message;
-  const _MessageBubble({required this.message});
+  final AppData appData;
+  final bool showRecipient;
+  const _MessageBubble({
+    required this.message,
+    required this.appData,
+    this.showRecipient = false,
+  });
+
+  String? get _recipientLabel {
+    if (!showRecipient) return null;
+    if (message.studentId != null) {
+      final s = appData.findStudent(message.studentId!);
+      if (s != null) return '👤 ${s.name}';
+      return message.className != null && message.className!.isNotEmpty
+          ? message.className
+          : null;
+    }
+    if (message.className != null && message.className!.isNotEmpty) {
+      return '📢 ${message.className}';
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
     final isTeacher = message.isFromTeacher;
+    final recipient = _recipientLabel;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -238,11 +329,11 @@ class _MessageBubble extends StatelessWidget {
                         style: TextStyle(color: kAccent, fontSize: 11, fontWeight: FontWeight.w700),
                       ),
                     ),
-                  if (message.className != null && message.className!.isNotEmpty)
+                  if (recipient != null)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 2),
                       child: Text(
-                        message.className!,
+                        recipient,
                         style: TextStyle(
                           color: isTeacher ? kBg.withOpacity(0.7) : kTextSecondary,
                           fontSize: 10,

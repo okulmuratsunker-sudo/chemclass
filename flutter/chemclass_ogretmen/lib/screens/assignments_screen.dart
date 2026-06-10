@@ -227,6 +227,7 @@ class _AddAssignmentSheetState extends State<_AddAssignmentSheet> {
         left: 20, right: 20, top: 20,
         bottom: MediaQuery.of(context).viewInsets.bottom + 20,
       ),
+      child: SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -334,6 +335,7 @@ class _AddAssignmentSheetState extends State<_AddAssignmentSheet> {
             ),
           ),
         ],
+      ),
       ),
     );
   }
