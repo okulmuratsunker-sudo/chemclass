@@ -7,6 +7,21 @@
   paylaşılan `<style>` bloğunu (CSS bileşenleri, renk değişkenleri, `.cell`,
   `.she`, `.eqn-block`, `.frac` vb.) yeniden kullan/genişlet.
 
+## Kota verimliliği (önemli — maliyeti büyük ölçüde azaltır)
+- **Kaynak PDF okuma**: Önce **120-150 dpi** ile kırp/oku. Sadece el yazısı
+  gerçekten okunamıyorsa o bölgeyi 200+ dpi ile tekrar kırp. Tüm kaynak
+  sayfayı yüksek dpi'da okumaktan kaçın.
+- **SVG hücre/diyagram şablonları**: Sıfırdan tasarlama. Belgede zaten
+  benzer bir hücre diyagramı varsa (galvanik hücre, elektroliz hücresi,
+  Hoffman düzeneği vb.) o `<svg>` bloğunu **kopyala**, sadece pattern id'lerini
+  (çakışmasın diye benzersiz numara ver), etiketleri, renkleri ve
+  gerekirse elektrot/sıvı seviyelerini değiştir. Geometriyi (koordinatlar,
+  viewBox, path'ler) yeniden hesaplamaya çalışma.
+- **Doğrulama görüntüleri**: Aşağıdaki "Doğrulama döngüsü"ndeki tek 60 dpi
+  son sayfa kontrolü dışında ekstra debug ekran görüntüsü/kırpma alma.
+  Bir overlay/diyagram sorunundan şüpheleniyorsan önce kodu/koordinatları
+  mantık yürüterek kontrol et, görsel kontrolü en sona bırak.
+
 ## Editöryel kurallar
 - İçeriği sadakatle aktar; sadece açık OCR saçmalıklarını düzelt.
 - Şıklardaki/ifadelerdeki kimyasal olarak tartışmalı sayıları "düzeltme" —
@@ -27,12 +42,15 @@ için kullan.
    ```
    node /home/user/chemclass/tools/measure.js /home/user/chemclass/redoks-tepkimeleri.html
    ```
-   Son `.page` bölümünün `heightMM` değeri tam **297.00** olmalı.
+   Son `.page` bölümünün `heightMM` değeri **290.00-297.00** aralığında
+   olmalı (tam 297.00 şart değil — `min-height:297mm` zaten taşmayı önler).
    - 297'den büyükse: fazlalık kadar mm'yi `.eqn-block`, `.cell`,
      `.statements`, `.answer-lines`, `.example`, `ul.notes`, `.two-col` gibi
      elemanlara satır-içi `style` ile küçük marj/padding/yükseklik/`.cell`
-     genişliği azaltmaları uygulayarak düş, tekrar ölç. 297.00 olana kadar
-     tekrarla — bu adımda PDF render veya ekran görüntüsü ALMA.
+     genişliği azaltmaları uygulayarak düş, tekrar ölç. 290-297 aralığına
+     girince dur — bu adımda PDF render veya ekran görüntüsü ALMA. Her
+     denemede büyük adımlarla küçült (ör. %50→%40 gibi), tek tek mm
+     denemekle çok tur harcama.
 3. Ölçüm 297.00 olunca, **tek seferde** tam belgeyi render et ve sayfa
    sayısını doğrula:
    ```
