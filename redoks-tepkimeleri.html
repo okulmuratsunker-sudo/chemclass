@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Redoks Tepkimeleri ve Aktiflik – Ders Notu</title>
+<style>
+  :root{
+    --red:#b3261e;
+    --ink:#1c1c1c;
+    --line:#cfd2d6;
+    --soft:#f7f4ee;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family:'Segoe UI', Calibri, Arial, Helvetica, sans-serif;
+    color:var(--ink);
+    font-size:11pt;
+    line-height:1.5;
+    background:#dcdcdc;
+    counter-reset:pagenum;
+  }
+  @page{ size:A4; margin:0; }
+
+  .page{
+    counter-increment:pagenum;
+    width:210mm;
+    min-height:297mm;
+    padding:15mm 17mm;
+    margin:8mm auto;
+    background:#fff;
+    box-shadow:0 0 8px rgba(0,0,0,.15);
+    page-break-after:always;
+    display:flex;
+    flex-direction:column;
+  }
+  .page:last-child{ page-break-after:auto; }
+  @media print{
+    body{ background:#fff; }
+    .page{ margin:0; box-shadow:none; }
+  }
+
+  /* ---------- header / footer ---------- */
+  .kicker{
+    font-size:9pt;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:#8a8a8a;
+    margin-bottom:1mm;
+  }
+  h1.page-title{
+    font-size:18pt;
+    color:var(--red);
+    margin:0 0 5mm 0;
+    padding-bottom:2mm;
+    border-bottom:2px solid var(--red);
+  }
+  h2.section-title{
+    font-size:13pt;
+    margin:0 0 3mm 0;
+    color:var(--ink);
+  }
+  .page-foot{
+    margin-top:auto;
+    padding-top:4mm;
+    border-top:1px solid var(--line);
+    display:flex;
+    justify-content:space-between;
+    font-size:8.5pt;
+    color:#9a9a9a;
+  }
+  .page-foot::after{ content:"Sayfa " counter(pagenum) " / 6"; }
+
+  /* ---------- bullet notes ---------- */
+  ul.notes{
+    list-style:none;
+    margin:0 0 4mm 0;
+    padding:0;
+  }
+  ul.notes li{
+    position:relative;
+    padding-left:6mm;
+    margin-bottom:2.6mm;
+    text-align:justify;
+  }
+  ul.notes li::before{
+    content:"✱";
+    position:absolute;
+    left:0;
+    top:0.05em;
+    color:var(--red);
+    font-size:.95em;
+  }
+  ul.notes.compact li{ margin-bottom:2mm; }
+
+  /* ---------- equation blocks ---------- */
+  .eqn-block{
+    background:var(--soft);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:4mm 5mm;
+    margin:3.5mm 0;
+  }
+  .eqn{
+    font-size:13pt;
+    text-align:center;
+    letter-spacing:.02em;
+  }
+  .eqn .arrow{ margin:0 3mm; font-weight:700; }
+  .ann{
+    margin-top:2mm;
+    font-size:9pt;
+    color:#666;
+    text-align:center;
+  }
+
+  /* ---------- half reactions ---------- */
+  .half-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:2mm 4mm;
+    margin-bottom:1.5mm;
+  }
+  .half-eqn{ font-size:12pt; white-space:nowrap; }
+  .half-note{ font-size:9.5pt; color:#666; white-space:nowrap; }
+  .mult{ font-weight:700; color:var(--red); }
+
+  /* ---------- overall equation ---------- */
+  .overall-eqn{
+    font-size:12.5pt;
+    text-align:center;
+    margin:3.5mm 0;
+    padding:2.5mm 3mm;
+    font-weight:600;
+  }
+  .overall-eqn.final{
+    border:2px solid var(--red);
+    border-radius:6px;
+    background:#fdf2f1;
+    padding:3.5mm;
+  }
+  .tag{
+    display:inline-block;
+    margin-left:3mm;
+    padding:.5mm 2.5mm;
+    border-radius:4px;
+    font-size:9.5pt;
+    font-weight:700;
+    vertical-align:middle;
+  }
+  .tag.redoks{ background:#fdecea; color:var(--red); border:1px solid var(--red); }
+  .tag.good{ background:#eaf6ec; color:#1e7e34; border:1px solid #1e7e34; }
+  .tag.bad{ background:#f3f3f3; color:#777; border:1px solid #bbb; }
+
+  /* ---------- e- verirse / alirsa boxes ---------- */
+  .box-row{
+    display:flex;
+    gap:5mm;
+    margin:3.5mm 0;
+  }
+  .concept-box{
+    flex:1;
+    border:1.5px solid var(--ink);
+    border-radius:10px;
+    padding:3.5mm 4.5mm;
+  }
+  .box-title{
+    font-weight:700;
+    text-align:center;
+    margin:0 0 2mm 0;
+    font-size:12pt;
+  }
+  .concept-box ul{ margin:0; padding-left:5mm; }
+  .concept-box li{ margin-bottom:1.3mm; font-size:10pt; }
+
+  /* ---------- example / mcq ---------- */
+  .example{
+    margin-top:4mm;
+    padding-top:3mm;
+    border-top:1px dashed var(--line);
+  }
+  .example p{ margin:0 0 2mm 0; text-align:justify; }
+  .options{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1.5mm 6mm;
+    margin-top:2.5mm;
+    font-size:10.5pt;
+  }
+
+  /* ---------- step blocks (page 2) ---------- */
+  .step{ margin-bottom:3mm; }
+  .step-title{ margin:0 0 1.5mm 0; font-weight:600; font-size:10.5pt; }
+  .sum-line{
+    border:none;
+    border-top:1px solid var(--ink);
+    margin:1.5mm 0;
+    width:55mm;
+    margin-left:auto; margin-right:auto;
+  }
+
+  /* ---------- practice problems (page 3) ---------- */
+  .instruction{ margin:0 0 5mm 0; font-style:italic; color:#555; }
+  .practice{
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:3.5mm 5mm;
+    margin-bottom:5mm;
+  }
+  .practice-eqn{
+    font-size:12.5pt;
+    text-align:center;
+    font-weight:600;
+    margin-bottom:3mm;
+  }
+  .answer-lines{
+    height:31mm;
+    background-image:repeating-linear-gradient(
+      to bottom, transparent, transparent 7.6mm,
+      var(--line) 7.6mm, var(--line) calc(7.6mm + 1px));
+  }
+  .answer-lines.short{ height:22mm; }
+
+  /* ---------- metal tree (page 5) ---------- */
+  .metal-tree{ text-align:center; margin:2mm 0 5mm 0; }
+  .tree-root{
+    display:inline-block;
+    font-weight:700;
+    font-size:13pt;
+    padding-bottom:1mm;
+  }
+  .tree-svg{ display:block; width:100%; height:9mm; }
+  .tree-svg line{ stroke:var(--ink); stroke-width:1.5; }
+  .tree-branches{
+    display:flex;
+    justify-content:space-around;
+    gap:8mm;
+  }
+  .branch{
+    flex:1;
+    padding-top:1mm;
+  }
+  .branch-title{
+    font-weight:700;
+    color:var(--red);
+    font-size:11.5pt;
+  }
+  .branch-title .muted{ color:#888; font-weight:400; font-size:9.5pt; }
+  .branch-content{ margin-top:1mm; font-size:11pt; }
+  .sub-branches{
+    display:flex;
+    justify-content:space-around;
+    margin-top:2mm;
+    font-size:9.5pt;
+    color:#666;
+  }
+  .sub-branches > div{
+    border-top:1px dotted #aaa;
+    padding-top:1mm;
+    flex:1;
+    margin:0 2mm;
+  }
+
+  .two-col{
+    display:flex;
+    gap:6mm;
+    margin-bottom:3.5mm;
+  }
+  .two-col .col{ flex:1; }
+
+  .note-block{
+    border-left:3px solid var(--red);
+    background:var(--soft);
+    padding:3mm 4mm;
+    border-radius:0 6px 6px 0;
+    font-size:10.5pt;
+    margin-bottom:3.5mm;
+  }
+  .note-block p{ margin:0; }
+  .muted{ color:#888; }
+
+  /* ---------- beakers (page 6) ---------- */
+  .beakers{
+    display:flex;
+    justify-content:space-around;
+    gap:6mm;
+    margin:5mm 0;
+  }
+  .beaker{
+    flex:1;
+    text-align:center;
+    margin:0;
+  }
+  .beaker-body{
+    height:30mm;
+    border:2px solid var(--ink);
+    border-top:none;
+    border-radius:0 0 5px 5px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:repeating-linear-gradient(45deg,#fdeaea,#fdeaea 4px,#fff 4px,#fff 8px);
+  }
+  .beaker-ion{ font-size:13pt; font-weight:700; }
+  .beaker figcaption{
+    margin-top:2mm;
+    font-size:10pt;
+    font-weight:600;
+  }
+</style>
+</head>
+<body>
+
+<!-- ======================= SAYFA 1 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik</div>
+  <h1 class="page-title">İndirgenme – Yükseltgenme Tepkimeleri</h1>
+
+  <ul class="notes">
+    <li>Bir kimyasal türün e<sup>-</sup> vermesi durumunda yükseltgenme basamağı artar. Yükseltgenme basamağının artmasına <strong>yükseltgenme</strong> denir.</li>
+    <li>Bir kimyasal türün e<sup>-</sup> alması durumunda yükseltgenme basamağı azalır. Yükseltgenme basamağındaki azalmaya <strong>indirgenme</strong> denir.</li>
+    <li>Yükseltgenme ve indirgenme olaylarının birlikte gerçekleştiği tepkimelere <strong>Redoks (İndirgenme – Yükseltgenme) Tepkimeleri</strong> denir.</li>
+  </ul>
+
+  <div class="eqn-block">
+    <div class="eqn">
+      C<sub>(k)</sub><sup>0</sup> + O<sub>2(g)</sub><sup>0</sup>
+      <span class="arrow">→</span>
+      C<sup>+4</sup>O<sub>2(g)</sub><sup>-2</sup>
+    </div>
+  </div>
+
+  <div class="half-row">
+    <div class="half-eqn">C<sub>(k)</sub> → C<sup>+4</sup> + 4e<sup>-</sup></div>
+    <div class="half-note">4e<sup>-</sup> vermiş → C yükseltgenmiş</div>
+  </div>
+  <div class="half-row">
+    <div class="half-eqn">4e<sup>-</sup> + O<sub>2</sub> → O<sub>2</sub><sup>-2</sup></div>
+    <div class="half-note">4e<sup>-</sup> almış → O<sub>2</sub> indirgenmiş</div>
+  </div>
+
+  <div class="overall-eqn">
+    C<sub>(k)</sub> + O<sub>2(g)</sub> → CO<sub>2(g)</sub>
+    <span class="tag redoks">Redoks</span>
+  </div>
+
+  <div class="box-row">
+    <div class="concept-box">
+      <div class="box-title">e<sup>-</sup> verirse</div>
+      <ul>
+        <li>Hafifler = yükselir = yükseltgenir</li>
+        <li>Yükselirken karşısındakini indirir</li>
+        <li>İndirendir = İndirgendir</li>
+      </ul>
+    </div>
+    <div class="concept-box">
+      <div class="box-title">e<sup>-</sup> alırsa</div>
+      <ul>
+        <li>Ağırlaşır = iner = indirgenir</li>
+        <li>İnerken karşısındakini yükseltir</li>
+        <li>Yükseltendir = Yükseltgendir</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="example">
+    <p><strong>Örnek:</strong>
+      H<sub>2</sub>O<sub>2(suda)</sub> + 2Fe<sup>+2</sup><sub>(suda)</sub> + 2H<sup>+</sup><sub>(suda)</sub>
+      → 2H<sub>2</sub>O<sub>(s)</sub> + 2Fe<sup>+3</sup><sub>(suda)</sub>
+      tepkimesi ile ilgili aşağıdakilerden hangisi doğrudur?
+    </p>
+    <div class="options">
+      <span>A) H<sub>2</sub>O<sub>2</sub> yükseltgendir.</span>
+      <span>B) H<sub>2</sub>O<sub>2</sub>'deki O atomu yükseltgenmiştir.</span>
+      <span>C) Fe<sup>+2</sup> yükseltgendir.</span>
+      <span>D) H<sup>+</sup> yükseltgendir.</span>
+      <span>E) H<sup>+</sup> indirgenmiştir.</span>
+    </div>
+  </div>
+
+  <div class="page-foot"><span>Redoks Tepkimeleri ve Aktiflik</span></div>
+</section>
+
+<!-- ======================= SAYFA 2 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik</div>
+  <h1 class="page-title">Redoks Tepkimelerinin Denkleştirilmesi</h1>
+  <h2 class="section-title">1) İyonsuz Denklemlerin Denkleştirilmesi</h2>
+
+  <div class="eqn-block">
+    <div class="eqn">
+      C<sup>0</sup> + H<sub>2</sub><sup>+1</sup>S<sup>+6</sup>O<sub>4</sub><sup>-2</sup>
+      <span class="arrow">→</span>
+      C<sup>+4</sup>O<sub>2</sub><sup>-2</sup> + S<sup>+4</sup>O<sub>2</sub><sup>-2</sup> + H<sub>2</sub>O
+    </div>
+    <div class="ann">Tüm atomların yükseltgenme basamakları belirlenir &nbsp;·&nbsp; C: 0 → +4 (yükseltgenme) &nbsp;·&nbsp; S: +6 → +4 (indirgenme)</div>
+  </div>
+
+  <div class="step">
+    <p class="step-title">Yükseltgenme ve indirgenme yarı tepkimeleri yazılır:</p>
+    <div class="half-row">
+      <div class="half-eqn">C<sup>0</sup> → C<sup>+4</sup> + 4e<sup>-</sup></div>
+      <div class="half-note"><span class="mult">×1</span></div>
+    </div>
+    <div class="half-row">
+      <div class="half-eqn">S<sup>+6</sup> + 2e<sup>-</sup> → S<sup>+4</sup></div>
+      <div class="half-note"><span class="mult">×2</span></div>
+    </div>
+    <p class="step-title" style="margin-top:2mm">e<sup>-</sup>'lar eşitlenir.</p>
+  </div>
+
+  <div class="step">
+    <p class="step-title">Yarı reaksiyonlar taraf tarafa toplanır ve katsayılar ana reaksiyona yazılır:</p>
+    <div class="half-eqn" style="text-align:center">C<sup>0</sup> → C<sup>+4</sup> + 4e<sup>-</sup></div>
+    <div class="half-eqn" style="text-align:center">2S<sup>+6</sup> + 4e<sup>-</sup> → 2S<sup>+4</sup></div>
+    <hr class="sum-line">
+    <div class="half-eqn" style="text-align:center">C<sup>0</sup> + 2S<sup>+6</sup> → C<sup>+4</sup> + 2S<sup>+4</sup></div>
+  </div>
+
+  <div class="overall-eqn">
+    C + 2H<sub>2</sub>SO<sub>4</sub> → CO<sub>2</sub> + 2SO<sub>2</sub> + H<sub>2</sub>O
+  </div>
+
+  <div class="step">
+    <p class="step-title">Son olarak H ve O atomları eşitlenir:</p>
+  </div>
+  <div class="overall-eqn final">
+    C + 2H<sub>2</sub>SO<sub>4</sub> → CO<sub>2</sub> + 2SO<sub>2</sub> + 2H<sub>2</sub>O
+  </div>
+
+  <div class="page-foot"><span>Redoks Tepkimeleri ve Aktiflik</span></div>
+</section>
+
+<!-- ======================= SAYFA 3 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik</div>
+  <h1 class="page-title">Denkleştirme Alıştırmaları</h1>
+  <p class="instruction">Aşağıda verilen tepkimeleri denkleştiriniz.</p>
+
+  <div class="practice">
+    <div class="practice-eqn">Cu + HNO<sub>3</sub> → Cu(NO<sub>3</sub>)<sub>2</sub> + NO + H<sub>2</sub>O</div>
+    <div class="answer-lines"></div>
+  </div>
+
+  <div class="practice">
+    <div class="practice-eqn">Sb + HMnO<sub>4</sub> → Sb<sub>2</sub>O<sub>5</sub> + MnO + H<sub>2</sub>O</div>
+    <div class="answer-lines"></div>
+  </div>
+
+  <div class="practice">
+    <div class="practice-eqn">Bi<sub>2</sub>S<sub>3</sub> + HNO<sub>3</sub> + H<sub>2</sub>O → H<sub>3</sub>BiO<sub>4</sub> + NO + S</div>
+    <div class="answer-lines"></div>
+  </div>
+
+  <div class="practice">
+    <div class="practice-eqn">MnO<sub>2</sub> + HCl → MnCl<sub>2</sub> + H<sub>2</sub>O + Cl<sub>2</sub></div>
+    <div class="answer-lines"></div>
+  </div>
+
+  <div class="page-foot"><span>Redoks Tepkimeleri ve Aktiflik</span></div>
+</section>
+
+<!-- ======================= SAYFA 4 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik</div>
+  <h1 class="page-title">Aktiflik</h1>
+
+  <ul class="notes">
+    <li>Bir elemente ait atomun bileşik oluşturma ya da iyon haline geçme eğilimine <strong>aktiflik</strong> denir.</li>
+    <li>Metallerin aktifliği elektron verebilme eğilimini belirtir. Elektron verme isteği arttıkça metal aktifliği artar.</li>
+    <li>Yükseltgenme eğilimi büyük olan metal, yükseltgenme eğilimi kendisinden küçük olan metalin sulu çözeltisiyle tepkimeye girer.</li>
+  </ul>
+
+  <p style="text-align:center; font-weight:600; margin:3mm 0">Elektron verme isteği: Zn &gt; Cu olsun</p>
+
+  <div class="overall-eqn">
+    Zn<sub>(k)</sub> + CuSO<sub>4(suda)</sub> → ZnSO<sub>4(suda)</sub> + Cu<sub>(k)</sub>
+    <span class="tag good">istemli</span>
+  </div>
+
+  <p style="margin:3mm 0 0 0; font-weight:600">Tersi durumda;</p>
+  <div class="overall-eqn">
+    Cu<sub>(k)</sub> + ZnSO<sub>4(suda)</sub> → Tepkime yok
+    <span class="tag bad">istemsiz</span>
+  </div>
+
+  <p class="step-title" style="margin-top:2mm">Buna göre;</p>
+  <ul class="notes">
+    <li>Aktif metal kendinden daha pasif olan metalin çözeltisiyle kendiliğinden tepkimeye girer.</li>
+    <li>Aktif metal kendinden daha pasif olan metali indirger.</li>
+  </ul>
+
+  <div class="eqn-block">
+    <div class="eqn">
+      Zn<sub>(k)</sub><sup>0</sup> + Cu<sup>+2</sup>SO<sub>4(suda)</sub><sup>-2</sup>
+      <span class="arrow">→</span>
+      Zn<sup>+2</sup>SO<sub>4(suda)</sub><sup>-2</sup> + Cu<sub>(k)</sub><sup>0</sup>
+    </div>
+    <div class="ann">Cu<sup>+2</sup> → Cu<sup>0</sup> &nbsp;(indirgenmiş)</div>
+  </div>
+
+  <ul class="notes">
+    <li>Aktif metal kendisinden daha pasif olan metalin çözeltisinde çözünür.</li>
+    <li>Metallerden yapılmış kaplarda aşınma olmaması için pasif metal kullanılmalıdır.</li>
+  </ul>
+
+  <div class="page-foot"><span>Redoks Tepkimeleri ve Aktiflik</span></div>
+</section>
+
+<!-- ======================= SAYFA 5 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik</div>
+  <h1 class="page-title">Metaller</h1>
+
+  <div class="metal-tree">
+    <div class="tree-root">Metaller</div>
+    <svg class="tree-svg" viewBox="0 0 600 50" preserveAspectRatio="none">
+      <line x1="300" y1="0"   x2="300" y2="22"/>
+      <line x1="150" y1="22"  x2="450" y2="22"/>
+      <line x1="150" y1="22"  x2="150" y2="50"/>
+      <line x1="450" y1="22"  x2="450" y2="50"/>
+    </svg>
+    <div class="tree-branches">
+      <div class="branch">
+        <div class="branch-title">Soy Metaller <span class="muted">(pasif)</span></div>
+        <div class="branch-content">Au, Pt, Ag, Hg, Cu</div>
+        <div class="sub-branches">
+          <div>Tam soy</div>
+          <div>Yarı soy</div>
+        </div>
+      </div>
+      <div class="branch">
+        <div class="branch-title">Aktif Metaller</div>
+        <div class="branch-content">Li, Na, K, Mg, Ca, Ba, Fe, Zn, Al ...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="col">
+      <ul class="notes compact">
+        <li>Elektron verme eğilimleri hidrojenden azdır.</li>
+        <li>Yarı soy olan Ag, Hg, Cu; HNO<sub>3</sub> gibi kuvvetli oksiasitlerle tepkimeye girer ancak H<sub>2(g)</sub> açığa çıkarmaz.</li>
+      </ul>
+    </div>
+    <div class="col">
+      <ul class="notes compact">
+        <li>Elektron verme eğilimleri H'den fazladır. Bu yüzden asitlerle tepkimelerinde H<sub>2(g)</sub> açığa çıkar.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="eqn-block">
+    <div class="eqn">
+      2K<sup>0</sup> + H<sub>2</sub>SO<sub>4</sub>
+      <span class="arrow">→</span>
+      <u>H<sub>2</sub></u> + K<sub>2</sub><sup>+1</sup>SO<sub>4</sub>
+    </div>
+  </div>
+
+  <div class="note-block">
+    <p><strong>Not:</strong> Su ile sadece en aktif olan 1A ve 2A grubu metalleri tepkime vererek H<sub>2</sub> gazı açığa çıkarırlar.
+    <span class="muted">(1A → soğuk su, 2A → sıcak su)</span></p>
+  </div>
+
+  <div class="example">
+    <p><strong>Örnek 1:</strong> Zn metali Ni(NO<sub>3</sub>)<sub>2</sub> çözeltisine atıldığında Ni metali açığa çıkarken,
+    Ca(NO<sub>3</sub>)<sub>2</sub> çözeltisine atıldığında bir değişiklik olmamaktadır. Buna göre Zn, Ni, Ca metallerinin
+    aktifliklerini karşılaştırınız.</p>
+    <div class="answer-lines short"></div>
+  </div>
+
+  <div class="page-foot"><span>Redoks Tepkimeleri ve Aktiflik</span></div>
+</section>
+
+<!-- ======================= SAYFA 6 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik</div>
+  <h1 class="page-title">Aktiflik – Örnek</h1>
+
+  <div class="example" style="border-top:none; padding-top:0; margin-top:0">
+    <p><strong>Örnek 2:</strong> Aktiflik sıralaması Al &gt; Zn &gt; Cu şeklindedir. Buna göre üç farklı kapta aşağıdaki
+    çözeltiler bulunmaktadır:</p>
+
+    <div class="beakers">
+      <figure class="beaker">
+        <div class="beaker-body"><span class="beaker-ion">Al<sup>+3</sup></span></div>
+        <figcaption>Bakır kap</figcaption>
+      </figure>
+      <figure class="beaker">
+        <div class="beaker-body"><span class="beaker-ion">Zn<sup>+2</sup></span></div>
+        <figcaption>Alüminyum kap</figcaption>
+      </figure>
+      <figure class="beaker">
+        <div class="beaker-body"><span class="beaker-ion">Cu<sup>+2</sup></span></div>
+        <figcaption>Çinko kap</figcaption>
+      </figure>
+    </div>
+
+    <p>Hangi kaplarda zamanla aşınma (korozyon) olur? Açıklayınız.</p>
+    <div class="answer-lines"></div>
+    <div class="answer-lines"></div>
+  </div>
+
+  <div class="page-foot"><span>Redoks Tepkimeleri ve Aktiflik</span></div>
+</section>
+
+</body>
+</html>
