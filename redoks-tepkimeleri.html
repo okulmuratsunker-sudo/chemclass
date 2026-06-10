@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Redoks Tepkimeleri ve Aktiflik – Ders Notu</title>
+<title>Kimya ve Elektrik – Ders Notu</title>
 <style>
   :root{
     --red:#b3261e;
@@ -70,7 +70,7 @@
     font-size:8.5pt;
     color:#9a9a9a;
   }
-  .page-foot::after{ content:"Sayfa " counter(pagenum) " / 6"; }
+  .page-foot::after{ content:"Sayfa " counter(pagenum) " / 13"; }
 
   /* ---------- bullet notes ---------- */
   ul.notes{
@@ -191,6 +191,20 @@
     font-size:10.5pt;
   }
 
+  /* ---------- judgment statements (I / II / III) ---------- */
+  .statements{ margin:3mm 0; }
+  .stmt{
+    display:flex;
+    align-items:baseline;
+    gap:2mm;
+    margin-bottom:1.5mm;
+  }
+  .stmt .num{
+    font-weight:700;
+    font-style:italic;
+    min-width:6mm;
+  }
+
   /* ---------- step blocks (page 2) ---------- */
   .step{ margin-bottom:3mm; }
   .step-title{ margin:0 0 1.5mm 0; font-weight:600; font-size:10.5pt; }
@@ -295,6 +309,7 @@
     margin:0;
   }
   .beaker-body{
+    position:relative;
     height:30mm;
     border:2px solid var(--ink);
     border-top:none;
@@ -309,6 +324,101 @@
     margin-top:2mm;
     font-size:10pt;
     font-weight:600;
+  }
+
+  /* ---------- metal rod in beaker (page 8) ---------- */
+  .rod{
+    position:absolute;
+    top:0;
+    right:6mm;
+    width:5mm;
+    height:24mm;
+    background:repeating-linear-gradient(135deg,#eee,#eee 3px,#999 3px,#999 6px);
+    border:1px solid #888;
+    border-radius:2px;
+    transform:rotate(12deg);
+    transform-origin:top center;
+  }
+  .rod-label{
+    position:absolute;
+    top:-7mm;
+    right:2mm;
+    font-size:9pt;
+    font-weight:700;
+    white-space:nowrap;
+  }
+  .beaker-ion.corner{
+    position:absolute;
+    bottom:3mm;
+    left:4mm;
+    font-size:12pt;
+  }
+  .beakers-wrap{
+    display:flex;
+    align-items:center;
+    gap:5mm;
+    margin:10mm 0 5mm 0;
+  }
+  .beakers-wrap .beakers{ flex:1; margin:0; }
+  .beakers.tall .beaker-body{ height:32mm; }
+  .beakers.tall .rod{ height:24mm; width:6mm; }
+  .beakers.tall .beaker-ion.corner{ font-size:13pt; }
+  .activity-note{
+    text-align:center;
+    font-size:10pt;
+    font-weight:700;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:3mm 4mm;
+    white-space:nowrap;
+  }
+
+  /* ---------- answer box (worked example result) ---------- */
+  .answer-box{
+    display:inline-block;
+    margin-top:2mm;
+    padding:1.5mm 4mm;
+    border:1.5px solid #1e7e34;
+    background:#eaf6ec;
+    color:#1e7e34;
+    font-weight:700;
+    border-radius:5px;
+  }
+
+  /* ---------- galvanic cell diagram (Elektrokimya) ---------- */
+  .cell{ width:58%; margin:1mm auto 2mm auto; }
+  .cell-labels{
+    display:flex;
+    justify-content:space-between;
+    padding:0 16%;
+    text-align:center;
+    font-size:10pt;
+    font-weight:600;
+    margin-bottom:1mm;
+  }
+  .cell-labels .role{ color:var(--red); font-weight:700; }
+  .cell-diagram{
+    position:relative;
+    width:100%;
+    aspect-ratio:720/320;
+  }
+  .cell-diagram svg{ position:absolute; inset:0; width:100%; height:100%; }
+  .cell-overlay{ position:absolute; inset:0; }
+  .cell-overlay span{
+    position:absolute;
+    font-size:9.5pt;
+    font-weight:600;
+    white-space:nowrap;
+    transform:translate(-50%,-50%);
+  }
+  .cell-captions{
+    display:flex;
+    justify-content:space-between;
+    padding:0 13%;
+    font-size:10pt;
+    font-weight:600;
+    margin-top:1mm;
+    text-align:center;
   }
 </style>
 </head>
@@ -381,7 +491,7 @@
     </div>
   </div>
 
-  <div class="page-foot"><span>Redoks Tepkimeleri ve Aktiflik</span></div>
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
 </section>
 
 <!-- ======================= SAYFA 2 ======================= -->
@@ -431,7 +541,7 @@
     C + 2H<sub>2</sub>SO<sub>4</sub> → CO<sub>2</sub> + 2SO<sub>2</sub> + 2H<sub>2</sub>O
   </div>
 
-  <div class="page-foot"><span>Redoks Tepkimeleri ve Aktiflik</span></div>
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
 </section>
 
 <!-- ======================= SAYFA 3 ======================= -->
@@ -460,7 +570,7 @@
     <div class="answer-lines"></div>
   </div>
 
-  <div class="page-foot"><span>Redoks Tepkimeleri ve Aktiflik</span></div>
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
 </section>
 
 <!-- ======================= SAYFA 4 ======================= -->
@@ -507,7 +617,7 @@
     <li>Metallerden yapılmış kaplarda aşınma olmaması için pasif metal kullanılmalıdır.</li>
   </ul>
 
-  <div class="page-foot"><span>Redoks Tepkimeleri ve Aktiflik</span></div>
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
 </section>
 
 <!-- ======================= SAYFA 5 ======================= -->
@@ -573,7 +683,7 @@
     <div class="answer-lines short"></div>
   </div>
 
-  <div class="page-foot"><span>Redoks Tepkimeleri ve Aktiflik</span></div>
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
 </section>
 
 <!-- ======================= SAYFA 6 ======================= -->
@@ -605,7 +715,517 @@
     <div class="answer-lines"></div>
   </div>
 
-  <div class="page-foot"><span>Redoks Tepkimeleri ve Aktiflik</span></div>
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 7 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik</div>
+  <h1 class="page-title">Aktiflik – Örnekler</h1>
+
+  <div class="example" style="border-top:none; padding-top:0; margin-top:0">
+    <p><strong>Örnek 3:</strong></p>
+    <div class="eqn-block">
+      <div class="eqn">Na<sub>(k)</sub> + AgNO<sub>3(suda)</sub> → NaNO<sub>3(suda)</sub> + Ag<sub>(k)</sub></div>
+      <div class="eqn" style="margin-top:1.5mm">Ca<sub>(k)</sub> + Sn(NO<sub>3</sub>)<sub>2(suda)</sub> → Ca(NO<sub>3</sub>)<sub>2(suda)</sub> + Sn<sub>(k)</sub></div>
+    </div>
+    <p>tepkimeleri kendiliğinden gerçekleşmektedir. Buna göre aşağıdakilerden hangisi <strong>yanlıştır</strong>?</p>
+    <div class="options" style="grid-template-columns:1fr">
+      <span>A) Na metali AgNO<sub>3</sub> çözeltisinde çözülür.</span>
+      <span>B) Sn(NO<sub>3</sub>)<sub>2</sub> çözeltisi Ca metalini aşındırır.</span>
+      <span>C) Na'nın yükseltgenme eğilimi Ag'den büyüktür.</span>
+      <span>D) Sn<sup>+2</sup>'nin indirgenme eğilimi Ca<sup>+2</sup>'den büyüktür.</span>
+      <span>E) Ca(NO<sub>3</sub>)<sub>2</sub> çözeltisi Sn kapta saklanamaz.</span>
+    </div>
+  </div>
+
+  <div class="example">
+    <p><strong>Örnek 4:</strong>
+      Cl<sub>2</sub> + CaBr<sub>2</sub> → CaCl<sub>2</sub> + Br<sub>2</sub>
+      bu tepkime ile ilgili olarak;</p>
+    <div class="statements">
+      <div class="stmt"><span class="num">I.</span><span>Redoks tepkimesidir.</span></div>
+      <div class="stmt"><span class="num">II.</span><span>Cl<sub>2</sub>, Br<sub>2</sub>'den daha aktiftir.</span></div>
+      <div class="stmt"><span class="num">III.</span><span>1 mol CaBr<sub>2</sub>, 2 mol e<sup>-</sup> almıştır.</span></div>
+    </div>
+    <p>yargılarından hangileri doğrudur?</p>
+    <div class="answer-lines short"></div>
+  </div>
+
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 8 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik</div>
+  <h1 class="page-title">Aktiflik – Örnek</h1>
+
+  <div class="example" style="border-top:none; padding-top:0; margin-top:0">
+    <p><strong>Örnek 5:</strong> Aşağıda üç farklı kapta bulunan metal çubuklar ve içinde bulundukları çözeltiler gösterilmiştir.</p>
+
+    <div class="beakers-wrap">
+      <div class="beakers tall">
+        <figure class="beaker">
+          <div class="beaker-body">
+            <div class="rod-label">X<sub>(k)</sub></div>
+            <div class="rod"></div>
+            <span class="beaker-ion corner">Y<sup>+</sup><sub>(suda)</sub></span>
+          </div>
+          <figcaption>Z kabı</figcaption>
+        </figure>
+        <figure class="beaker">
+          <div class="beaker-body">
+            <div class="rod-label">Y<sub>(k)</sub></div>
+            <div class="rod"></div>
+            <span class="beaker-ion corner">Z<sup>+2</sup><sub>(suda)</sub></span>
+          </div>
+          <figcaption>X kabı</figcaption>
+        </figure>
+        <figure class="beaker">
+          <div class="beaker-body">
+            <div class="rod-label">Z<sub>(k)</sub></div>
+            <div class="rod"></div>
+            <span class="beaker-ion corner">X<sup>+</sup><sub>(suda)</sub></span>
+          </div>
+          <figcaption>Y kabı</figcaption>
+        </figure>
+      </div>
+      <div class="activity-note">Metal Aktiflik<br>X &gt; Y &gt; Z</div>
+    </div>
+
+    <div class="statements">
+      <div class="stmt"><span class="num">I.</span><span>Y kabında X<sup>+</sup> iyonlarının derişimi azalır.</span></div>
+      <div class="stmt"><span class="num">II.</span><span>Y metal çubuğunda aşınma olurken X kabında değişiklik olmaz.</span></div>
+      <div class="stmt"><span class="num">III.</span><span>X metal çubuğunda aşınma olur.</span></div>
+    </div>
+    <p>Yargılarından hangileri doğrudur?</p>
+    <div class="answer-lines"></div>
+    <div class="answer-lines"></div>
+  </div>
+
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 9 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik · Elektrokimya</div>
+  <h1 class="page-title" style="text-align:center">Elektrokimya</h1>
+
+  <h2 class="section-title">Elektrokimyasal Hücreler</h2>
+  <ul class="notes">
+    <li>İki tür elektrokimyasal hücre vardır.</li>
+  </ul>
+
+  <h2 class="section-title" style="color:var(--red); margin-top:3mm">1. Galvanik Hücre (Volta Hücresi)</h2>
+  <ul class="notes compact">
+    <li>Kimyasal tepkimeler sonucunda elektrik enerjisi üreten sistemlere <strong>galvanik (volta) hücresi</strong> denir.</li>
+    <li>Halk arasında volta hücresi ya da <strong>pil</strong> olarak bilinir.</li>
+    <li>Bu hücrelerde istemli redoks tepkimeleri gerçekleşir.</li>
+    <li>Galvanik hücreler, birbirine iletken tel ve tuz köprüsüyle bağlanan iki yarı hücreden oluşur.</li>
+  </ul>
+
+  <div class="cell">
+    <div class="cell-labels">
+      <div>Zn elektrot<br><span class="role">(anot)</span></div>
+      <div>Cu elektrot<br><span class="role">(katot)</span></div>
+    </div>
+    <div class="cell-diagram">
+      <svg viewBox="0 0 720 320" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <pattern id="liquid" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="8" height="8" fill="#fdeaea"/>
+            <line x1="0" y1="0" x2="0" y2="8" stroke="#f3c9c7" stroke-width="4"/>
+          </pattern>
+          <pattern id="rodhatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="6" height="6" fill="#eee"/>
+            <line x1="0" y1="0" x2="0" y2="6" stroke="#999" stroke-width="3"/>
+          </pattern>
+        </defs>
+
+        <!-- salt bridge -->
+        <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#1c1c1c" stroke-width="14" stroke-linecap="round"/>
+        <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+
+        <!-- wire + meter -->
+        <line x1="162" y1="20" x2="328" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="372" y1="20" x2="538" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+        <circle cx="350" cy="20" r="22" fill="#fff" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="350" y1="20" x2="362" y2="8" stroke="#1c1c1c" stroke-width="2"/>
+        <line x1="162" y1="20" x2="162" y2="30" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="538" y1="20" x2="538" y2="30" stroke="#1c1c1c" stroke-width="2.5"/>
+
+        <!-- electrodes -->
+        <rect x="150" y="30" width="24" height="160" fill="url(#rodhatch)" stroke="#888" stroke-width="1.5" rx="2"/>
+        <rect x="526" y="30" width="24" height="160" fill="url(#rodhatch)" stroke="#888" stroke-width="1.5" rx="2"/>
+
+        <!-- beakers -->
+        <path d="M60,100 L60,280 Q60,300 80,300 L260,300 Q280,300 280,280 L280,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+        <path d="M440,100 L440,280 Q440,300 460,300 L640,300 Q660,300 660,280 L660,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+
+        <!-- liquid fill -->
+        <path d="M62,170 L62,279 Q62,298 80,298 L260,298 Q278,298 278,279 L278,170 Z" fill="url(#liquid)"/>
+        <path d="M442,170 L442,279 Q442,298 460,298 L640,298 Q658,298 658,279 L658,170 Z" fill="url(#liquid)"/>
+
+        <!-- liquid surface -->
+        <line x1="60" y1="170" x2="280" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+        <line x1="440" y1="170" x2="660" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+      </svg>
+      <div class="cell-overlay">
+        <span style="left:16.7%; top:2.5%">−</span>
+        <span style="left:80.6%; top:2.5%">+</span>
+        <span style="left:34%; top:2.5%">e<sup>-</sup> →</span>
+        <span style="left:63.2%; top:2.5%">e<sup>-</sup> →</span>
+        <span style="left:24.2%; top:60.9%">Zn<sup>+2</sup></span>
+        <span style="left:24.2%; top:79.7%">SO<sub>4</sub><sup>-2</sup></span>
+        <span style="left:76.4%; top:60.9%">Cu<sup>+2</sup></span>
+        <span style="left:76.4%; top:79.7%">SO<sub>4</sub><sup>-2</sup></span>
+        <span style="left:41.7%; top:14.1%">Cl<sup>-</sup></span>
+        <span style="left:58.3%; top:14.1%">K<sup>+</sup></span>
+      </div>
+    </div>
+    <div class="cell-captions">
+      <span>ZnSO<sub>4</sub> çözeltisi</span>
+      <span>CuSO<sub>4</sub> çözeltisi</span>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="col">
+      <ul class="notes compact">
+        <li>Yükseltgenmenin olduğu elektrot <strong>anot</strong>tur.</li>
+        <li>İndirgenmenin olduğu elektrot <strong>katot</strong>tur.</li>
+      </ul>
+    </div>
+    <div class="col">
+      <div class="half-row">
+        <div class="half-eqn">Zn<sub>(k)</sub> → Zn<sup>+2</sup><sub>(suda)</sub> + 2e<sup>-</sup></div>
+      </div>
+      <div class="half-note" style="text-align:right; margin-top:-1.5mm">aşınma <span class="muted">(anot)</span></div>
+      <div class="half-row" style="margin-top:1.5mm">
+        <div class="half-eqn">Cu<sup>+2</sup><sub>(suda)</sub> + 2e<sup>-</sup> → Cu<sub>(k)</sub></div>
+      </div>
+      <div class="half-note" style="text-align:right; margin-top:-1.5mm">birikme <span class="muted">(katot)</span></div>
+    </div>
+  </div>
+
+  <div class="overall-eqn final">
+    Zn<sub>(k)</sub> + Cu<sup>+2</sup><sub>(suda)</sub> → Zn<sup>+2</sup><sub>(suda)</sub> + Cu<sub>(k)</sub>
+    <div class="ann">net tepkime</div>
+  </div>
+
+  <div class="eqn-block">
+    <div class="eqn" style="font-size:12pt">
+      Zn<sub>(k)</sub> &#124; Zn<sup>+2</sup><sub>(suda)</sub> &nbsp;&#8214;&nbsp; Cu<sup>+2</sup><sub>(suda)</sub> &#124; Cu<sub>(k)</sub>
+    </div>
+    <div class="ann" style="display:flex; justify-content:space-between; padding:0 12%; margin-top:1mm">
+      <span>anot</span><span>şematik gösterim</span><span>katot</span>
+    </div>
+  </div>
+
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 10 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik · Elektrokimya</div>
+  <h1 class="page-title">Hücre Potansiyeli (E°)</h1>
+
+  <div class="note-block">
+    <p>Galvanik hücrede yükseltgenme ve indirgenme tepkimesi gerçekleşirken iki elektrot arasında bir potansiyel fark oluşur. Bu potansiyel farka <strong>hücre potansiyeli (pil potansiyeli)</strong> denir.</p>
+  </div>
+
+  <ul class="notes">
+    <li>Voltmetre ile ölçülür, birimi <strong>volt (V)</strong>'dur.</li>
+    <li>Bu potansiyele <strong>elektromotor kuvvet (E)</strong> de denir.</li>
+    <li>Bir pilin standart gerilimi, <strong>E°<sub>pil</sub> = E°<sub>yük.</sub> + E°<sub>in.</sub></strong> ile bulunur.</li>
+  </ul>
+
+  <h2 class="section-title" style="color:var(--red); margin-top:5mm">E°'nin Özellikleri</h2>
+  <ul class="notes">
+    <li>Maddenin cinsine, derişimine, sıcaklığa ve basınca bağlıdır.</li>
+    <li>Yazıldığı yönün gerilimini bildirir.</li>
+  </ul>
+
+  <div class="eqn-block">
+    <div class="half-row">
+      <div class="half-eqn">X → X<sup>+2</sup> + 2e<sup>-</sup></div>
+      <div class="half-note">E°<sub>yük.</sub></div>
+    </div>
+    <div class="half-row" style="margin-top:1.5mm">
+      <div class="half-eqn">Y<sup>+2</sup> + 2e<sup>-</sup> → Y</div>
+      <div class="half-note">E°<sub>in.</sub></div>
+    </div>
+  </div>
+
+  <ul class="notes">
+    <li>Yarı pil tepkimesi ters çevrilince, E° değerinin işareti değişir.</li>
+    <li>Yarı pil tepkimesi bir sayı ile çarpılırsa E° değeri değişmez.</li>
+  </ul>
+
+  <div class="example" style="margin-top:6mm">
+    <p><strong>Örnek 6:</strong></p>
+    <div class="half-row">
+      <div class="half-eqn"><strong>I.</strong>&nbsp; Zn<sub>(k)</sub> + Cu<sup>+2</sup><sub>(suda)</sub> → Zn<sup>+2</sup><sub>(suda)</sub> + Cu<sub>(k)</sub></div>
+      <div class="half-note">E° = 1,1 V</div>
+    </div>
+    <div class="half-row" style="margin-top:1.5mm">
+      <div class="half-eqn"><strong>II.</strong>&nbsp; Zn<sup>+2</sup><sub>(suda)</sub> + 2e<sup>-</sup> → Zn<sub>(k)</sub></div>
+      <div class="half-note">E° = -0,76 V</div>
+    </div>
+    <p style="margin-top:3mm">Buna göre standart koşullarda katot tepkimesinin yarı pil potansiyeli ne olur?</p>
+    <div class="answer-box">Cevap: E°<sub>katot</sub> (Cu<sup>+2</sup>/Cu) = +0,34 V</div>
+  </div>
+
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 11 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik · Elektrokimya</div>
+  <h1 class="page-title">Galvanik Hücre – Örnekler</h1>
+
+  <div class="note-block">
+    <p><strong>Not:</strong> Aktif metallerin yükseltgenme potansiyelleri pozitif, soy (pasif) metallerin yükseltgenme potansiyelleri negatiftir.</p>
+  </div>
+  <div class="note-block">
+    <p><strong>Not:</strong> Pilin çalışması için elektrotlar arasında aktiflik farkı ya da çözeltiler arasında derişim farkı bulunmalıdır.</p>
+  </div>
+
+  <div class="example" style="border-top:none; padding-top:0; margin-top:0">
+    <p><strong>Örnek 7:</strong> Şekildeki galvanik hücre çalışırken zamanla Cu elektrodun aşındığı gözlemlenmektedir.</p>
+
+    <div class="cell">
+      <div class="cell-labels">
+        <div>Cu elektrot</div>
+        <div>Ag elektrot</div>
+      </div>
+      <div class="cell-diagram">
+        <svg viewBox="0 0 720 320" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="liquid2" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="8" height="8" fill="#fdeaea"/>
+              <line x1="0" y1="0" x2="0" y2="8" stroke="#f3c9c7" stroke-width="4"/>
+            </pattern>
+            <pattern id="rodhatch2" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="6" height="6" fill="#eee"/>
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#999" stroke-width="3"/>
+            </pattern>
+          </defs>
+
+          <!-- salt bridge -->
+          <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#1c1c1c" stroke-width="14" stroke-linecap="round"/>
+          <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+
+          <!-- wire + meter -->
+          <line x1="162" y1="20" x2="328" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="372" y1="20" x2="538" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+          <circle cx="350" cy="20" r="22" fill="#fff" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="350" y1="20" x2="362" y2="8" stroke="#1c1c1c" stroke-width="2"/>
+          <line x1="162" y1="20" x2="162" y2="30" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="538" y1="20" x2="538" y2="30" stroke="#1c1c1c" stroke-width="2.5"/>
+
+          <!-- electrodes -->
+          <rect x="150" y="30" width="24" height="160" fill="url(#rodhatch2)" stroke="#888" stroke-width="1.5" rx="2"/>
+          <rect x="526" y="30" width="24" height="160" fill="url(#rodhatch2)" stroke="#888" stroke-width="1.5" rx="2"/>
+
+          <!-- beakers -->
+          <path d="M60,100 L60,280 Q60,300 80,300 L260,300 Q280,300 280,280 L280,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+          <path d="M440,100 L440,280 Q440,300 460,300 L640,300 Q660,300 660,280 L660,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+
+          <!-- liquid fill -->
+          <path d="M62,170 L62,279 Q62,298 80,298 L260,298 Q278,298 278,279 L278,170 Z" fill="url(#liquid2)"/>
+          <path d="M442,170 L442,279 Q442,298 460,298 L640,298 Q658,298 658,279 L658,170 Z" fill="url(#liquid2)"/>
+
+          <!-- liquid surface -->
+          <line x1="60" y1="170" x2="280" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+          <line x1="440" y1="170" x2="660" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+        </svg>
+        <div class="cell-overlay">
+          <span style="left:50%; top:14.1%">KCl</span>
+        </div>
+      </div>
+      <div class="cell-captions">
+        <span>Cu(NO<sub>3</sub>)<sub>2</sub> çözeltisi</span>
+        <span>AgNO<sub>3</sub> çözeltisi</span>
+      </div>
+    </div>
+
+    <p>Buna göre hangisi <strong>yanlıştır</strong>?</p>
+    <div class="options" style="grid-template-columns:1fr">
+      <span>A) Elektronlar dış devrede Cu elektrottan Ag elektroda doğru gider.</span>
+      <span>B) Anot tepkimesi Cu<sub>(k)</sub> → Cu<sup>+2</sup> + 2e<sup>-</sup>'dur.</span>
+      <span>C) Katot tepkimesi Ag<sup>+</sup> + e<sup>-</sup> → Ag<sub>(k)</sub>'dir.</span>
+      <span>D) Cu elektrodun kütlesi 0,2 mol azalırken Ag elektrodun kütlesi 0,1 mol artar.</span>
+      <span>E) Tuz köprüsündeki Cl<sup>-</sup> iyonları Cu elektrodun bulunduğu yarı hücreye gider.</span>
+    </div>
+  </div>
+
+  <div class="example">
+    <p><strong>Örnek 8:</strong> X metalinin yükseltgenme yarı pil potansiyeli pozitif, Y metalininki ise negatiftir. Buna göre hangisi <strong>yanlıştır</strong>?</p>
+    <div class="options" style="grid-template-columns:1fr">
+      <span>A) X, HCl ile H<sub>2</sub> gazı açığa çıkarır.</span>
+      <span>B) Y, HNO<sub>3</sub> ile H<sub>2</sub> gazı açığa çıkarır.</span>
+      <span>C) HCl çözeltisinde Y metali çözünmez.</span>
+      <span>D) X metali Na olabilir.</span>
+      <span>E) Y metali Cu olabilir.</span>
+    </div>
+  </div>
+
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 12 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik · Elektrokimya</div>
+  <h1 class="page-title">Aktiflik ve Hücre Potansiyeli</h1>
+
+  <div class="example" style="border-top:none; padding-top:0; margin-top:0">
+    <p><strong>Örnek 9:</strong></p>
+    <div class="eqn-block">
+      <div class="half-row"><div class="half-eqn">Zn → Zn<sup>+2</sup> + 2e<sup>-</sup></div><div class="half-note">E° = 0,76 V</div></div>
+      <div class="half-row" style="margin-top:1.5mm"><div class="half-eqn">Al → Al<sup>+3</sup> + 3e<sup>-</sup></div><div class="half-note">E° = 1,66 V</div></div>
+      <div class="half-row" style="margin-top:1.5mm"><div class="half-eqn">Na → Na<sup>+</sup> + e<sup>-</sup></div><div class="half-note">E° = 2,71 V</div></div>
+      <div class="half-row" style="margin-top:1.5mm"><div class="half-eqn">Mg → Mg<sup>+2</sup> + 2e<sup>-</sup></div><div class="half-note">E° = 2,37 V</div></div>
+    </div>
+    <div class="statements">
+      <div class="stmt"><span class="num">I.</span><span>3Zn + 2Al<sup>+3</sup> → 3Zn<sup>+2</sup> + 2Al</span></div>
+      <div class="stmt"><span class="num">II.</span><span>2Na + Zn<sup>+2</sup> → 2Na<sup>+</sup> + Zn</span></div>
+      <div class="stmt"><span class="num">III.</span><span>2Al + 3Mg<sup>+2</sup> → 2Al<sup>+3</sup> + 3Mg</span></div>
+    </div>
+    <p>tepkimelerinden hangileri istemlidir?</p>
+    <div class="answer-lines short"></div>
+  </div>
+
+  <div class="example">
+    <p><strong>Örnek 10:</strong></p>
+    <div class="eqn-block">
+      <div class="half-row"><div class="half-eqn">Ag<sup>+</sup>/Ag</div><div class="half-note">E° = 0,80 V</div></div>
+      <div class="half-row" style="margin-top:1.5mm"><div class="half-eqn">Zn<sup>+2</sup>/Zn</div><div class="half-note">E° = -0,76 V</div></div>
+      <div class="half-row" style="margin-top:1.5mm"><div class="half-eqn">Fe<sup>+3</sup>/Fe</div><div class="half-note">E° = -0,04 V</div></div>
+    </div>
+
+    <div class="beakers tall">
+      <figure class="beaker">
+        <div class="beaker-body">
+          <div class="rod-label">Ag<sub>(k)</sub></div>
+          <div class="rod"></div>
+          <span class="beaker-ion corner">Zn<sup>+2</sup><sub>(suda)</sub></span>
+        </div>
+      </figure>
+      <figure class="beaker">
+        <div class="beaker-body">
+          <div class="rod-label">Fe<sub>(k)</sub></div>
+          <div class="rod"></div>
+          <span class="beaker-ion corner">Ag<sup>+</sup><sub>(suda)</sub></span>
+        </div>
+      </figure>
+      <figure class="beaker">
+        <div class="beaker-body">
+          <div class="rod-label">Zn<sub>(k)</sub></div>
+          <div class="rod"></div>
+          <span class="beaker-ion corner">Fe<sup>+3</sup><sub>(suda)</sub></span>
+        </div>
+      </figure>
+    </div>
+
+    <p>Yukarıdaki kapların hangilerinde tepkime gerçekleşir?</p>
+    <div class="answer-lines short"></div>
+  </div>
+
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 13 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik · Elektrokimya</div>
+  <h1 class="page-title">Galvanik Hücre – Örnekler</h1>
+
+  <div class="example" style="border-top:none; padding-top:0; margin-top:0">
+    <p><strong>Örnek 11:</strong> Aşağıdaki pil çalışırken e<sup>-</sup>'lar dış devrede X elektrodundan Y elektroduna doğru gitmektedir.</p>
+
+    <div class="cell" style="margin:0.5mm auto 1mm auto">
+      <div class="cell-labels">
+        <div>X elektrot</div>
+        <div>Y elektrot</div>
+      </div>
+      <div class="cell-diagram">
+        <svg viewBox="0 0 720 320" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="liquid3" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="8" height="8" fill="#fdeaea"/>
+              <line x1="0" y1="0" x2="0" y2="8" stroke="#f3c9c7" stroke-width="4"/>
+            </pattern>
+            <pattern id="rodhatch3" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="6" height="6" fill="#eee"/>
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#999" stroke-width="3"/>
+            </pattern>
+          </defs>
+
+          <!-- salt bridge -->
+          <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#1c1c1c" stroke-width="14" stroke-linecap="round"/>
+          <path d="M300,230 L300,55 L420,55 L420,230" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+
+          <!-- wire + meter -->
+          <line x1="162" y1="20" x2="328" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="372" y1="20" x2="538" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+          <circle cx="350" cy="20" r="22" fill="#fff" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="350" y1="20" x2="362" y2="8" stroke="#1c1c1c" stroke-width="2"/>
+          <line x1="162" y1="20" x2="162" y2="30" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="538" y1="20" x2="538" y2="30" stroke="#1c1c1c" stroke-width="2.5"/>
+
+          <!-- electrodes -->
+          <rect x="150" y="30" width="24" height="160" fill="url(#rodhatch3)" stroke="#888" stroke-width="1.5" rx="2"/>
+          <rect x="526" y="30" width="24" height="160" fill="url(#rodhatch3)" stroke="#888" stroke-width="1.5" rx="2"/>
+
+          <!-- beakers -->
+          <path d="M60,100 L60,280 Q60,300 80,300 L260,300 Q280,300 280,280 L280,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+          <path d="M440,100 L440,280 Q440,300 460,300 L640,300 Q660,300 660,280 L660,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+
+          <!-- liquid fill -->
+          <path d="M62,170 L62,279 Q62,298 80,298 L260,298 Q278,298 278,279 L278,170 Z" fill="url(#liquid3)"/>
+          <path d="M442,170 L442,279 Q442,298 460,298 L640,298 Q658,298 658,279 L658,170 Z" fill="url(#liquid3)"/>
+
+          <!-- liquid surface -->
+          <line x1="60" y1="170" x2="280" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+          <line x1="440" y1="170" x2="660" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+        </svg>
+        <div class="cell-overlay">
+          <span style="left:34%; top:2.5%">e<sup>-</sup> →</span>
+          <span style="left:63.2%; top:2.5%">e<sup>-</sup> →</span>
+        </div>
+      </div>
+      <div class="cell-captions">
+        <span>1M X(NO<sub>3</sub>)<sub>2</sub></span>
+        <span>1M Y(NO<sub>3</sub>)<sub>2</sub></span>
+      </div>
+    </div>
+
+    <div class="statements">
+      <div class="stmt"><span class="num">I.</span><span>X elektrodu yükseltgenmektedir.</span></div>
+      <div class="stmt"><span class="num">II.</span><span>Pil istemlidir.</span></div>
+      <div class="stmt"><span class="num">III.</span><span>Y<sup>+2</sup> iyon derişimi azalmaktadır.</span></div>
+    </div>
+    <p>Hangileri doğrudur?</p>
+    <div class="answer-lines short"></div>
+  </div>
+
+  <div class="example" style="margin-top:2mm; padding-top:1.5mm">
+    <p><strong>Örnek 12:</strong></p>
+    <div class="eqn-block">
+      <div class="half-row"><div class="half-eqn">Al<sup>+3</sup><sub>(suda)</sub> + 3e<sup>-</sup> → Al<sub>(k)</sub></div><div class="half-note">E° = -1,66 V</div></div>
+      <div class="half-row" style="margin-top:1.5mm"><div class="half-eqn">Ag<sup>+</sup><sub>(suda)</sub> + e<sup>-</sup> → Ag<sub>(k)</sub></div><div class="half-note">E° = +0,80 V</div></div>
+    </div>
+    <p>Buna göre;</p>
+    <div class="statements">
+      <div class="stmt"><span class="num">I.</span><span>Pilin anodu Al, katotu Ag'dir.</span></div>
+      <div class="stmt"><span class="num">II.</span><span>İstemli gerçekleşen pilde potansiyel gerilim 2,46 V'dur.</span></div>
+      <div class="stmt"><span class="num">III.</span><span>Pilin net tepkimesi Al<sub>(k)</sub> + 3Ag<sup>+</sup><sub>(suda)</sub> ⇌ Al<sup>+3</sup><sub>(suda)</sub> + 3Ag<sub>(k)</sub></span></div>
+    </div>
+    <p>Hangileri doğrudur?</p>
+    <div class="answer-lines short"></div>
+  </div>
+
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
 </section>
 
 </body>
