@@ -1,0 +1,23 @@
+# Bu dosyalar/klasörler statik site olarak chemclass.muratsunker.workers.dev
+# adresinden YAYINLANMASIN diye Cloudflare Workers asset yükleyicisine
+# (wrangler deploy) hariç tutuluyor.
+
+# Flutter mobil uygulama kaynak kodları (öğretmen & öğrenci)
+flutter
+
+# iOS native proje dosyaları ve App Store yayın materyalleri
+ios
+ios-publish
+
+# Ayrı Cloudflare Worker projeleri (kendi wrangler.toml'ları var)
+kasa-api
+kasa-worker
+
+# Supabase migration / edge function kaynakları (sunucu tarafı)
+supabase
+
+# Repo/araç dosyaları
+.git
+.assetsignore
+wrangler.jsonc
+*.md
