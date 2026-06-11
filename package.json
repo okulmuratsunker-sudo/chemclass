@@ -1,0 +1,8 @@
+{
+  "name": "chemclass-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
