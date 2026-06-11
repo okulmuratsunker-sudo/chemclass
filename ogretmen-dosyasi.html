@@ -287,6 +287,7 @@ select.inp{cursor:pointer}
   <button class="menu-item-btn" data-page="grades" onclick="goto('grades')"><span class="mi-ico">📝</span>Not Defteri</button>
   <button class="menu-item-btn" data-page="analysis" onclick="goto('analysis')"><span class="mi-ico">🔬</span>Madde Analizi</button>
   <button class="menu-item-btn" data-page="scores" onclick="goto('scores')"><span class="mi-ico">⭐</span>Puan Sistemi</button>
+  <button class="menu-item-btn" data-page="chemlink" onclick="goto('chemlink')"><span class="mi-ico">🔗</span>ChemClass Bağlantısı</button>
   <button class="menu-item-btn" data-page="plans" onclick="goto('plans')"><span class="mi-ico">📚</span>Ders Planları</button>
 </div>
 
@@ -301,6 +302,24 @@ select.inp{cursor:pointer}
     <div class="row-btns">
       <button class="btn btn-outline" onclick="closeModal('mo-score')">İptal</button>
       <button class="btn btn-primary" onclick="saveScore()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- ChemClass Link Modal -->
+<div class="overlay" id="mo-chemlink">
+  <div class="modal">
+    <div class="modal-hd"><span id="mo-chemlink-title">ChemClass Bağlantısı</span><button class="modal-close" onclick="closeModal('mo-chemlink')">×</button></div>
+    <div class="field"><label class="field-label">ChemClass Sınıfı</label>
+      <select class="inp" id="cl-class" onchange="chemLinkClassChange()"></select>
+    </div>
+    <div class="field"><label class="field-label">ChemClass Öğrencisi</label>
+      <select class="inp" id="cl-student"></select>
+    </div>
+    <div class="row-btns">
+      <button class="btn btn-outline" id="cl-remove" onclick="removeChemLink()" style="display:none">Bağlantıyı Kaldır</button>
+      <button class="btn btn-outline" onclick="closeModal('mo-chemlink')">İptal</button>
+      <button class="btn btn-primary" onclick="saveChemLink()">Kaydet</button>
     </div>
   </div>
 </div>
@@ -341,6 +360,11 @@ const SB_URL='https://yqyrhuednyhirgcghexe.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxeXJodWVkbnloaXJnY2doZXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzQ5MTgsImV4cCI6MjA5NTM1MDkxOH0.bPaF2xWNL4k4eZhhQpzYpaCojqSVIYe4sqM-atpoDJM';
 const sb=supabase.createClient(SB_URL,SB_KEY);
 
+// ── ChemClass (davranış puanı senkronizasyonu için ikinci proje)
+const CHEM_SB_URL='https://zajzfbvduhewrvaetyuk.supabase.co';
+const CHEM_SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphanpmYnZkdWhld3J2YWV0eXVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjYzMjIsImV4cCI6MjA5Njc0MjMyMn0.OJgaxVlQRPtqndIttIScM-cLMXTKqYe1IHnSp90DQJs';
+const sbChem=supabase.createClient(CHEM_SB_URL,CHEM_SB_KEY);
+
 // ── Auth
 let authMode='login';
 function authTab(mode){
@@ -369,6 +393,7 @@ async function doAuth(){
   }
   showApp(res.data.user);
   await loadAll();
+  await tryChemAuth(email,pass);
 }
 function showApp(user){
   document.getElementById('authScreen').style.display='none';
@@ -384,6 +409,11 @@ let students=[],grades=[],scores=[],scoreHistory=[],schedule=[],plans=[],photos=
 let examQuestions=[],questionScores=[];
 let page='dashboard',sem=1,editSched=false,scoreStudentId=null,searchQ='';
 let anaSem=1,anaExam='w1',anaView='entry';
+
+// ── ChemClass bağlantısı
+let chemUser=null,chemLinked=false,behaviorPointLinks=[],chemClasses=[],chemRoster={};
+let chemChannel=null,chemLinkStudentId=null;
+const _sentBPIds=new Set();
 
 // ── Theme
 (function(){const t=localStorage.getItem('of_theme')||'light';document.documentElement.setAttribute('data-theme',t)})();
@@ -532,6 +562,7 @@ function render(){
   else if(page==='grades')m.innerHTML=renderGrades();
   else if(page==='analysis')m.innerHTML=renderAnalysis();
   else if(page==='scores')m.innerHTML=renderScores();
+  else if(page==='chemlink')m.innerHTML=renderChemLinks();
   else if(page==='schedule')m.innerHTML=renderSchedule();
   else if(page==='plans')m.innerHTML=renderPlans();
 }
@@ -1099,7 +1130,220 @@ async function saveScore(){
   }
   const{error:he}=await sb.from('score_history').insert({student_id:sid,delta,note:note||''});
   if(!he)scoreHistory.unshift({student_id:sid,delta,note:note||'',created_at:new Date().toISOString()});
+  syncScoreToChem(sid_,delta,note);
   closeModal('mo-score');render();toast(`✓ ${delta>=0?'+':''}${delta} puan eklendi`);
+}
+
+// ════════════════════════════════════════
+// CHEMCLASS BAĞLANTISI (davranış puanı senkronizasyonu)
+// ════════════════════════════════════════
+async function tryChemAuth(email,pass){
+  try{
+    const{data,error}=await sbChem.auth.signInWithPassword({email,password:pass});
+    if(error||!data?.session){chemLinked=false;chemUser=null;return;}
+    chemUser=data.user;chemLinked=true;
+    await Promise.all([loadChemLinks(),loadChemClasses()]);
+    subscribeChemBehaviorPoints();
+  }catch(e){chemLinked=false;chemUser=null;}
+}
+
+async function retryChemAuth(){
+  const email=document.getElementById('userEmail')?.textContent;
+  const pass=prompt('ChemClass öğretmen hesabınızın şifresini girin:');
+  if(!email||!pass)return;
+  await tryChemAuth(email,pass);
+  render();
+  if(chemLinked)toast('✓ ChemClass bağlantısı kuruldu');
+  else toast('Bağlanılamadı. E-posta/şifre ChemClass hesabınızla aynı mı?',true);
+}
+
+async function loadChemLinks(){
+  if(!chemUser)return;
+  const{data}=await sbChem.from('behavior_point_links').select('*').eq('teacher_id',chemUser.id);
+  behaviorPointLinks=data||[];
+}
+
+async function loadChemClasses(){
+  if(!chemUser)return;
+  const{data:cls}=await sbChem.from('classes').select('id,name').eq('teacher_id',chemUser.id).order('name');
+  chemClasses=cls||[];
+  chemRoster={};
+  for(const c of chemClasses){
+    const{data:roster}=await sbChem.from('class_students').select('student_id, profiles(full_name)').eq('class_id',c.id);
+    chemRoster[c.id]=(roster||[]).map(r=>({id:r.student_id,name:r.profiles?.full_name||'?'}));
+  }
+}
+
+async function refreshChemData(){
+  await Promise.all([loadChemLinks(),loadChemClasses()]);
+  render();toast('✓ Güncellendi');
+}
+
+function subscribeChemBehaviorPoints(){
+  if(chemChannel)return;
+  chemChannel=sbChem.channel('behavior-points-sync')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'behavior_points'},payload=>{
+      handleChemBehaviorPoint(payload.new);
+    })
+    .subscribe();
+}
+
+async function handleChemBehaviorPoint(row){
+  if(_sentBPIds.has(row.id)){_sentBPIds.delete(row.id);return;}
+  const link=behaviorPointLinks.find(l=>l.chemclass_student_id===row.student_id&&l.chemclass_class_id===row.class_id);
+  if(!link)return;
+  const sid=link.ogretmenim_student_id;
+  let scRow=scores.find(x=>x.student_id===sid);
+  if(scRow){
+    const nv=(scRow.score||0)+row.points;
+    await sb.from('student_scores').update({score:nv,updated_at:new Date().toISOString()}).eq('id',scRow.id);
+    scRow.score=nv;
+  }else{
+    const{data}=await sb.from('student_scores').insert({student_id:sid,score:row.points}).select().single();
+    if(data)scores.push(data);
+  }
+  const note=row.reason?row.reason+' (ChemClass)':'(ChemClass)';
+  await sb.from('score_history').insert({student_id:sid,delta:row.points,note});
+  scoreHistory.unshift({student_id:sid,delta:row.points,note,created_at:new Date().toISOString()});
+  ofSaveCache();
+  if(page==='scores'||page==='dashboard'||page==='chemlink')render();
+  toast(`📥 ChemClass'tan ${row.points>=0?'+':''}${row.points} puan (${link.ogretmenim_student_name})`);
+}
+
+async function syncScoreToChem(sid,delta,note){
+  if(!chemLinked||!chemUser)return;
+  const link=behaviorPointLinks.find(l=>l.ogretmenim_student_id===sid);
+  if(!link)return;
+  const{data,error}=await sbChem.from('behavior_points').insert({
+    class_id:link.chemclass_class_id,
+    student_id:link.chemclass_student_id,
+    given_by:chemUser.id,
+    points:delta,
+    reason:note||null,
+  }).select().single();
+  if(!error&&data)_sentBPIds.add(data.id);
+}
+
+function normalizeName(s){
+  return String(s||'').toLocaleLowerCase('tr-TR')
+    .replace(/ı/g,'i').replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ş/g,'s').replace(/ö/g,'o').replace(/ç/g,'c')
+    .replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
+}
+
+function findChemSuggestion(name){
+  const target=normalizeName(name);
+  const linkedChemIds=new Set(behaviorPointLinks.map(l=>l.chemclass_student_id));
+  for(const c of chemClasses){
+    for(const r of (chemRoster[c.id]||[])){
+      if(linkedChemIds.has(r.id))continue;
+      if(normalizeName(r.name)===target)return{classId:c.id,className:c.name,studentId:r.id,studentName:r.name};
+    }
+  }
+  return null;
+}
+
+function renderChemLinks(){
+  let h=`<div class="page-title">🔗 ChemClass Bağlantısı</div>`;
+  if(!chemLinked){
+    h+=`<div class="card"><div class="card-title">Bağlantı Yok</div>
+<div style="font-size:.85rem;color:var(--text2);line-height:1.6">
+ChemClass hesabınıza bu e-posta/şifre ile giriş yapılamadı. ChemClass öğretmen uygulamasında aynı e-posta ve şifreyle bir hesabınız varsa "Tekrar Dene"ye basıp şifrenizi girin. Hesabınız yoksa önce ChemClass uygulamasından kayıt olun.
+</div>
+<div class="row-btns" style="margin-top:12px"><button class="btn btn-primary" onclick="retryChemAuth()">Tekrar Dene</button></div>
+</div>`;
+    return h;
+  }
+  h+=`<div class="row-btns" style="margin-bottom:16px;justify-content:flex-end"><button class="btn btn-outline btn-sm" onclick="refreshChemData()">🔄 Yenile</button></div>`;
+  if(!chemClasses.length){
+    h+=`<div class="card"><div class="empty"><div class="empty-ico">🏫</div>ChemClass'ta henüz bir sınıfınız yok. Önce ChemClass uygulamasında bir sınıf oluşturun.</div></div>`;
+    return h;
+  }
+  h+=`<div class="card" style="margin-bottom:16px"><div class="card-title">ℹ️ Nasıl çalışır?</div>
+<div style="font-size:.83rem;color:var(--text2);line-height:1.6">Her öğrenciyi ChemClass'taki sınıf listenizden bir öğrenciyle eşleştirin. Eşleştirdikten sonra, bu sayfadan veya ChemClass'tan verilen davranış puanları her iki uygulamada da anında güncellenir.</div></div>`;
+  h+=`<div class="card"><div class="card-title">👥 Öğrenciler</div>`;
+  if(!students.length)h+='<div class="empty"><div class="empty-ico">📭</div>Önce öğrenci ekleyin.</div>';
+  else students.forEach(st=>{
+    const link=behaviorPointLinks.find(l=>l.ogretmenim_student_id===st.id);
+    const bg=aColor(st.name),ini=initials(st.name);
+    let linkInfo;
+    if(link){
+      const cls=chemClasses.find(c=>c.id===link.chemclass_class_id);
+      const roster=chemRoster[link.chemclass_class_id]||[];
+      const stu=roster.find(r=>r.id===link.chemclass_student_id);
+      linkInfo=`<div style="font-size:.74rem;color:var(--success)">✓ ${esc(cls?.name||'?')} — ${esc(stu?.name||'?')}</div>`;
+    }else{
+      const sugg=findChemSuggestion(st.name);
+      linkInfo=sugg?`<div style="font-size:.74rem;color:var(--text2)">Öneri: ${esc(sugg.className)} — ${esc(sugg.studentName)}</div>`:`<div style="font-size:.74rem;color:var(--text2)">Bağlı değil</div>`;
+    }
+    h+=`<div class="score-row">
+  <div class="s-avatar" style="background:${bg};width:34px;height:34px;font-size:.82rem">${ini}</div>
+  <div style="flex:1">
+    <div style="font-weight:600;font-size:.9rem">${esc(st.name)}</div>
+    ${linkInfo}
+  </div>
+  <button class="btn btn-outline btn-sm" onclick="openChemLinkModal('${st.id}')">${link?'Değiştir':'Bağla'}</button>
+</div>`;
+  });
+  h+='</div>';
+  return h;
+}
+
+function fillChemStudentSelect(classId,preselect){
+  const roster=chemRoster[classId]||[];
+  const linkedIds=new Set(behaviorPointLinks.filter(l=>l.ogretmenim_student_id!==chemLinkStudentId).map(l=>l.chemclass_student_id));
+  const available=roster.filter(r=>!linkedIds.has(r.id));
+  const sel=document.getElementById('cl-student');
+  if(!available.length){sel.innerHTML='<option value="">(Bu sınıfta uygun öğrenci yok)</option>';return;}
+  sel.innerHTML=available.map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join('');
+  if(preselect&&available.find(r=>r.id===preselect))sel.value=preselect;
+}
+
+function chemLinkClassChange(){
+  fillChemStudentSelect(document.getElementById('cl-class').value);
+}
+
+function openChemLinkModal(sid){
+  chemLinkStudentId=sid;
+  const st=students.find(s=>s.id===sid);
+  document.getElementById('mo-chemlink-title').textContent=(st?.name||'Öğrenci')+' — ChemClass Bağlantısı';
+  const link=behaviorPointLinks.find(l=>l.ogretmenim_student_id===sid);
+  const sugg=!link?findChemSuggestion(st?.name||''):null;
+  const classSel=document.getElementById('cl-class');
+  classSel.innerHTML=chemClasses.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  const initialClass=link?.chemclass_class_id||sugg?.classId||chemClasses[0]?.id;
+  classSel.value=initialClass;
+  fillChemStudentSelect(initialClass,link?.chemclass_student_id||sugg?.studentId);
+  document.getElementById('cl-remove').style.display=link?'':'none';
+  openModal('mo-chemlink');
+}
+
+async function saveChemLink(){
+  const sid=chemLinkStudentId;if(!sid||!chemUser)return;
+  const classId=document.getElementById('cl-class').value;
+  const studentId=document.getElementById('cl-student').value;
+  if(!classId||!studentId){toast('Sınıf ve öğrenci seçin',true);return;}
+  const st=students.find(s=>s.id===sid);
+  const{data,error}=await sbChem.from('behavior_point_links').upsert({
+    teacher_id:chemUser.id,
+    ogretmenim_student_id:sid,
+    ogretmenim_student_name:st?.name||'',
+    chemclass_class_id:classId,
+    chemclass_student_id:studentId,
+  },{onConflict:'teacher_id,ogretmenim_student_id'}).select().single();
+  if(error){toast('Hata: '+error.message,true);return}
+  behaviorPointLinks=behaviorPointLinks.filter(l=>l.ogretmenim_student_id!==sid);
+  behaviorPointLinks.push(data);
+  closeModal('mo-chemlink');render();toast('✓ Bağlantı kaydedildi');
+}
+
+async function removeChemLink(){
+  const sid=chemLinkStudentId;if(!sid||!chemUser)return;
+  const link=behaviorPointLinks.find(l=>l.ogretmenim_student_id===sid);
+  if(!link)return;
+  const{error}=await sbChem.from('behavior_point_links').delete().eq('id',link.id);
+  if(error){toast('Hata: '+error.message,true);return}
+  behaviorPointLinks=behaviorPointLinks.filter(l=>l.id!==link.id);
+  closeModal('mo-chemlink');render();toast('Bağlantı kaldırıldı');
 }
 
 // ════════════════════════════════════════
@@ -1190,7 +1434,16 @@ document.head.appendChild(_s);
 // ── Init with auth check
 (async()=>{
   const{data:{session}}=await sb.auth.getSession();
-  if(session){showApp(session.user);await loadAll();}
+  if(session){
+    showApp(session.user);await loadAll();
+    const{data:{session:chemSession}}=await sbChem.auth.getSession();
+    if(chemSession){
+      chemUser=chemSession.user;chemLinked=true;
+      await Promise.all([loadChemLinks(),loadChemClasses()]);
+      subscribeChemBehaviorPoints();
+      if(page==='chemlink')render();
+    }
+  }
   sb.auth.onAuthStateChange(async(event,session)=>{
     if(event==='SIGNED_OUT')location.reload();
   });
