@@ -3,7 +3,13 @@ import { supabase } from "../supabaseClient"
 import type { Database } from "../database.types"
 
 /** Tables included in the `supabase_realtime` publication that are id-keyed lists. */
-export type RealtimeListTable = "behavior_points" | "messages" | "homework" | "announcements" | "grades"
+export type RealtimeListTable =
+  | "behavior_points"
+  | "messages"
+  | "homework"
+  | "announcements"
+  | "grades"
+  | "schedule_entries"
 
 type Row<T extends RealtimeListTable> = Database["public"]["Tables"][T]["Row"]
 
