@@ -167,7 +167,10 @@ class _HomeButton extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(title, style: TextStyle(color: cc.text1, fontWeight: FontWeight.bold, fontSize: 14)),
+              Text(title,
+                  style: TextStyle(color: cc.text1, fontWeight: FontWeight.bold, fontSize: 14),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis),
               const SizedBox(height: 4),
               Text(subtitle,
                   style: TextStyle(color: cc.text2, fontSize: 11),
