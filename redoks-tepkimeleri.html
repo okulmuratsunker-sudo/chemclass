@@ -70,7 +70,7 @@
     font-size:8.5pt;
     color:#9a9a9a;
   }
-  .page-foot::after{ content:"Sayfa " counter(pagenum) " / 29"; }
+  .page-foot::after{ content:"Sayfa " counter(pagenum) " / 34"; }
 
   /* ---------- bullet notes ---------- */
   ul.notes{
@@ -284,6 +284,30 @@
     margin-bottom:3.5mm;
   }
   .two-col .col{ flex:1; }
+
+  /* ---------- organic chemistry exercise list ---------- */
+  .org-box{
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:2mm 6mm;
+  }
+  .org-list{ list-style:none; margin:0; padding:0; }
+  .org-list li{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:4mm;
+    padding:11mm 0;
+    border-bottom:1px dotted var(--line);
+    font-size:12.5pt;
+  }
+  .org-list li:last-child{ border-bottom:none; }
+  .org-list .blank{
+    flex:0 0 34mm;
+    height:12mm;
+    border:1px solid var(--ink);
+    border-radius:3px;
+  }
 
   .note-block{
     border-left:3px solid var(--red);
@@ -2873,6 +2897,272 @@
   </div>
 
   <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 30 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik · Elektroliz</div>
+  <h1 class="page-title">Faraday Kanunları</h1>
+
+  <ul class="notes">
+    <li>Bir elektroliz devresinde, elektrotlarda açığa çıkan madde miktarı, devreden geçen elektrik yük miktarı ile doğru orantılıdır.</li>
+    <li>Bir elektroliz devresinden 1 Faraday akım (1 Faraday = 96 500 coulomb = 1 mol e<sup>-</sup>) geçtiğinde her elektrotta 1 eşdeğer gram madde açığa çıkar.</li>
+    <li>Elektrotlarda açığa çıkan madde miktarı (m), aşağıdaki bağıntı ile bulunur:</li>
+  </ul>
+
+  <div class="eqn-block" style="margin:2mm 0; padding:5mm 6mm">
+    <div class="eqn" style="font-size:15pt">
+      m = <span class="frac"><span class="num">M<sub>A</sub> · Q</span><span class="den">n · 96 500</span></span>
+      &nbsp;&nbsp;&nbsp;&nbsp; ( Q = İ · t )
+    </div>
+    <div class="ann" style="margin-top:4mm; font-size:10pt; line-height:1.7">
+      <strong>m</strong>: açığa çıkan / toplanan madde kütlesi (g) &nbsp;·&nbsp;
+      <strong>M<sub>A</sub></strong>: molekül/atom ağırlığı &nbsp;·&nbsp;
+      <strong>n</strong>: alınan/verilen e<sup>-</sup> sayısı<br>
+      <strong>İ</strong>: akım (amper) &nbsp;·&nbsp;
+      <strong>t</strong>: zaman (saniye) &nbsp;·&nbsp;
+      <strong>Q</strong>: yük (coulomb)
+    </div>
+  </div>
+
+  <div class="example" style="border-top:none; padding-top:0; margin-top:3mm">
+    <p><strong>Örnek 35:</strong> NaCl eriyiği 2 faradaylık akımla elektroliz ediliyor. Katotta ve anotta oluşan maddelerin kütleleri toplamı kaç gramdır? (Na: 23, Cl: 35,5)</p>
+    <div class="answer-lines" style="height:46mm"></div>
+  </div>
+
+  <div class="example">
+    <p><strong>Örnek 36:</strong> Erimiş KCl sıvısının elektrolizinde normal koşullarda anotta 44,8 L Cl<sub>2</sub> gazı açığa çıkıyor. Buna göre katotta toplanan K metali kaç gramdır? (K: 39)</p>
+    <div class="answer-lines" style="height:46mm"></div>
+  </div>
+
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 31 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik · Elektroliz</div>
+  <h1 class="page-title">Faraday Kanunları – Örnekler</h1>
+
+  <div class="example" style="border-top:none; padding-top:0; margin-top:0">
+    <p><strong>Örnek 37:</strong> Erimiş KCl tuzu 9,65 A akım ile 10 dakika elektroliz ediliyor. Buna göre katotta toplanan K miktarı ile anotta toplanan Cl<sub>2</sub> gazının normal koşullarda hacmi kaç L olur? (K: 39)</p>
+    <div class="answer-lines" style="height:36mm"></div>
+  </div>
+
+  <div class="example">
+    <p><strong>Örnek 38:</strong> 1 molar 1 litrelik KCl sulu çözeltisi 9,65 A akımla 100 sn elektroliz ediliyor. Çözeltinin pOH değeri kaç olur? (e<sup>-</sup> verme eğilimleri: K &gt; H<sub>2</sub>)</p>
+    <div class="answer-lines" style="height:36mm"></div>
+  </div>
+
+  <div class="example">
+    <p><strong>Örnek 39:</strong> 1 molar 100 mL NaCl çözeltisi bir süre elektroliz edilince çözeltinin pH'ı 10 olmaktadır. Buna göre açığa çıkan H<sub>2(g)</sub> kaç gramdır?</p>
+    <div class="answer-lines" style="height:36mm"></div>
+  </div>
+
+  <div class="example">
+    <p><strong>Örnek 40:</strong> Seri bağlı elektroliz kaplarından birinde MgCl<sub>2</sub> sıvısı, diğerinde AlF<sub>3</sub> sıvısı elektroliz ediliyor. MgCl<sub>2</sub> tuzu bulunan kabın katodunda 4,8 gram katı toplandığında, diğer kabın katodunda kaç gram metal toplanır? (Mg: 24, Al: 27)</p>
+    <div class="answer-lines" style="height:36mm"></div>
+  </div>
+
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 32 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik · Elektroliz</div>
+  <h1 class="page-title">Faraday Kanunları – Örnekler</h1>
+
+  <div class="example" style="border-top:none; padding-top:0; margin-top:0">
+    <p><strong>Örnek 41:</strong> Seri bağlı elektroliz kaplarında sırası ile erimiş Al(NO<sub>3</sub>)<sub>3</sub> ve NaNO<sub>3</sub> bulunmaktadır. 1. kabın katodunda 0,3 mol Al toplandığında 2. kabın katodunda kaç gram Na toplanır? (Na: 23)</p>
+
+    <div class="cell" style="width:62%; margin:1mm auto 2mm auto">
+      <div class="cell-diagram">
+        <svg viewBox="0 0 720 320" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="liquid19" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="8" height="8" fill="#dff3fb"/>
+              <line x1="0" y1="0" x2="0" y2="8" stroke="#8fd3ec" stroke-width="4"/>
+            </pattern>
+            <pattern id="rodhatch22" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="6" height="6" fill="#eee"/>
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#999" stroke-width="3"/>
+            </pattern>
+          </defs>
+
+          <!-- iç bağlantı kablosu: 1.kabın 2.elektrotu ile 2.kabın 1.elektrotu -->
+          <path d="M244,30 L244,18 L476,18 L476,30" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+
+          <!-- dış bağlantı kablosu + üreteç -->
+          <path d="M96,30 L96,8 L352,8" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+          <path d="M368,8 L624,8 L624,30" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="352" y1="2" x2="352" y2="14" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="368" y1="4" x2="368" y2="12" stroke="#1c1c1c" stroke-width="5"/>
+
+          <!-- elektrotlar -->
+          <rect x="84"  y="30" width="24" height="160" fill="url(#rodhatch22)" stroke="#888" stroke-width="1.5" rx="2"/>
+          <rect x="232" y="30" width="24" height="160" fill="url(#rodhatch22)" stroke="#888" stroke-width="1.5" rx="2"/>
+          <rect x="464" y="30" width="24" height="160" fill="url(#rodhatch22)" stroke="#888" stroke-width="1.5" rx="2"/>
+          <rect x="612" y="30" width="24" height="160" fill="url(#rodhatch22)" stroke="#888" stroke-width="1.5" rx="2"/>
+
+          <!-- kaplar -->
+          <path d="M60,100 L60,280 Q60,300 80,300 L260,300 Q280,300 280,280 L280,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+          <path d="M440,100 L440,280 Q440,300 460,300 L640,300 Q660,300 660,280 L660,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+
+          <!-- sıvı -->
+          <path d="M62,170 L62,279 Q62,298 80,298 L260,298 Q278,298 278,279 L278,170 Z" fill="url(#liquid19)"/>
+          <path d="M442,170 L442,279 Q442,298 460,298 L640,298 Q658,298 658,279 L658,170 Z" fill="url(#liquid19)"/>
+
+          <!-- sıvı yüzeyi -->
+          <line x1="60" y1="170" x2="280" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+          <line x1="440" y1="170" x2="660" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+        </svg>
+        <div class="cell-overlay">
+          <span style="left:13.3%; top:1.5%">+</span>
+          <span style="left:33.9%; top:1.5%">−</span>
+          <span style="left:66.1%; top:1.5%">+</span>
+          <span style="left:86.7%; top:1.5%">−</span>
+        </div>
+      </div>
+      <div class="cell-captions">
+        <span>Al(NO<sub>3</sub>)<sub>3</sub><br>1.kap</span>
+        <span>NaNO<sub>3</sub><br>2.kap</span>
+      </div>
+    </div>
+
+    <div class="answer-lines" style="height:32mm"></div>
+  </div>
+
+  <div class="example">
+    <p><strong>Örnek 42:</strong> Seri bağlı elektroliz kaplarında erimiş CuCl<sub>2</sub> ve CuBr<sub>2</sub> tuzları bulunmaktadır. Elektroliz düzeneğinden belirli sürede akım geçirildiğinde 1. ve 2. kabın katodunda toplam 38,4 gram bakır toplanmaktadır. Buna göre devreden geçen akım kaç faradaydır?</p>
+
+    <div class="cell" style="width:62%; margin:1mm auto 2mm auto">
+      <div class="cell-diagram">
+        <svg viewBox="0 0 720 320" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="liquid20" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="8" height="8" fill="#dff3fb"/>
+              <line x1="0" y1="0" x2="0" y2="8" stroke="#8fd3ec" stroke-width="4"/>
+            </pattern>
+            <pattern id="rodhatch23" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="6" height="6" fill="#eee"/>
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#999" stroke-width="3"/>
+            </pattern>
+          </defs>
+
+          <!-- iç bağlantı kablosu: 1.kabın 2.elektrotu ile 2.kabın 1.elektrotu -->
+          <path d="M244,30 L244,18 L476,18 L476,30" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+
+          <!-- dış bağlantı kablosu + üreteç -->
+          <path d="M96,30 L96,8 L352,8" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+          <path d="M368,8 L624,8 L624,30" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="352" y1="2" x2="352" y2="14" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="368" y1="4" x2="368" y2="12" stroke="#1c1c1c" stroke-width="5"/>
+
+          <!-- elektrotlar -->
+          <rect x="84"  y="30" width="24" height="160" fill="url(#rodhatch23)" stroke="#888" stroke-width="1.5" rx="2"/>
+          <rect x="232" y="30" width="24" height="160" fill="url(#rodhatch23)" stroke="#888" stroke-width="1.5" rx="2"/>
+          <rect x="464" y="30" width="24" height="160" fill="url(#rodhatch23)" stroke="#888" stroke-width="1.5" rx="2"/>
+          <rect x="612" y="30" width="24" height="160" fill="url(#rodhatch23)" stroke="#888" stroke-width="1.5" rx="2"/>
+
+          <!-- kaplar -->
+          <path d="M60,100 L60,280 Q60,300 80,300 L260,300 Q280,300 280,280 L280,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+          <path d="M440,100 L440,280 Q440,300 460,300 L640,300 Q660,300 660,280 L660,100" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+
+          <!-- sıvı -->
+          <path d="M62,170 L62,279 Q62,298 80,298 L260,298 Q278,298 278,279 L278,170 Z" fill="url(#liquid20)"/>
+          <path d="M442,170 L442,279 Q442,298 460,298 L640,298 Q658,298 658,279 L658,170 Z" fill="url(#liquid20)"/>
+
+          <!-- sıvı yüzeyi -->
+          <line x1="60" y1="170" x2="280" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+          <line x1="440" y1="170" x2="660" y2="170" stroke="#1c1c1c" stroke-width="1" stroke-dasharray="4 3"/>
+        </svg>
+        <div class="cell-overlay">
+          <span style="left:13.3%; top:1.5%">+</span>
+          <span style="left:33.9%; top:1.5%">−</span>
+          <span style="left:66.1%; top:1.5%">+</span>
+          <span style="left:86.7%; top:1.5%">−</span>
+          <span style="left:23.6%; top:64%">Cu<sup>+2</sup></span>
+          <span style="left:76.4%; top:64%">Cu<sup>+2</sup></span>
+        </div>
+      </div>
+      <div class="cell-captions">
+        <span>CuCl<sub>2</sub><br>1.kap</span>
+        <span>CuBr<sub>2</sub><br>2.kap</span>
+      </div>
+    </div>
+
+    <div class="answer-lines" style="height:24mm"></div>
+  </div>
+
+  <div class="page-foot"><span>Kimya ve Elektrik</span></div>
+</section>
+
+<!-- ======================= SAYFA 33 ======================= -->
+<section class="page">
+  <div class="kicker">Kimya ve Elektrik · Elektroliz</div>
+  <h1 class="page-title">Faraday Kanunları – Örnekler</h1>
+
+  <div class="example" style="border-top:none; padding-top:0; margin-top:0">
+    <p><strong>Örnek 43:</strong> 1 L 0,2 molar Zn(NO<sub>3</sub>)<sub>2</sub> çözeltisindeki Zn<sup>+2</sup> iyonlarını metalik çinkoya indirgemek için, sisteme 1 saat süreyle 9,65 amperlik akım ile elektroliz ediliyor. Buna göre işlem sonrası Zn<sup>+2</sup> iyon derişimi kaç mol/L olur? (1F = 96 500 C)</p>
+    <div class="answer-lines" style="height:100mm"></div>
+  </div>
+
+  <h1 class="page-title" style="margin-top:5mm">Organik Kimyaya Giriş</h1>
+
+  <ul class="notes">
+    <li>Yapısında Karbon (C) ve Hidrojen (H) elementlerini bulunduran, ana kaynağı genellikle canlılar olan bileşiklere <strong>organik bileşikler</strong> denir.</li>
+    <li>Organik bileşiklerin yapısında C ve H atomlarının yanı sıra O, N, S, P gibi elementler de bulunabilir.</li>
+  </ul>
+
+  <div class="eqn-block" style="margin-top:0">
+    <div class="eqn" style="font-size:12pt">
+      C<sub>3</sub>H<sub>6</sub> &nbsp;&nbsp;&nbsp;&nbsp; C<sub>2</sub>H<sub>5</sub>–OH &nbsp;&nbsp;&nbsp;&nbsp; C<sub>2</sub>H<sub>5</sub>–NH<sub>2</sub>
+    </div>
+  </div>
+
+  <ul class="notes" style="margin-top:0">
+    <li>Yapısında C ve H elementlerini içermesine rağmen CN<sup>-</sup> ve CO<sub>3</sub><sup>-2</sup> iyonları bulunduran bileşikler organik bileşik değildirler. Organik olmayan bileşiklere <strong>anorganik</strong> ya da <strong>inorganik</strong> denir.</li>
+  </ul>
+
+  <div class="note-block">
+    <p><strong>HCN</strong> ve <strong>H<sub>2</sub>CO<sub>3</sub></strong> → <strong>Organik değil!</strong></p>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 34 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya</div>
+  <h1 class="page-title">Organik Kimyaya Giriş – Alıştırma</h1>
+
+  <p class="instruction" style="margin-bottom:6mm">Aşağıdaki bileşiklerin yapılarına göre organik ya da inorganik (anorganik) olduklarını belirtiniz.</p>
+
+  <div class="two-col org-box">
+    <div class="col">
+      <ul class="org-list">
+        <li><span>C<sub>3</sub>H<sub>7</sub>OH</span><span class="blank"></span></li>
+        <li><span>Ca(OH)<sub>2</sub></span><span class="blank"></span></li>
+        <li><span>CH<sub>3</sub>–O–CH<sub>3</sub></span><span class="blank"></span></li>
+        <li><span>CH<sub>3</sub>NH<sub>2</sub></span><span class="blank"></span></li>
+        <li><span>HCOOH</span><span class="blank"></span></li>
+      </ul>
+    </div>
+    <div class="col">
+      <ul class="org-list">
+        <li><span>Na<sub>2</sub>CO<sub>3</sub></span><span class="blank"></span></li>
+        <li><span>NH<sub>4</sub>CN</span><span class="blank"></span></li>
+        <li><span>CO<sub>2</sub></span><span class="blank"></span></li>
+        <li><span>C<sub>6</sub>H<sub>12</sub>O<sub>6</sub></span><span class="blank"></span></li>
+        <li><span>Al<sub>2</sub>O<sub>3</sub></span><span class="blank"></span></li>
+      </ul>
+    </div>
+  </div>
+
+  <ul class="notes" style="margin-top:8mm">
+    <li>Yapısında H bulunmadan da organik olan bileşikler vardır. <span style="color:var(--red); font-weight:600">(CCl<sub>4</sub>: organik bileşik)</span></li>
+  </ul>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
 </section>
 
 </body>
