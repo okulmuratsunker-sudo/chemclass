@@ -52,6 +52,19 @@ extension AppStateExport on AppState {
     return file.path;
   }
 
+  /// Opens a file picker for a JSON backup and restores it via
+  /// [importBackup], surfacing the result as a toast.
+  Future<void> pickAndImportBackup() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['json'],
+    );
+    final path = result?.files.single.path;
+    if (path == null) return;
+    final err = await importBackup(path);
+    toast(err ?? 'Yedek yüklendi ✓');
+  }
+
   /// Restores app data from a JSON backup file, mirroring `importData()`.
   /// Returns an error message, or `null` on success.
   Future<String?> importBackup(String filePath) async {

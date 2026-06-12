@@ -5,6 +5,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:excel/excel.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -54,6 +55,16 @@ class AppState extends ChangeNotifier {
 
   bool _ready = false;
   bool get ready => _ready;
+
+  // ── Navigation ────────────────────────────────────────────────────────────
+  AppTab currentTab = AppTab.home;
+
+  /// Switches the active section, mirroring the web app's `tab()`.
+  void setTab(AppTab tab) {
+    currentTab = tab;
+    if (tab == AppTab.attend) ensureAttState(selectedAttClass);
+    notify();
+  }
 
   // ── Pick (Rastgele Seçici) ────────────────────────────────────────────────
   List<String> picked = [];

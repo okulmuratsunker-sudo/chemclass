@@ -1,5 +1,6 @@
 /// CSV/XLSX smart-import heuristics, ported from the web app's
 /// `extractStudent` / `looksName` / `looksNo` / `isHeader` / `splitCsvLine`.
+library;
 
 class ExtractedStudent {
   final String name;
