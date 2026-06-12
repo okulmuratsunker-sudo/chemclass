@@ -69,6 +69,7 @@ extension AppStateCloud on AppState {
       notify();
       await loadFromCloud();
       setupTeacherRealtime();
+      unawaited(_syncPushToken());
       toast('Giriş yapıldı ✓');
       return null;
     } catch (err) {
@@ -77,6 +78,7 @@ extension AppStateCloud on AppState {
   }
 
   Future<void> signOut() async {
+    unawaited(_unregisterPushToken());
     try {
       await cloud.signOut();
     } catch (_) {}

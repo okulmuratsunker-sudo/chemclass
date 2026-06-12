@@ -18,6 +18,8 @@ extension AppStateAuth on AppState {
       _seenInitialized = false;
       await refresh();
       startPolling();
+      startRealtime();
+      unawaited(_syncPushToken());
       return null;
     } catch (e) {
       return _loginError(e);
@@ -36,7 +38,9 @@ extension AppStateAuth on AppState {
   }
 
   Future<void> logout() async {
+    unawaited(_unregisterPushToken());
     stopPolling();
+    stopRealtime();
     await _storage.clearSession();
     session = null;
     studentInfo = null;

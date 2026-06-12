@@ -106,6 +106,10 @@ extension AppStateMessages on AppState {
     } catch (e) {
       return 'Gönderilemedi: $e';
     }
+    final pingChannel = studentId != null
+        ? studentChannel(studentId)
+        : (className != null ? classChannel(className) : everyoneChannel);
+    unawaited(cloud.broadcast(pingChannel, evtNewMessage));
     toast('Gönderildi → $label');
     await loadTeacherMessages();
     return null;
@@ -162,6 +166,7 @@ extension AppStateMessages on AppState {
     } catch (e) {
       return 'Gönderilemedi: $e';
     }
+    unawaited(cloud.broadcast(studentChannel(s.id), evtNewMessage));
     await loadTeacherMessages();
     return null;
   }

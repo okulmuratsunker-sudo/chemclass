@@ -14,6 +14,25 @@ extension AppStateData on AppState {
     _pollTimer = null;
   }
 
+  /// Subscribes to Realtime broadcast pings the teacher app sends when it
+  /// posts a message/assignment for this student, this student's class, or
+  /// everyone, so [refresh] runs immediately instead of on the next poll.
+  void startRealtime() {
+    stopRealtime();
+    final s = session;
+    if (s == null) return;
+    for (final ch in [studentChannel(s.studentId), classChannel(s.className), everyoneChannel]) {
+      _realtimeChannels.add(_api.subscribeBroadcast(ch, () => refresh()));
+    }
+  }
+
+  void stopRealtime() {
+    for (final ch in _realtimeChannels) {
+      _api.removeChannel(ch);
+    }
+    _realtimeChannels.clear();
+  }
+
   Future<void> refresh() async {
     final s = session;
     if (s == null) return;

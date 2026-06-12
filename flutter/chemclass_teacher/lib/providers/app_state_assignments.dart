@@ -94,6 +94,7 @@ extension AppStateAssignments on AppState {
     } catch (e) {
       return 'Gönderilemedi: $e';
     }
+    unawaited(cloud.broadcast(classChannel(className), evtNewAssignment));
     toast('Öğrencilere gönderildi ✓');
     await loadTeacherAssignments();
     return null;

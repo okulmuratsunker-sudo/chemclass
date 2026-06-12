@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/assignment.dart';
 import '../models/chat_message.dart';
@@ -9,14 +10,17 @@ import '../models/schedule_entry.dart';
 import '../models/student_info.dart';
 import '../models/student_session.dart';
 import '../services/notification_service.dart';
+import '../services/push_service.dart';
 import '../services/storage_service.dart';
 import '../services/supabase_service.dart';
 import '../services/tts_service.dart';
 import '../utils/constants.dart';
+import '../utils/realtime_channels.dart';
 
 part 'app_state_auth.dart';
 part 'app_state_data.dart';
 part 'app_state_messages.dart';
+part 'app_state_push.dart';
 part 'app_state_schedule.dart';
 part 'app_state_tts.dart';
 
@@ -27,7 +31,9 @@ class AppState extends ChangeNotifier {
   final StorageService _storage = StorageService();
   final SupabaseService _api = SupabaseService();
   final NotificationService notificationService = NotificationService();
+  final PushService pushService = PushService();
   final TtsService ttsService = TtsService();
+  String? _pushToken;
 
   bool _ready = false;
   bool get ready => _ready;
@@ -48,6 +54,7 @@ class AppState extends ChangeNotifier {
 
   Timer? _pollTimer;
   bool _seenInitialized = false;
+  final List<RealtimeChannel> _realtimeChannels = [];
 
   /// One-shot, fire-and-forget user messages for async events (new
   /// message/assignment toasts). Screens listen via [toasts].
@@ -67,10 +74,13 @@ class AppState extends ChangeNotifier {
     if (session != null) {
       await refresh();
       startPolling();
+      startRealtime();
     }
 
     _ready = true;
     notifyListeners();
+
+    unawaited(_initPush());
   }
 
   void toggleTheme() {
@@ -89,6 +99,7 @@ class AppState extends ChangeNotifier {
   @override
   void dispose() {
     _pollTimer?.cancel();
+    stopRealtime();
     ttsService.dispose();
     _toastController.close();
     super.dispose();

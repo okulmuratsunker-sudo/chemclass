@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -177,5 +178,28 @@ class SupabaseService {
 
   void removeChannel(RealtimeChannel channel) {
     _client.removeChannel(channel);
+  }
+
+  /// Best-effort "live" ping for the student app: posts a Realtime broadcast
+  /// event on [channelName] so a subscribed student refetches immediately
+  /// instead of waiting for its next poll. Failures are ignored - polling
+  /// remains the source of truth.
+  Future<void> broadcast(String channelName, String event) async {
+    try {
+      await _client.channel(channelName).sendBroadcastMessage(event: event, payload: const {});
+    } catch (_) {}
+  }
+
+  // ── Push notifications ───────────────────────────────────────────────────
+
+  Future<void> registerPushToken(String fcmToken) async {
+    await _client.rpc('register_teacher_push_token', params: {
+      'p_fcm_token': fcmToken,
+      'p_platform': Platform.isIOS ? 'ios' : 'android',
+    });
+  }
+
+  Future<void> unregisterPushToken(String fcmToken) async {
+    await _client.rpc('unregister_push_token', params: {'p_fcm_token': fcmToken});
   }
 }

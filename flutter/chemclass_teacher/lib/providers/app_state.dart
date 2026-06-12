@@ -16,6 +16,7 @@ import '../models/chat_message.dart';
 import '../models/group.dart';
 import '../models/student.dart';
 import '../services/notification_service.dart';
+import '../services/push_service.dart';
 import '../services/sound_service.dart';
 import '../services/storage_service.dart';
 import '../services/supabase_service.dart';
@@ -23,6 +24,7 @@ import '../services/teacher_sync_service.dart';
 import '../utils/constants.dart';
 import '../utils/helpers.dart';
 import '../utils/import_utils.dart';
+import '../utils/realtime_channels.dart';
 
 part 'app_state_students.dart';
 part 'app_state_pick.dart';
@@ -34,6 +36,7 @@ part 'app_state_cloud.dart';
 part 'app_state_board.dart';
 part 'app_state_assignments.dart';
 part 'app_state_messages.dart';
+part 'app_state_push.dart';
 
 /// Central application state, mirroring the web app's single global `data`
 /// object plus all of its mutable runtime state (pick history, groups,
@@ -45,8 +48,10 @@ class AppState extends ChangeNotifier {
   final StorageService _storage = StorageService();
   final SoundService soundService = SoundService();
   final NotificationService notificationService = NotificationService();
+  final PushService pushService = PushService();
   final TeacherSyncService _teacherSync = TeacherSyncService();
   SupabaseService cloud = SupabaseService();
+  String? _pushToken;
 
   AppData _data = AppData.empty();
   AppData get data => _data;
@@ -169,6 +174,8 @@ class AppState extends ChangeNotifier {
     await _initCloud();
     _ready = true;
     notifyListeners();
+
+    unawaited(_initPush());
   }
 
   void toggleTheme() {
