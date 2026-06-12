@@ -70,7 +70,7 @@
     font-size:8.5pt;
     color:#9a9a9a;
   }
-  .page-foot::after{ content:"Sayfa " counter(pagenum) " / 34"; }
+  .page-foot::after{ content:"Sayfa " counter(pagenum) " / 36"; }
 
   /* ---------- bullet notes ---------- */
   ul.notes{
@@ -458,6 +458,94 @@
     transform:translate(-50%,-50%);
     text-align:center;
   }
+
+  /* ---------- 2x2 practice grid (yanma analizi alıştırmaları) ---------- */
+  .quad-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:1fr 1fr;
+    gap:5mm;
+    flex:1;
+  }
+  .qbox{
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:3mm 4mm;
+    display:flex;
+    flex-direction:column;
+  }
+  .qbox > p{ margin:0 0 2mm 0; text-align:justify; font-size:10pt; }
+  .qbox ul.notes{ font-size:9.5pt; margin:0 0 2mm 0; }
+  .qbox ul.notes li{ margin-bottom:1mm; }
+  .qbox .answer-lines{ flex:1; margin:0; }
+  .qbox .answer-box{ align-self:flex-start; margin-top:2mm; font-size:9.5pt; }
+  .qgraph{ flex:1; display:flex; flex-direction:column; min-height:0; }
+  .qgraph svg{ flex:1; width:100%; min-height:0; }
+
+  /* ---------- Lewis (elektron-nokta) gösterimi ---------- */
+  .lewis{
+    display:inline-grid;
+    grid-template-columns:3mm auto 3mm;
+    grid-template-rows:3mm auto 3mm;
+    justify-items:center;
+    align-items:center;
+    font-size:13pt;
+    font-weight:700;
+    font-style:italic;
+    vertical-align:middle;
+  }
+  .lewis .sym{ grid-area:2/2; padding:0 0.8mm; }
+  .lewis .dt{ grid-area:1/2; display:flex; gap:1mm; }
+  .lewis .db{ grid-area:3/2; display:flex; gap:1mm; }
+  .lewis .dl{ grid-area:2/1; display:flex; flex-direction:column; gap:1mm; align-items:center; }
+  .lewis .dr{ grid-area:2/3; display:flex; flex-direction:column; gap:1mm; align-items:center; }
+  .lewis .e{ width:1.6mm; height:1.6mm; border-radius:50%; background:var(--red); display:block; }
+
+  .elem-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:repeat(5,auto);
+    grid-auto-flow:column;
+    gap:1mm 8mm;
+    margin:3mm 0 4mm 0;
+  }
+  .elem-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:3mm;
+    font-size:10pt;
+    padding:0.5mm 3mm;
+    border:1px solid var(--line);
+    border-radius:5px;
+  }
+
+  /* ---------- covalent compounds: Lewis worked example ---------- */
+  .ch4-steps{
+    display:flex;
+    align-items:center;
+    justify-content:space-around;
+    gap:2mm;
+    margin:3mm 0 0 0;
+    flex-wrap:nowrap;
+  }
+  .ch4-step{ text-align:center; }
+  .ch4-arrow{ font-size:14pt; font-weight:700; color:var(--red); }
+
+  .lewis-ex-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:5mm;
+    margin-top:3mm;
+  }
+  .lewis-ex{
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:2.5mm 4mm;
+  }
+  .lewis-ex .ex-title{ font-weight:700; font-size:11pt; margin-bottom:1mm; }
+  .lewis-ex .ex-cfg{ font-size:9.5pt; color:#666; margin-bottom:1.5mm; }
+  .lewis-ex .ex-cfg span{ margin-right:4mm; }
 
   /* ---------- inline fraction (Nernst denklemi) ---------- */
   .frac{
@@ -3163,6 +3251,188 @@
   </ul>
 
   <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 35 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya</div>
+  <h1 class="page-title">Tam Yanma ile Formül Bulma – Alıştırma</h1>
+
+  <div class="quad-grid">
+    <div class="qbox">
+      <p><strong>4.</strong> Organik bir bileşiğin 0,2 molü, 0,8 mol O<sub>2</sub> ile artansız tepkimeye sokulduğunda 26,4 gram CO<sub>2</sub> ve 7,2 gram H<sub>2</sub>O oluşuyor. Buna göre organik bileşiğin formülü ne olur?</p>
+      <div class="answer-lines"></div>
+      <div class="answer-box">Cevap: C<sub>3</sub>H<sub>8</sub></div>
+    </div>
+
+    <div class="qbox">
+      <p><strong>6.</strong> Genel formülü C<sub>n</sub>H<sub>2n+2</sub>O<sub>2</sub> olan bir organik bileşiğin 12,4 gramı yeterli miktarda oksijen gazıyla yakıldığında 17,6 gram CO<sub>2</sub> gazı oluşmaktadır. Buna göre bileşikteki "n" değeri ne olur?</p>
+      <div class="answer-lines"></div>
+      <div class="answer-box">Cevap: n = 2</div>
+    </div>
+
+    <div class="qbox">
+      <p><strong>5.</strong> C, H ve O içeren bir organik bileşiğin 0,2 molü;</p>
+      <ul class="notes">
+        <li>Tam yanınca 0,6 mol CO<sub>2</sub> ve bir miktar H<sub>2</sub>O oluşuyor.</li>
+        <li>1,6·N<sub>A</sub> tane H atomu içeriyor.</li>
+        <li>15,2 gramdır.</li>
+      </ul>
+      <p>Buna göre bileşiğin formülü ne olur? (H:1, C:12, O:16)</p>
+      <div class="answer-lines"></div>
+      <div class="answer-box">Cevap: C<sub>3</sub>H<sub>8</sub>O<sub>2</sub></div>
+    </div>
+
+    <div class="qbox">
+      <p><strong>7.</strong> C, H ve O atomu içeren bir organik bileşiğin tamamının yakılmasıyla, harcanan O<sub>2</sub> ile oluşan CO<sub>2</sub> ve H<sub>2</sub>O'nun kütle değişim grafiği verilmiştir. Buna göre organik bileşiğin basit formülü ne olur?</p>
+      <div class="qgraph">
+        <svg viewBox="0 0 300 200" preserveAspectRatio="xMidYMid meet">
+          <line x1="45" y1="12" x2="45" y2="172" stroke="#1c1c1c" stroke-width="1.5"/>
+          <polygon points="45,8 41,17 49,17" fill="#1c1c1c"/>
+          <line x1="45" y1="172" x2="288" y2="172" stroke="#1c1c1c" stroke-width="1.5"/>
+          <polygon points="293,172 284,168 284,176" fill="#1c1c1c"/>
+          <text x="50" y="15" font-size="11" font-weight="600">kütle (gram)</text>
+          <text x="252" y="190" font-size="11" font-weight="600">zaman</text>
+
+          <path d="M50,28 Q170,28 282,160" fill="none" stroke="#b3261e" stroke-width="2"/>
+          <text x="222" y="156" font-size="11" font-weight="700" fill="#b3261e">O<tspan baseline-shift="sub" font-size="8">2</tspan></text>
+
+          <path d="M50,165 Q170,165 282,18" fill="none" stroke="#b3261e" stroke-width="2"/>
+          <text x="250" y="14" font-size="11" font-weight="700" fill="#b3261e">CO<tspan baseline-shift="sub" font-size="8">2</tspan></text>
+
+          <path d="M50,165 Q170,165 262,80" fill="none" stroke="#b3261e" stroke-width="2"/>
+          <line x1="50" y1="80" x2="262" y2="80" stroke="#999" stroke-width="1" stroke-dasharray="4 3"/>
+          <text x="266" y="84" font-size="11" font-weight="700" fill="#b3261e">H<tspan baseline-shift="sub" font-size="8">2</tspan>O</text>
+        </svg>
+      </div>
+      <div class="answer-box">Cevap: CH<sub>4</sub>O</div>
+    </div>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 36 ======================= -->
+<section class="page">
+  <div class="kicker">Kimyasal Bağlar</div>
+  <h1 class="page-title">Lewis (Elektron – Nokta) Gösterimi</h1>
+
+  <div class="note-block" style="margin-bottom:2.5mm">
+    <p>Değerlik elektronlarının atomun sembolü etrafında noktalarla gösterilmesine <strong>Lewis gösterimi</strong> denir.</p>
+  </div>
+
+  <div class="elem-grid">
+    <div class="elem-row">
+      <span><sub>1</sub>H: 1s<sup>1</sup></span>
+      <span class="lewis"><span class="dr"><span class="e"></span></span><span class="sym">H</span></span>
+    </div>
+    <div class="elem-row">
+      <span><sub>2</sub>He: 1s<sup>2</sup></span>
+      <span class="lewis"><span class="dr"><span class="e"></span><span class="e"></span></span><span class="sym">He</span></span>
+    </div>
+    <div class="elem-row">
+      <span><sub>3</sub>Li: 1s<sup>2</sup>2s<sup>1</sup></span>
+      <span class="lewis"><span class="dr"><span class="e"></span></span><span class="sym">Li</span></span>
+    </div>
+    <div class="elem-row">
+      <span><sub>4</sub>Be: 1s<sup>2</sup>2s<sup>2</sup></span>
+      <span class="lewis"><span class="dl"><span class="e"></span></span><span class="sym">Be</span><span class="dr"><span class="e"></span></span></span>
+    </div>
+    <div class="elem-row">
+      <span><sub>5</sub>B: 1s<sup>2</sup>2s<sup>2</sup>2p<sup>1</sup></span>
+      <span class="lewis"><span class="dt"><span class="e"></span></span><span class="dl"><span class="e"></span></span><span class="sym">B</span><span class="dr"><span class="e"></span><span class="e"></span></span></span>
+    </div>
+    <div class="elem-row">
+      <span><sub>6</sub>C: 1s<sup>2</sup>2s<sup>2</sup>2p<sup>2</sup></span>
+      <span class="lewis"><span class="dt"><span class="e"></span></span><span class="dl"><span class="e"></span></span><span class="sym">C</span><span class="db"><span class="e"></span><span class="e"></span></span></span>
+    </div>
+    <div class="elem-row">
+      <span><sub>7</sub>N: 1s<sup>2</sup>2s<sup>2</sup>2p<sup>3</sup></span>
+      <span class="lewis"><span class="dt"><span class="e"></span><span class="e"></span></span><span class="dl"><span class="e"></span></span><span class="sym">N</span><span class="dr"><span class="e"></span></span><span class="db"><span class="e"></span></span></span>
+    </div>
+    <div class="elem-row">
+      <span><sub>8</sub>O: 1s<sup>2</sup>2s<sup>2</sup>2p<sup>4</sup></span>
+      <span class="lewis"><span class="dt"><span class="e"></span><span class="e"></span></span><span class="dl"><span class="e"></span></span><span class="sym">O</span><span class="dr"><span class="e"></span><span class="e"></span></span><span class="db"><span class="e"></span></span></span>
+    </div>
+    <div class="elem-row">
+      <span><sub>9</sub>F: 1s<sup>2</sup>2s<sup>2</sup>2p<sup>5</sup></span>
+      <span class="lewis"><span class="dt"><span class="e"></span><span class="e"></span></span><span class="dl"><span class="e"></span></span><span class="sym">F</span><span class="dr"><span class="e"></span><span class="e"></span></span><span class="db"><span class="e"></span><span class="e"></span></span></span>
+    </div>
+    <div class="elem-row">
+      <span><sub>10</sub>Ne: 1s<sup>2</sup>2s<sup>2</sup>2p<sup>6</sup></span>
+      <span class="lewis"><span class="dt"><span class="e"></span><span class="e"></span></span><span class="dl"><span class="e"></span><span class="e"></span></span><span class="sym">Ne</span><span class="dr"><span class="e"></span><span class="e"></span></span><span class="db"><span class="e"></span><span class="e"></span></span></span>
+    </div>
+  </div>
+
+  <h2 class="section-title" style="color:var(--red); margin-top:4mm">Kovalent Bileşiklerin Lewis Gösterimi</h2>
+
+  <div class="example" style="margin-top:2mm">
+    <p><strong>CH<sub>4</sub> :</strong> &nbsp; <sub>6</sub>C: 1s<sup>2</sup>2s<sup>2</sup>2p<sup>2</sup> &nbsp;&nbsp;&nbsp; <sub>1</sub>H: 1s<sup>1</sup></p>
+    <div class="ch4-steps">
+      <div class="ch4-step">
+        <span class="lewis"><span class="dt"><span class="e"></span></span><span class="dl"><span class="e"></span></span><span class="sym">C</span><span class="dr"><span class="e"></span></span><span class="db"><span class="e"></span></span></span>
+      </div>
+      <span class="ch4-arrow">+</span>
+      <div class="ch4-step">
+        4 <span class="lewis"><span class="dr"><span class="e"></span></span><span class="sym">H</span></span>
+      </div>
+      <span class="ch4-arrow">→</span>
+      <div class="ch4-step">
+        <svg viewBox="0 0 100 100" style="width:17mm; height:17mm">
+          <text x="50" y="20" text-anchor="middle" font-size="22" font-weight="700" font-style="italic">H</text>
+          <circle cx="46" cy="30" r="2.3" fill="#b3261e"/><circle cx="54" cy="30" r="2.3" fill="#b3261e"/>
+          <text x="50" y="58" text-anchor="middle" font-size="22" font-weight="700" font-style="italic">C</text>
+          <circle cx="46" cy="74" r="2.3" fill="#b3261e"/><circle cx="54" cy="74" r="2.3" fill="#b3261e"/>
+          <text x="50" y="94" text-anchor="middle" font-size="22" font-weight="700" font-style="italic">H</text>
+          <circle cx="28" cy="46" r="2.3" fill="#b3261e"/><circle cx="28" cy="54" r="2.3" fill="#b3261e"/>
+          <text x="14" y="58" text-anchor="middle" font-size="22" font-weight="700" font-style="italic">H</text>
+          <circle cx="72" cy="46" r="2.3" fill="#b3261e"/><circle cx="72" cy="54" r="2.3" fill="#b3261e"/>
+          <text x="86" y="58" text-anchor="middle" font-size="22" font-weight="700" font-style="italic">H</text>
+        </svg>
+      </div>
+      <span class="ch4-arrow">→</span>
+      <div class="ch4-step">
+        <svg viewBox="0 0 100 100" style="width:17mm; height:17mm">
+          <text x="50" y="20" text-anchor="middle" font-size="22" font-weight="700" font-style="italic">H</text>
+          <line x1="50" y1="26" x2="50" y2="42" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="50" y="58" text-anchor="middle" font-size="22" font-weight="700" font-style="italic">C</text>
+          <line x1="50" y1="66" x2="50" y2="82" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="50" y="94" text-anchor="middle" font-size="22" font-weight="700" font-style="italic">H</text>
+          <line x1="20" y1="50" x2="38" y2="50" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="14" y="58" text-anchor="middle" font-size="22" font-weight="700" font-style="italic">H</text>
+          <line x1="62" y1="50" x2="80" y2="50" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="86" y="58" text-anchor="middle" font-size="22" font-weight="700" font-style="italic">H</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <p style="margin-top:3mm; margin-bottom:0">Aşağıdaki kovalent bileşiklerin Lewis yapılarını çiziniz:</p>
+
+  <div class="lewis-ex-grid" style="margin-top:2mm">
+    <div class="lewis-ex">
+      <div class="ex-title">CO<sub>2</sub></div>
+      <div class="ex-cfg"><span><sub>6</sub>C: 1s<sup>2</sup>2s<sup>2</sup>2p<sup>2</sup></span><span><sub>8</sub>O: 1s<sup>2</sup>2s<sup>2</sup>2p<sup>4</sup></span></div>
+      <div class="answer-lines" style="height:14mm"></div>
+    </div>
+    <div class="lewis-ex">
+      <div class="ex-title">NH<sub>3</sub></div>
+      <div class="ex-cfg"><span><sub>7</sub>N: 1s<sup>2</sup>2s<sup>2</sup>2p<sup>3</sup></span><span><sub>1</sub>H: 1s<sup>1</sup></span></div>
+      <div class="answer-lines" style="height:14mm"></div>
+    </div>
+    <div class="lewis-ex">
+      <div class="ex-title">C<sub>2</sub>H<sub>2</sub></div>
+      <div class="ex-cfg"><span><sub>6</sub>C: 1s<sup>2</sup>2s<sup>2</sup>2p<sup>2</sup></span><span><sub>1</sub>H: 1s<sup>1</sup></span></div>
+      <div class="answer-lines" style="height:14mm"></div>
+    </div>
+    <div class="lewis-ex">
+      <div class="ex-title">C<sub>2</sub>H<sub>5</sub>OH</div>
+      <div class="ex-cfg"><span><sub>6</sub>C: 1s<sup>2</sup>2s<sup>2</sup>2p<sup>2</sup></span><span><sub>8</sub>O: 1s<sup>2</sup>2s<sup>2</sup>2p<sup>4</sup></span><span><sub>1</sub>H: 1s<sup>1</sup></span></div>
+      <div class="answer-lines" style="height:14mm"></div>
+    </div>
+  </div>
+
+  <div class="page-foot"><span>Kimyasal Bağlar</span></div>
 </section>
 
 </body>
