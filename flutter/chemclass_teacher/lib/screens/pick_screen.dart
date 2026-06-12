@@ -5,6 +5,7 @@ import '../providers/app_state.dart';
 import '../theme/app_theme.dart';
 import '../utils/snack.dart';
 import '../widgets/class_chips.dart';
+import '../widgets/score_action_button.dart';
 
 /// Rastgele Seçici - mirrors `index.html`'s `#pick` section.
 class PickScreen extends StatelessWidget {
@@ -91,28 +92,28 @@ class PickScreen extends StatelessWidget {
                 runSpacing: 8,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  _ActButton(
+                  ScoreActionButton(
                     label: '−1 Uyarı',
                     color: cc.red,
                     onTap: () => app.changeScore(lastPicked.id, -1, label: 'Uyarı'),
                   ),
-                  _ActButton(
+                  ScoreActionButton(
                     label: '+1 Katılım',
                     color: cc.green,
                     onTap: () => app.changeScore(lastPicked.id, 1, label: 'Katılım'),
                   ),
-                  _ActButton(
+                  ScoreActionButton(
                     label: '+2 Doğru cevap',
                     color: cc.green,
                     onTap: () => app.changeScore(lastPicked.id, 2, label: 'Doğru cevap'),
                   ),
-                  _ActButton(
+                  ScoreActionButton(
                     label: '+3 Grup liderliği',
                     color: cc.green,
                     onTap: () => app.changeScore(lastPicked.id, 3, label: 'Grup liderliği'),
                   ),
                   for (final b in app.data.customBtns)
-                    _ActButton(
+                    ScoreActionButton(
                       label: '${b.val > 0 ? '+' : ''}${b.val} ${b.label}',
                       color: cc.text1,
                       onTap: () => app.changeScore(lastPicked.id, b.val, label: b.label),
@@ -136,30 +137,6 @@ class PickScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _ActButton extends StatelessWidget {
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-  const _ActButton({required this.label, required this.color, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton(
-      onPressed: onTap,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: color,
-        side: BorderSide(color: color.withValues(alpha: 0.4)),
-        backgroundColor: color.withValues(alpha: 0.12),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-        minimumSize: Size.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
-      child: Text(label),
     );
   }
 }
