@@ -61,15 +61,21 @@ Firebase projesinde **2 ayrı Android uygulaması** ekleyeceksin (Öğretmen ve 
 
 ## ADIM 3 — iOS Uygulamalarını Ekle (her iki uygulama için)
 
+> ℹ️ Her iki iOS projesinde şu an **placeholder (sahte)** bir
+> `GoogleService-Info.plist` var (`ios/Runner/GoogleService-Info.plist`) ve
+> Xcode projesine zaten Resources olarak eklenmiş durumda — bu sayede
+> Firebase kurulmadan önce de uygulama çökmüyor. Aşağıdaki adımlarda
+> Firebase'den indirdiğin **gerçek** dosyayı bu placeholder'ın üzerine
+> **aynı isimle/aynı konuma kopyalayıp değiştirmen** yeterli — Xcode'da
+> "Add Files" yapmana gerek yok, referans zaten projede.
+
 ### 3a. ChemClass (Öğretmen)
 1. **"Add app" → iOS**
 2. **iOS bundle ID:** `com.muratsunker.chemclass.chemclassTeacher`
 3. **App nickname:** ChemClass Öğretmen
 4. **Register app** → **`GoogleService-Info.plist` dosyasını indir**
-5. Bu dosyayı Xcode ile ekle (önemli — Finder'dan sürükleyip kopyalamak yetmez):
-   - `flutter/chemclass_teacher/ios` klasöründe `open Runner.xcworkspace`
-   - Sol panelde `Runner` klasörüne sağ tık → **Add Files to "Runner"...**
-   - İndirdiğin `GoogleService-Info.plist`'i seç, **"Copy items if needed"** işaretli olsun
+5. İndirdiğin dosyayı şu yoldaki placeholder dosyanın üzerine kopyala (üzerine yaz):
+   `flutter/chemclass_teacher/ios/Runner/GoogleService-Info.plist`
 6. "Continue to console" (APNs anahtarını ADIM 3c'de ekleyeceğiz)
 
 ### 3b. ChemClass Öğrenci
@@ -77,7 +83,8 @@ Firebase projesinde **2 ayrı Android uygulaması** ekleyeceksin (Öğretmen ve 
 2. **iOS bundle ID:** `com.muratsunker.chemclass.chemclassStudent`
 3. **App nickname:** ChemClass Öğrenci
 4. **Register app** → **`GoogleService-Info.plist` dosyasını indir**
-5. Aynı şekilde Xcode ile `flutter/chemclass_student/ios/Runner.xcworkspace` içine ekle
+5. İndirdiğin dosyayı şu yoldaki placeholder dosyanın üzerine kopyala (üzerine yaz):
+   `flutter/chemclass_student/ios/Runner/GoogleService-Info.plist`
 6. "Continue to console"
 
 ### 3c. APNs Anahtarı (iOS push için zorunlu)
