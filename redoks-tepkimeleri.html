@@ -605,10 +605,10 @@
   }
 
   /* ---------- sigma/pi orbital örtüşme diyagramları ---------- */
-  .orb-row{ display:flex; justify-content:space-around; align-items:flex-end; gap:4mm; margin:3mm 0; text-align:center; }
+  .orb-row{ display:flex; justify-content:space-around; align-items:flex-end; gap:4mm; margin:5mm 0; text-align:center; }
   .orb-item{ display:flex; flex-direction:column; align-items:center; }
-  .orb-item svg{ width:38mm; height:20mm; }
-  .orb-row.pi-row .orb-item svg{ width:52mm; height:26mm; }
+  .orb-item svg{ width:46mm; height:24mm; }
+  .orb-row.pi-row .orb-item svg{ width:64mm; height:32mm; }
   .orb-label{ font-size:9.5pt; font-weight:700; color:var(--red); margin-top:1mm; line-height:1.25; }
 
   .bond-example{ display:flex; align-items:center; gap:6mm; flex:1; margin-top:2mm; }
@@ -619,10 +619,10 @@
   .hc-tree{ width:100%; margin:3mm 0 4mm 0; }
 
   /* ---------- homolog seri ---------- */
-  .homolog-row{ display:flex; align-items:flex-end; justify-content:center; font-size:14pt; font-weight:700; margin:5mm 0; }
+  .homolog-row{ display:flex; align-items:flex-end; justify-content:center; font-size:18pt; font-weight:700; margin:5mm 0; }
   .homolog-row .hf{ padding:0 2mm; }
-  .homolog-row .hlink{ flex:0 0 20mm; height:7mm; border-bottom:1.5px solid var(--ink); position:relative; margin:0 1mm; }
-  .homolog-row .hlink span{ position:absolute; bottom:1mm; left:50%; transform:translateX(-50%); font-size:10pt; font-weight:700; color:var(--red); white-space:nowrap; }
+  .homolog-row .hlink{ flex:0 0 20mm; height:10mm; border-bottom:1.5px solid var(--ink); position:relative; margin:0 1mm; }
+  .homolog-row .hlink span{ position:absolute; bottom:1mm; left:50%; transform:translateX(-50%); font-size:12pt; font-weight:700; color:var(--red); white-space:nowrap; }
 
   /* ---------- alkan tablosu ---------- */
   .alkan-table{ width:100%; border-collapse:collapse; font-size:10pt; margin-top:3mm; }
@@ -631,9 +631,14 @@
   .alkan-table td.formula{ font-weight:700; font-size:11.5pt; }
   .alkan-table .lewis-cell svg{ width:100%; height:15mm; display:block; }
   .alkan-table tr.basic td{ padding:2.5mm 2mm; }
+  .alkan-table td.fill{
+    background-image:repeating-linear-gradient(
+      to bottom, transparent, transparent 5mm,
+      var(--line) 5mm, var(--line) calc(5mm + 1px));
+  }
 
   /* ---------- alkil grupları ---------- */
-  .alkyl-row{ display:flex; justify-content:space-around; margin:5mm 0 2mm 0; text-align:center; }
+  .alkyl-row{ display:flex; justify-content:space-around; margin:3mm 0 2mm 0; text-align:center; }
   .alkyl-item{ display:flex; flex-direction:column; align-items:center; gap:1.5mm; }
   .alkyl-top, .alkyl-bottom{ font-size:13pt; font-weight:700; }
   .alkyl-arrow{ color:var(--red); font-size:16pt; font-weight:700; line-height:1; }
@@ -4033,7 +4038,7 @@
     </div>
   </div>
 
-  <ul class="notes compact">
+  <ul class="notes compact" style="margin-bottom:6mm">
     <li><strong>Not:</strong> Sigma bağları, π bağlarından daha sağlamdır.</li>
     <li><strong>Not:</strong> Pi bağını oluşturan orbitaller hibritleşmeye katılmaz.</li>
   </ul>
@@ -4307,7 +4312,7 @@
     <li>Homolog seri oluştururlar.</li>
   </ul>
 
-  <div class="homolog-row" style="margin:10mm 0">
+  <div class="homolog-row" style="margin:11.5mm 0">
     <div class="hf">CH<sub>4</sub></div>
     <div class="hlink"><span>CH<sub>2</sub></span></div>
     <div class="hf">C<sub>2</sub>H<sub>6</sub></div>
@@ -4453,16 +4458,17 @@
         </td>
         <td class="formula">CH<sub>3</sub>–CH<sub>2</sub>–CH<sub>2</sub>–CH<sub>3</sub></td>
       </tr>
-      <tr class="basic"><td>5</td><td>Pentan</td><td class="formula">C<sub>5</sub>H<sub>12</sub></td><td></td><td></td></tr>
-      <tr class="basic"><td>6</td><td>Heksan</td><td class="formula">C<sub>6</sub>H<sub>14</sub></td><td></td><td></td></tr>
-      <tr class="basic"><td>7</td><td>Heptan</td><td class="formula">C<sub>7</sub>H<sub>16</sub></td><td></td><td></td></tr>
-      <tr class="basic"><td>8</td><td>Oktan</td><td class="formula">C<sub>8</sub>H<sub>18</sub></td><td></td><td></td></tr>
-      <tr class="basic"><td>9</td><td>Nonan</td><td class="formula">C<sub>9</sub>H<sub>20</sub></td><td></td><td></td></tr>
-      <tr class="basic"><td>10</td><td>Dekan</td><td class="formula">C<sub>10</sub>H<sub>22</sub></td><td></td><td></td></tr>
+      <tr class="basic"><td>5</td><td>Pentan</td><td class="formula">C<sub>5</sub>H<sub>12</sub></td><td class="fill"></td><td class="fill"></td></tr>
+      <tr class="basic"><td>6</td><td>Heksan</td><td class="formula">C<sub>6</sub>H<sub>14</sub></td><td class="fill"></td><td class="fill"></td></tr>
+      <tr class="basic"><td>7</td><td>Heptan</td><td class="formula">C<sub>7</sub>H<sub>16</sub></td><td class="fill"></td><td class="fill"></td></tr>
+      <tr class="basic"><td>8</td><td>Oktan</td><td class="formula">C<sub>8</sub>H<sub>18</sub></td><td class="fill"></td><td class="fill"></td></tr>
+      <tr class="basic"><td>9</td><td>Nonan</td><td class="formula">C<sub>9</sub>H<sub>20</sub></td><td class="fill"></td><td class="fill"></td></tr>
+      <tr class="basic"><td>10</td><td>Dekan</td><td class="formula">C<sub>10</sub>H<sub>22</sub></td><td class="fill"></td><td class="fill"></td></tr>
     </tbody>
   </table>
+  <p class="instruction" style="margin:0">5-10 numaralı alkanların yapı ve yarı açık formüllerini tamamlayınız.</p>
 
-  <h2 class="section-title" style="color:var(--red); margin-top:6mm">Alkil Grupları</h2>
+  <h2 class="section-title" style="color:var(--red); margin-top:4mm">Alkil Grupları</h2>
   <ul class="notes">
     <li>Alkanlardan bir hidrojen eksilmesi ile oluşan radikal gruplara <strong>alkil</strong> denir.</li>
     <li>Alkiller türedikleri alkanlara göre adlandırılırlar.</li>
