@@ -598,6 +598,11 @@
   .struct-stack svg{ width:34mm; height:16mm; }
   .geo-name{ font-size:9pt; font-weight:600; }
   .bond-angle{ font-size:11pt; font-weight:700; }
+  .vsepr-table td.fill{
+    background-image:repeating-linear-gradient(
+      to bottom, transparent, transparent 6mm,
+      var(--line) 6mm, var(--line) calc(6mm + 1px));
+  }
 
   /* ---------- sigma/pi orbital örtüşme diyagramları ---------- */
   .orb-row{ display:flex; justify-content:space-around; align-items:flex-end; gap:4mm; margin:3mm 0; text-align:center; }
@@ -3730,6 +3735,7 @@
 <section class="page">
   <div class="kicker">Kimyasal Bağlar</div>
   <h1 class="page-title">Molekül Geometrisi – Referans Tablosu</h1>
+  <p class="instruction" style="margin:0">Tabloyu VSEPR gösterimi, hibritleşme türü ve molekül polaritesi bilgileriyle tamamlayınız.</p>
 
   <table class="vsepr-table">
     <colgroup>
@@ -3793,7 +3799,7 @@
         </td>
         <td class="geo-name">Çizgisel<br>(Doğrusal)</td>
         <td class="bond-angle">180°</td>
-        <td></td><td></td><td></td>
+        <td class="fill"></td><td class="fill"></td><td class="fill"></td>
       </tr>
       <tr class="grp">
         <td>
@@ -3844,7 +3850,7 @@
         </td>
         <td class="geo-name">Düzlem Üçgen</td>
         <td class="bond-angle">120°</td>
-        <td></td><td></td><td></td>
+        <td class="fill"></td><td class="fill"></td><td class="fill"></td>
       </tr>
       <tr class="grp">
         <td>
@@ -3887,7 +3893,7 @@
         </td>
         <td class="geo-name">Düzgün Dörtyüzlü</td>
         <td class="bond-angle">109,5°</td>
-        <td></td><td></td><td></td>
+        <td class="fill"></td><td class="fill"></td><td class="fill"></td>
       </tr>
       <tr class="grp">
         <td>
@@ -3922,7 +3928,7 @@
         </td>
         <td class="geo-name">Üçgen Piramit</td>
         <td class="bond-angle">107,3°</td>
-        <td></td><td></td><td></td>
+        <td class="fill"></td><td class="fill"></td><td class="fill"></td>
       </tr>
       <tr class="grp">
         <td>
@@ -3955,7 +3961,7 @@
         </td>
         <td class="geo-name">Açısal</td>
         <td class="bond-angle">104,5°</td>
-        <td></td><td></td><td></td>
+        <td class="fill"></td><td class="fill"></td><td class="fill"></td>
       </tr>
     </tbody>
   </table>
