@@ -664,6 +664,15 @@
   .ex-grid{ display:grid; grid-template-columns:1fr 1fr; gap:3mm 8mm; margin-top:1mm; }
   .ex-item{ border:1px solid var(--line); border-radius:2px; padding:3mm 2mm; display:flex; flex-direction:column; align-items:center; justify-content:center; }
   .ex-item .ex-num{ align-self:flex-start; font-weight:700; color:var(--red); margin-bottom:1mm; }
+  .ex-item .answer-box{ margin-top:1mm; padding:1mm 3mm; font-size:8.5pt; }
+
+  /* ---------- sayfa 46: numaralandırma kuralları ---------- */
+  .page-46 .note-block{ padding:5mm 6mm; margin-bottom:8mm; font-size:12pt; }
+  .page-46 .iupac-chain{ font-size:19pt; gap:2mm; }
+  .page-46 .iupac-chain.has-down{ margin-bottom:9mm; }
+  .page-46 .iupac-chain.has-up{ margin-top:9mm; }
+  .page-46 .iupac-chain .branch .bline{ height:5mm; }
+  .page-46 .iupac-chain .num{ font-size:11pt; }
 
   /* ---------- alkil grup kartları ---------- */
   .iupac-chain.small{ font-size:10pt; }
@@ -4499,8 +4508,6 @@
   <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
   <h1 class="page-title">Alkanların Adlandırılması</h1>
 
-  <div class="answer-strip">1) 2,3-dimetil pentan&nbsp;&nbsp; 2) 2,2,3-trimetil pentan&nbsp;&nbsp; 3) 3-bromo-2-metil pentan&nbsp;&nbsp; 4) 3-etil hekzan</div>
-
   <h2 class="section-title">1. Sistematik Adlandırma (IUPAC Sistemi)</h2>
   <div class="bond-example" style="margin-top:3mm">
     <div class="iupac-chain big has-up has-down">
@@ -4552,6 +4559,7 @@
         <div class="bond">–</div>
         <div class="atom">CH<sub>3</sub></div>
       </div>
+      <div class="answer-box">Cevap: 2,3-dimetil pentan</div>
     </div>
     <div class="ex-item">
       <div class="ex-num">4.</div>
@@ -4569,6 +4577,7 @@
         <div class="bond">–</div>
         <div class="atom">CH<sub>3</sub></div>
       </div>
+      <div class="answer-box">Cevap: 3-etil hekzan</div>
     </div>
     <div class="ex-item">
       <div class="ex-num">2.</div>
@@ -4586,6 +4595,7 @@
         <div class="bond">–</div>
         <div class="atom">CH<sub>3</sub></div>
       </div>
+      <div class="answer-box">Cevap: 2,2,3-trimetil pentan</div>
     </div>
     <div class="ex-item">
       <div class="ex-num">5.</div>
@@ -4603,6 +4613,7 @@
         <div class="bond">–</div>
         <div class="atom">CH<sub>3</sub></div>
       </div>
+      <div class="answer-box">Cevap: 4-etil-3-metil heptan</div>
     </div>
     <div class="ex-item">
       <div class="ex-num">3.</div>
@@ -4619,6 +4630,7 @@
         <div class="bond">–</div>
         <div class="atom">Br</div>
       </div>
+      <div class="answer-box">Cevap: 3-bromo-2-metil pentan</div>
     </div>
     <div class="ex-item">
       <div class="ex-num">6.</div>
@@ -4640,15 +4652,14 @@
         <div class="bond">–</div>
         <div class="atom">CH<sub>3</sub></div>
       </div>
+      <div class="answer-box">Cevap: 2,4,6-trimetil-5-etil oktan</div>
     </div>
   </div>
-
-  <div class="answer-strip" style="margin-top:4mm">5) 4-etil-3-metil heptan&nbsp;&nbsp; 6) 2,4,6-trimetil-5-etil oktan</div>
 
   <div class="page-foot"><span>Organik Kimya</span></div>
 </section>
 
-<section class="page">
+<section class="page page-46">
   <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
   <h1 class="page-title">Alkanların Adlandırılması</h1>
 
@@ -4698,35 +4709,33 @@
 
   <div class="note-block">
     <p><strong>Not:</strong> Eğer yapıda eşit uzunlukta birden fazla zincir varsa, üzerinde dallanmanın fazla olduğu zincir esas alınır.</p>
-    <div style="display:flex; justify-content:space-around; align-items:center; margin-top:5mm; gap:8mm">
-      <div class="iupac-chain has-down" style="gap:5mm">
-        <div class="atom">CH<sub>3</sub></div>
-        <div class="bond">–</div>
-        <div class="atom">CH<sub>2</sub></div>
-        <div class="bond">–</div>
-        <div class="atom">CH
-          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH(CH<sub>3</sub>)<sub>2</sub></span></div></div>
-        </div>
-        <div class="bond">–</div>
-        <div class="atom">CH<sub>2</sub>
-          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>C<sub>2</sub>H<sub>5</sub></span></div></div>
-        </div>
+    <div class="iupac-chain has-down" style="margin-top:6mm">
+      <div class="atom">CH<sub>3</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH(CH<sub>3</sub>)<sub>2</sub></span></div></div>
       </div>
-      <div class="iupac-chain has-up has-down" style="gap:5mm">
-        <div class="atom">CH<sub>3</sub></div>
-        <div class="bond">–</div>
-        <div class="atom">CH<sub>2</sub></div>
-        <div class="bond">–</div>
-        <div class="atom">CH
-          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span style="font-size:0.85em">CH<sub>2</sub>CH(CH<sub>3</sub>)<sub>2</sub></span></div></div>
-        </div>
-        <div class="bond">–</div>
-        <div class="atom">CH
-          <div class="branch up"><div class="lbl-row"><span>CH(CH<sub>3</sub>)<sub>2</sub></span></div><div class="bline"></div></div>
-        </div>
-        <div class="bond">–</div>
-        <div class="atom">CH<sub>3</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub>
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>C<sub>2</sub>H<sub>5</sub></span></div></div>
       </div>
+    </div>
+    <div class="iupac-chain has-down" style="margin-top:14mm; gap:9mm">
+      <div class="atom">CH<sub>3</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span style="font-size:0.85em">CH<sub>2</sub>CH(CH<sub>3</sub>)<sub>2</sub></span></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH(CH<sub>3</sub>)<sub>2</sub></span></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub></div>
     </div>
   </div>
 
