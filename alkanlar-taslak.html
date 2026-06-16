@@ -209,6 +209,11 @@
   /* ---------- I/II/III adlandırma seçenekleri (sayfa 52) ---------- */
   .roman-options{ display:flex; justify-content:center; gap:10mm; margin:2mm 0; font-size:11pt; }
   .roman-options strong{ color:var(--red); }
+
+  /* ---------- Sikloalkan halka diyagramları ---------- */
+  .cyclo-row{ display:flex; justify-content:center; gap:8mm; margin:3mm 0; flex-wrap:wrap; align-items:flex-end; }
+  .cyclo-item{ display:flex; flex-direction:column; align-items:center; text-align:center; }
+  .cyclo-name{ color:var(--red); font-weight:700; font-size:10pt; margin-top:1.5mm; }
 </style>
 </head>
 <body>
@@ -1083,6 +1088,823 @@
     <span><strong>3.</strong> 2,2,3-trimetil-3-etil pentan</span>
     <span><strong>4.</strong> I, II ve III</span>
     <span><strong>5.</strong> I ve III</span>
+  </div>
+
+  <p style="margin:8mm 0 1.5mm 0;"><strong>6.</strong> Aşağıdaki bileşik için hangi adlandırmalar doğrudur?</p>
+  <div class="diagram-wrap">
+    <div class="iupac-chain big has-up">
+      <div class="atom">CH<sub>3</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch up"><div class="lbl-row"><span>CH<sub>2</sub>–CH<sub>3</sub></span></div><div class="bline"></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub></div>
+    </div>
+  </div>
+  <div class="roman-options">
+    <span><strong>I.</strong> 2-etil propan</span>
+    <span><strong>II.</strong> izo pentan</span>
+    <span><strong>III.</strong> trimetil metan</span>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 53 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Dallanmış Alkil Gruplarının Adlandırılması</h1>
+
+  <p style="margin:0 0 1.5mm 0;"><strong>7.</strong> Aşağıda verilen bileşiklerin IUPAC sistemine göre isimlerini yazınız.</p>
+  <div class="ex-grid">
+    <div class="ex-item">
+      <div class="ex-num">a)</div>
+      <div class="iupac-chain has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+      <div style="border-bottom:1px solid var(--line);width:50mm;margin:3mm auto 0"></div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">b)</div>
+      <div class="iupac-chain has-up has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+      </div>
+      <div style="border-bottom:1px solid var(--line);width:50mm;margin:3mm auto 0"></div>
+    </div>
+  </div>
+
+  <p style="margin:4mm 0 1.5mm 0;"><strong>8.</strong> Aşağıda verilen bileşiklerin IUPAC sistemine göre adlarını yazınız.</p>
+  <div class="diagram-wrap" style="margin:0 0 1mm 0">
+    <div class="iupac-chain has-down">
+      <div class="atom">CH<sub>2</sub>
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>NO<sub>2</sub></span></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub>
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>NO<sub>2</sub></span></div></div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:4mm;margin:0 0 4mm 12mm">
+    <span style="font-weight:700;color:var(--red)">a)</span>
+    <div style="border-bottom:1px solid var(--line);flex:1;max-width:100mm"></div>
+  </div>
+
+  <div class="diagram-wrap" style="margin:0 0 1mm 0">
+    <div class="iupac-chain has-up has-down">
+      <div class="atom">CH<sub>3</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch up"><div class="lbl-row"><span>Cl</span></div><div class="bline"></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH(CH<sub>3</sub>)<sub>2</sub></span></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:4mm;margin:0 0 4mm 12mm">
+    <span style="font-weight:700;color:var(--red)">b)</span>
+    <div style="border-bottom:1px solid var(--line);flex:1;max-width:100mm"></div>
+  </div>
+
+  <div class="diagram-wrap" style="margin:0 0 1mm 0">
+    <div class="iupac-chain has-up has-down">
+      <div class="atom">CH<sub>3</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch up"><div class="lbl-row"><span>Cl</span></div><div class="bline"></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">C
+        <div class="branch up"><div class="lbl-row"><span>Br</span></div><div class="bline"></div></div>
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>NO<sub>2</sub></span></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:4mm;margin:0 0 4mm 12mm">
+    <span style="font-weight:700;color:var(--red)">c)</span>
+    <div style="border-bottom:1px solid var(--line);flex:1;max-width:100mm"></div>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 54 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Dallanmış Alkil Gruplarının Adlandırılması</h1>
+
+  <p style="margin:0 0 1.5mm 0;"><strong>9.</strong> Aşağıdaki bileşiğin IUPAC sistemine göre adını yazınız.</p>
+  <div class="diagram-wrap" style="margin:0 0 1mm 0">
+    <div class="iupac-chain big has-up has-down">
+      <div class="atom">CH<sub>3</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>C<sub>2</sub>H<sub>5</sub></span></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch up"><div class="lbl-row"><span>NO<sub>2</sub></span></div><div class="bline"></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub></div>
+    </div>
+  </div>
+  <div style="border-bottom:1px solid var(--line);width:90mm;margin:2mm auto 8mm"></div>
+
+  <p style="margin:2mm 0 1.5mm 0;"><strong>10.</strong> Aşağıdakilerden hangisinin kapalı formülü C<sub>5</sub>H<sub>12</sub> değildir?</p>
+  <div style="display:flex;flex-wrap:wrap;gap:2mm 10mm;margin:1mm 0 8mm 0;font-size:11pt">
+    <span><strong style="color:var(--red)">A)</strong> 2,2-dimetil propan</span>
+    <span><strong style="color:var(--red)">B)</strong> Neopentan</span>
+    <span><strong style="color:var(--red)">C)</strong> izo pentan</span>
+    <span><strong style="color:var(--red)">D)</strong> 2-metil bütan</span>
+    <span><strong style="color:var(--red)">E)</strong> Tetra etil metan</span>
+  </div>
+
+  <p style="margin:2mm 0 1.5mm 0;"><strong>11.</strong> Aşağıda isimleri verilen alkanların açık formüllerini yazınız.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2mm 10mm;font-size:11pt;margin:0 0 8mm 0">
+    <div>a) 2,2,4,4-tetra metil heptan</div>
+    <div>b) 4-etil-4-kloro-2,3-dimetil oktan</div>
+    <div>c) neo ekzan</div>
+    <div>d) 3-etil-4-izopropil heptan</div>
+    <div>e) ter-pentil bromür</div>
+    <div>f) izo heksil klorür</div>
+  </div>
+
+  <h2 class="section-title" style="margin:0 0 1.5mm 0">Cevaplar</h2>
+  <div class="answers-note" style="font-size:9.5pt">
+    <span><strong>6.</strong> Yalnız II</span>
+    <span><strong>7.</strong> a) 2-metil pentan &nbsp; b) 2-metil hekzan</span>
+    <span><strong>8a.</strong> 1,7-dinitro-3-metil heptan</span>
+    <span><strong>8b.</strong> 3-kloro-5-metil-4-izopropil heptan</span>
+    <span><strong>8c.</strong> 3-bromo-2-kloro-3-nitro oktan</span>
+    <span><strong>9.</strong> 3-etil-2-metil-4-nitro heptan</span>
+    <span><strong>10.</strong> E</span>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 55 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Sikloalkanlar (Halkalı Yapıdaki Alkanlar)</h1>
+
+  <div class="note-line">Genel formülleri C<sub>n</sub>H<sub>2n</sub>'dir.</div>
+  <div class="note-line">En küçük üyesi üç karbonludur.</div>
+  <div class="note-line" style="margin-top:3mm">Adlandırılma yapılırken, aynı karbon sayılı alkanın adına <strong>siklo-</strong> öneki getirilerek adlandırılır.</div>
+
+  <div class="cyclo-row" style="margin:3mm 0 1mm 0">
+    <!-- Siklopropan: eşkenar üçgen, her köşede CH2 etiketi -->
+    <div class="cyclo-item">
+      <svg width="40mm" height="37mm" viewBox="-8 -6 104 90" style="overflow:visible;display:block">
+        <polygon points="44,12 80,72 8,72" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="44" y="5" text-anchor="middle" font-size="12" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="9">2</tspan></text>
+        <text x="85" y="76" text-anchor="start" font-size="12" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="9">2</tspan></text>
+        <text x="3" y="76" text-anchor="end" font-size="12" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="9">2</tspan></text>
+      </svg>
+      <div class="cyclo-name">siklopropan</div>
+    </div>
+    <!-- Siklobütan: kare -->
+    <div class="cyclo-item">
+      <svg width="30mm" height="30mm" viewBox="0 0 70 70">
+        <polygon points="8,8 62,8 62,62 8,62" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+      </svg>
+      <div class="cyclo-name">siklobütan</div>
+    </div>
+    <!-- Siklopentan: beşgen -->
+    <div class="cyclo-item">
+      <svg width="34mm" height="32mm" viewBox="0 0 82 78">
+        <polygon points="41,8 73,31 61,68 21,68 9,31" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+      </svg>
+      <div class="cyclo-name">siklopentan</div>
+    </div>
+    <!-- Siklohekzan: altıgen -->
+    <div class="cyclo-item">
+      <svg width="34mm" height="32mm" viewBox="0 0 82 82">
+        <polygon points="41,8 73,26 73,59 41,77 9,59 9,26" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+      </svg>
+      <div class="cyclo-name">siklohekzan</div>
+    </div>
+  </div>
+
+  <div class="note-line" style="margin-top:3mm">Eğer karbon halkasına <strong>tek fonksiyonel grup</strong> bağlı ise grupların bağlı olduğu karbona numara vermek gerekmez.</div>
+
+  <div class="cyclo-row" style="gap:20mm;margin:3mm 0 3mm 0">
+    <!-- Metil siklopropan -->
+    <div class="cyclo-item">
+      <svg width="36mm" height="40mm" viewBox="-4 -10 96 100" style="overflow:visible;display:block">
+        <polygon points="44,28 79,85 9,85" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="44" y1="28" x2="44" y2="9" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="44" y="4" text-anchor="middle" font-size="12" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="9">3</tspan></text>
+      </svg>
+      <div class="cyclo-name">metil siklopropan</div>
+    </div>
+    <!-- Hidroksil siklobütan -->
+    <div class="cyclo-item">
+      <svg width="36mm" height="40mm" viewBox="-4 -10 88 100" style="overflow:visible;display:block">
+        <polygon points="10,28 66,28 66,82 10,82" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="66" y1="28" x2="66" y2="9" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="66" y="4" text-anchor="middle" font-size="12" font-weight="700" font-family="serif">OH</text>
+      </svg>
+      <div class="cyclo-name">hidroksil siklobütan</div>
+    </div>
+  </div>
+
+  <div class="note-line">Birden fazla fonksiyonel gruba bağlı ise bunlar <strong>en küçük numarayı</strong> alacak şekilde numaralandırılır.</div>
+
+  <div class="cyclo-row" style="gap:14mm;margin:4mm 0">
+    <!-- 1-bromo-2-etil siklobütan -->
+    <div class="cyclo-item">
+      <svg width="46mm" height="44mm" viewBox="-18 -18 116 108" style="overflow:visible;display:block">
+        <polygon points="10,10 62,10 62,62 10,62" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <!-- Br at C1 (top-right, 62,10) going UP -->
+        <line x1="62" y1="10" x2="62" y2="-8" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="62" y="-12" text-anchor="middle" font-size="12" font-weight="700" font-family="serif">Br</text>
+        <!-- C2H5 at C2 (bottom-right, 62,62) going RIGHT -->
+        <line x1="62" y1="62" x2="80" y2="62" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="83" y="66" text-anchor="start" font-size="12" font-weight="700" font-family="serif">C<tspan dy="3" font-size="9">2</tspan><tspan dy="-3" font-size="12">H<tspan dy="3" font-size="9">5</tspan></tspan></text>
+        <!-- Vertex numbers -->
+        <text x="65" y="9" text-anchor="start" font-size="10" font-style="italic" fill="#b3261e">1</text>
+        <text x="65" y="72" text-anchor="start" font-size="10" font-style="italic" fill="#b3261e">2</text>
+      </svg>
+      <div class="cyclo-name">1-bromo-2-etil siklobütan</div>
+    </div>
+    <!-- 1-kloro-1,2-dimetil siklohekzan -->
+    <div class="cyclo-item">
+      <svg width="52mm" height="48mm" viewBox="-18 -20 130 118" style="overflow:visible;display:block">
+        <polygon points="45,10 79,29 79,64 45,83 11,64 11,29" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <!-- C1 = top vertex (45,10): CH3 going UP, Cl going upper-right -->
+        <line x1="45" y1="10" x2="45" y2="-8" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="45" y="-12" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8">3</tspan></text>
+        <line x1="45" y1="10" x2="64" y2="-4" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="67" y="-7" text-anchor="start" font-size="11" font-weight="700" font-family="serif">Cl</text>
+        <!-- C2 = upper-right (79,29): CH3 going upper-right -->
+        <line x1="79" y1="29" x2="96" y2="17" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="99" y="14" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8">3</tspan></text>
+        <!-- Vertex numbers -->
+        <text x="47" y="24" text-anchor="start" font-size="10" font-style="italic" fill="#b3261e">1</text>
+        <text x="81" y="34" text-anchor="start" font-size="10" font-style="italic" fill="#b3261e">2</text>
+      </svg>
+      <div class="cyclo-name">1-kloro-1,2-dimetil siklohekzan</div>
+    </div>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 56 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Sikloalkanlar</h1>
+
+  <div class="note-line">Halk içinde alkan ve sikloalkan içeren bileşiklerde adlandırma yapılırken karbon sayısı fazla olan grup <strong>ana zincir</strong>, diğer bağlı gruplar ise dal kabul edilir.</div>
+
+  <div class="cyclo-row" style="gap:12mm;margin:2mm 0 2mm 0">
+    <!-- izopropil siklopentan -->
+    <div class="cyclo-item">
+      <svg width="38mm" height="38mm" viewBox="-14 -24 112 108" style="overflow:visible;display:block">
+        <polygon points="42,12 72,33 61,68 23,68 12,33" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="42" y1="12" x2="42" y2="-4" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="42" y1="-4" x2="28" y2="-18" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="24" y="-20" text-anchor="end" font-size="11" font-weight="700">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+        <line x1="42" y1="-4" x2="56" y2="-18" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="60" y="-20" text-anchor="start" font-size="11" font-weight="700">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+        <text x="44" y="-1" text-anchor="start" font-size="10">CH</text>
+      </svg>
+      <div class="cyclo-name">izopropil siklopentan</div>
+    </div>
+    <!-- 2-siklopropil bütan -->
+    <div class="cyclo-item">
+      <svg width="58mm" height="38mm" viewBox="-8 0 170 110" style="overflow:visible;display:block">
+        <!-- Chain: C1-C2-C3-C4 at y=42 -->
+        <text x="10" y="42" text-anchor="middle" font-size="12" font-weight="700">CH<tspan dy="3" font-size="9">3</tspan></text>
+        <line x1="22" y1="40" x2="35" y2="40" stroke="#1c1c1c" stroke-width="2"/>
+        <text x="45" y="42" text-anchor="middle" font-size="12" font-weight="700">CH</text>
+        <line x1="57" y1="40" x2="70" y2="40" stroke="#1c1c1c" stroke-width="2"/>
+        <text x="82" y="42" text-anchor="middle" font-size="12" font-weight="700">CH<tspan dy="3" font-size="9">2</tspan></text>
+        <line x1="95" y1="40" x2="108" y2="40" stroke="#1c1c1c" stroke-width="2"/>
+        <text x="120" y="42" text-anchor="middle" font-size="12" font-weight="700">CH<tspan dy="3" font-size="9">3</tspan></text>
+        <!-- Numbers above -->
+        <text x="10" y="27" text-anchor="middle" font-size="9" fill="#b3261e" font-style="italic">1</text>
+        <text x="45" y="27" text-anchor="middle" font-size="9" fill="#b3261e" font-style="italic">2</text>
+        <text x="82" y="27" text-anchor="middle" font-size="9" fill="#b3261e" font-style="italic">3</text>
+        <text x="120" y="27" text-anchor="middle" font-size="9" fill="#b3261e" font-style="italic">4</text>
+        <!-- Bond from C2 down to cyclopropane -->
+        <line x1="45" y1="46" x2="45" y2="60" stroke="#1c1c1c" stroke-width="2"/>
+        <!-- Cyclopropane triangle below -->
+        <polygon points="45,60 73,100 17,100" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+      </svg>
+      <div class="cyclo-name">2-siklopropil bütan</div>
+    </div>
+  </div>
+
+  <div class="note-line">Sadece farklı karbon sayılı sikloalkanlar içeren bileşiklerde adlandırma yapılırken karbon sayısı fazla olan <strong>siklohalkası ana isimcik</strong> kabul edilir.</div>
+
+  <div class="cyclo-row" style="margin:2mm 0 2mm 0">
+    <!-- siklopropil siklobütan -->
+    <div class="cyclo-item">
+      <svg width="46mm" height="30mm" viewBox="0 0 140 90" style="display:block">
+        <!-- Cyclobutane (square) -->
+        <polygon points="10,12 60,12 60,62 10,62" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <!-- Bond connecting them -->
+        <line x1="60" y1="37" x2="78" y2="37" stroke="#1c1c1c" stroke-width="2.5"/>
+        <!-- Cyclopropane (triangle) -->
+        <polygon points="100,10 130,65 70,65" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+      </svg>
+      <div class="cyclo-name">siklopropil siklobütan</div>
+    </div>
+  </div>
+
+  <h2 class="section-title" style="margin:0 0 1mm 0">Alıştırmalar</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1mm 8mm">
+    <!-- Soru 1 -->
+    <div>
+      <p style="margin:0 0 1mm 0;font-weight:700;font-size:10.5pt">1. Aşağıda verilen bileşikleri adlandırınız.</p>
+      <!-- Ex 1a: Cyclohexane with C2H5 and 2× CH3 -->
+      <div class="cyclo-item" style="align-items:flex-start;margin-bottom:1mm">
+        <svg width="40mm" height="40mm" viewBox="-18 -10 118 112" style="overflow:visible;display:block">
+          <!-- Hexagon: V0=top, going clockwise C1=upper-right(C2H5), C3=lower-right(CH3), C5=lower-left(CH3) -->
+          <polygon points="42,8 74,26 74,58 42,76 10,58 10,26" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+          <!-- C2H5 at C1=upper-right (74,26) -->
+          <line x1="74" y1="26" x2="90" y2="17" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="93" y="15" text-anchor="start" font-size="11" font-weight="700">C<tspan dy="3" font-size="8.5">2</tspan><tspan dy="-3">H<tspan dy="3" font-size="8.5">5</tspan></tspan></text>
+          <!-- CH3 at C3=lower-right (74,58) -->
+          <line x1="74" y1="58" x2="90" y2="67" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="93" y="70" text-anchor="start" font-size="11" font-weight="700">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+          <!-- CH3 at C5=lower-left (10,58) -->
+          <line x1="10" y1="58" x2="-6" y2="67" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="-9" y="70" text-anchor="end" font-size="11" font-weight="700">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+        </svg>
+        <div style="border-bottom:1px solid var(--line);width:55mm;margin:1mm 0 0 0"></div>
+      </div>
+      <!-- Ex 1b: Cyclohexane with 2× Br and CH3 -->
+      <div class="cyclo-item" style="align-items:flex-start">
+        <svg width="40mm" height="44mm" viewBox="-18 -10 118 120" style="overflow:visible;display:block">
+          <polygon points="42,8 74,26 74,58 42,76 10,58 10,26" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+          <!-- Br at C1=upper-right (74,26) -->
+          <line x1="74" y1="26" x2="90" y2="17" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="93" y="15" text-anchor="start" font-size="11" font-weight="700">Br</text>
+          <!-- Br at C3=lower-right (74,58) -->
+          <line x1="74" y1="58" x2="90" y2="67" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="93" y="70" text-anchor="start" font-size="11" font-weight="700">Br</text>
+          <!-- CH3 at C5=lower-left (10,58) -->
+          <line x1="10" y1="58" x2="-6" y2="67" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="-9" y="70" text-anchor="end" font-size="11" font-weight="700">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+        </svg>
+        <div style="border-bottom:1px solid var(--line);width:55mm;margin:1mm 0 0 0"></div>
+      </div>
+    </div>
+    <!-- Soru 2 -->
+    <div>
+      <p style="margin:0 0 1mm 0;font-weight:700;font-size:10.5pt">2. Aşağıda verilen bileşikleri adlandırınız.</p>
+      <!-- Ex 2a: Cyclobutane + cyclopropane (same as theory example) -->
+      <div class="cyclo-item" style="align-items:flex-start;margin-bottom:1mm">
+        <svg width="40mm" height="30mm" viewBox="0 0 120 80" style="display:block">
+          <polygon points="8,10 56,10 56,58 8,58" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="56" y1="34" x2="72" y2="34" stroke="#1c1c1c" stroke-width="2.5"/>
+          <polygon points="94,10 120,55 68,55" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        </svg>
+        <div style="border-bottom:1px solid var(--line);width:55mm;margin:1mm 0 0 0"></div>
+      </div>
+      <!-- Ex 2b: CH3-CH(CH3)-CH2-CH(cyclopropyl)-CH3 -->
+      <div class="cyclo-item" style="align-items:flex-start">
+        <svg width="55mm" height="42mm" viewBox="-8 -6 158 116" style="overflow:visible;display:block">
+          <!-- Chain: C1(10,35) - C2(42,35) - C3(74,35) - C4(106,35) - C5(130,35) -->
+          <text x="10" y="38" text-anchor="middle" font-size="11" font-weight="700">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+          <line x1="22" y1="36" x2="30" y2="36" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="42" y="38" text-anchor="middle" font-size="11" font-weight="700">CH</text>
+          <line x1="54" y1="36" x2="62" y2="36" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="74" y="38" text-anchor="middle" font-size="11" font-weight="700">CH<tspan dy="3" font-size="8.5">2</tspan></text>
+          <line x1="86" y1="36" x2="94" y2="36" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="106" y="38" text-anchor="middle" font-size="11" font-weight="700">CH</text>
+          <line x1="118" y1="36" x2="126" y2="36" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="135" y="38" text-anchor="middle" font-size="11" font-weight="700">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+          <!-- CH3 branch down from C2 -->
+          <line x1="42" y1="42" x2="42" y2="55" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="42" y="64" text-anchor="middle" font-size="11" font-weight="700">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+          <!-- Cyclopropane below C4 -->
+          <line x1="106" y1="42" x2="106" y2="55" stroke="#1c1c1c" stroke-width="2"/>
+          <polygon points="106,55 126,95 86,95" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        </svg>
+        <div style="border-bottom:1px solid var(--line);width:55mm;margin:1mm 0 0 0"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 57 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Sikloalkanlar</h1>
+
+  <h2 class="section-title" style="margin:0 0 1.5mm 0">Alıştırmalar</h2>
+  <p style="margin:0 0 2mm 0;"><strong>3.</strong> Aşağıda verilen bileşikleri adlandırınız.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2mm 8mm;margin:0 0 3mm 0">
+    <!-- 3a: cyclopentane + Br (C1, top) + isopropyl (C2, upper-right) -->
+    <div>
+      <div style="font-weight:700;font-size:10.5pt;margin-bottom:1mm">a)</div>
+      <div class="cyclo-item" style="align-items:flex-start">
+        <svg width="52mm" height="38mm" viewBox="-16 -20 138 110" style="overflow:visible;display:block">
+          <polygon points="42,8 75,32 62,70 22,70 10,32" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+          <!-- Br at C1 (top, 42,8) -->
+          <line x1="42" y1="8" x2="42" y2="-6" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="42" y="-10" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">Br</text>
+          <!-- Isopropyl at C2 (75,32): CH with two CH3 -->
+          <line x1="75" y1="32" x2="88" y2="32" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="94" y="35" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">CH</text>
+          <line x1="100" y1="30" x2="113" y2="20" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="117" y="17" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+          <line x1="100" y1="34" x2="113" y2="44" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="117" y="47" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+        </svg>
+        <div style="border-bottom:1px solid var(--line);width:55mm;margin:0.5mm 0 0 0"></div>
+      </div>
+    </div>
+    <!-- 3b: cyclobutane (diamond) + Br (C1, left) + isopropyl (C2, top) -->
+    <div>
+      <div style="font-weight:700;font-size:10.5pt;margin-bottom:1mm">b)</div>
+      <div class="cyclo-item" style="align-items:flex-start">
+        <svg width="52mm" height="38mm" viewBox="-20 -18 138 112" style="overflow:visible;display:block">
+          <polygon points="12,42 42,12 72,42 42,72" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+          <!-- Br at C1 (left, 12,42) -->
+          <line x1="12" y1="42" x2="-4" y2="42" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="-8" y="45" text-anchor="end" font-size="11" font-weight="700" font-family="serif">Br</text>
+          <!-- Isopropyl at C2 (top, 42,12): CH with two CH3 going upper-right -->
+          <line x1="42" y1="12" x2="56" y2="0" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="62" y="-2" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH</text>
+          <line x1="76" y1="-4" x2="90" y2="-14" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="93" y="-17" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+          <line x1="76" y1="-4" x2="90" y2="6" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="93" y="9" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+        </svg>
+        <div style="border-bottom:1px solid var(--line);width:55mm;margin:0.5mm 0 0 0"></div>
+      </div>
+    </div>
+    <!-- 3c: cyclohexane + sec-bütil (–CH(CH3)–CH2–CH3) at C1 upper-right -->
+    <div>
+      <div style="font-weight:700;font-size:10.5pt;margin-bottom:1mm">c)</div>
+      <div class="cyclo-item" style="align-items:flex-start">
+        <svg width="54mm" height="42mm" viewBox="-10 -4 148 114" style="overflow:visible;display:block">
+          <polygon points="42,8 74,26 74,59 42,77 10,59 10,26" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+          <!-- sec-butyl at C1 (upper-right, 74,26): –CH(CH3)–CH2–CH3 -->
+          <line x1="74" y1="26" x2="88" y2="26" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="94" y="29" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">CH</text>
+          <!-- CH3 branch going up from CH -->
+          <line x1="94" y1="19" x2="94" y2="6" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="94" y="2" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+          <!-- CH2 going right from CH -->
+          <line x1="104" y1="26" x2="118" y2="26" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="126" y="29" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">2</tspan></text>
+          <!-- CH3 terminal going right from CH2 -->
+          <line x1="136" y1="26" x2="150" y2="26" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="158" y="29" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+        </svg>
+        <div style="border-bottom:1px solid var(--line);width:55mm;margin:0.5mm 0 0 0"></div>
+      </div>
+    </div>
+    <!-- 3d: cyclohexane + izobütil (–CH2–CH(CH3)–CH3) at C1 upper-right -->
+    <div>
+      <div style="font-weight:700;font-size:10.5pt;margin-bottom:1mm">d)</div>
+      <div class="cyclo-item" style="align-items:flex-start">
+        <svg width="54mm" height="42mm" viewBox="-10 -4 148 114" style="overflow:visible;display:block">
+          <polygon points="42,8 74,26 74,59 42,77 10,59 10,26" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+          <!-- izobutyl at C1 (upper-right, 74,26): –CH2–CH(CH3)–CH3 -->
+          <line x1="74" y1="26" x2="88" y2="26" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="96" y="29" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">2</tspan></text>
+          <line x1="108" y1="26" x2="122" y2="26" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="130" y="29" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">CH</text>
+          <!-- CH3 branch going up from CH center -->
+          <line x1="130" y1="19" x2="130" y2="6" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="130" y="2" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+          <!-- CH3 terminal going right -->
+          <line x1="140" y1="26" x2="154" y2="26" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="162" y="29" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+        </svg>
+        <div style="border-bottom:1px solid var(--line);width:55mm;margin:0.5mm 0 0 0"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- İskelet-Kizgi Formülü section -->
+  <div class="note-line" style="margin:2mm 0 2mm 0">İskelet veya kizgi formülünde C ve H atomları belirtilmez. Her bir köşe bir karbon atomunu simgeler.</div>
+
+  <!-- Example 1: propane structural → skeletal -->
+  <div style="display:flex;align-items:center;gap:5mm;margin:1mm 0 2mm 0">
+    <div class="iupac-chain">
+      <div class="atom">CH<sub>3</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub></div>
+    </div>
+    <span style="font-size:16pt;line-height:1">→</span>
+    <svg width="24mm" height="16mm" viewBox="-4 -4 54 32" style="display:block">
+      <line x1="0" y1="24" x2="24" y2="6" stroke="#1c1c1c" stroke-width="2.5"/>
+      <line x1="24" y1="6" x2="48" y2="24" stroke="#1c1c1c" stroke-width="2.5"/>
+    </svg>
+  </div>
+
+  <!-- Example 2: 6-carbon chain structural → skeletal -->
+  <!-- Structural formula -->
+  <div style="margin:0 0 1mm 0">
+    <div style="display:flex;align-items:flex-start;gap:0;font-size:10.5pt;font-weight:700;font-family:serif;line-height:1.4">
+      <span style="color:var(--red);font-style:italic;font-size:9pt;font-weight:400;margin-right:1mm">1</span>
+      <span>CH<sub>3</sub>–</span>
+      <span style="display:inline-flex;flex-direction:column;align-items:center;margin:0 0.5mm">
+        <span style="color:var(--red);font-style:italic;font-size:9pt;font-weight:400;margin-bottom:-0.5mm">2</span>
+        <span>CH–</span>
+      </span>
+      <span style="display:inline-flex;flex-direction:column;align-items:center;margin:0 0.5mm">
+        <span style="color:var(--red);font-style:italic;font-size:9pt;font-weight:400;margin-bottom:-0.5mm">3</span>
+        <span>CH–</span>
+      </span>
+      <span style="display:inline-flex;flex-direction:column;align-items:center;margin:0 0.5mm">
+        <span style="color:var(--red);font-style:italic;font-size:9pt;font-weight:400;margin-bottom:-0.5mm">4</span>
+        <span>CH<sub>2</sub>–</span>
+      </span>
+      <span style="display:inline-flex;flex-direction:column;align-items:center;margin:0 0.5mm">
+        <span style="color:var(--red);font-style:italic;font-size:9pt;font-weight:400;margin-bottom:-0.5mm">5</span>
+        <span>CH–</span>
+      </span>
+      <span style="color:var(--red);font-style:italic;font-size:9pt;font-weight:400;margin-right:0.5mm">6</span>
+      <span>CH<sub>3</sub></span>
+    </div>
+  </div>
+  <!-- Branches shown below the chain line -->
+  <div style="display:flex;gap:0;font-size:10.5pt;font-weight:700;font-family:serif;padding-left:14mm;margin:0 0 1mm 0">
+    <span style="width:9mm;text-align:center;color:var(--ink)">CH<sub>3</sub></span>
+    <span style="width:2mm"></span>
+    <span style="width:11mm;text-align:center">C<sub>2</sub>H<sub>5</sub></span>
+    <span style="width:14mm"></span>
+    <span style="width:7mm;text-align:center">Cl</span>
+  </div>
+
+  <!-- Arrow + skeletal formula -->
+  <div style="display:flex;align-items:center;gap:5mm;margin:1mm 0 0 0">
+    <span style="font-size:16pt;line-height:1">→</span>
+    <!-- 6-carbon zigzag with branches: CH3 down at C2, C2H5 up at C3, Cl down at C5 -->
+    <svg width="62mm" height="34mm" viewBox="-8 -18 170 94" style="overflow:visible;display:block">
+      <!-- Zigzag backbone C1–C6 -->
+      <line x1="0" y1="52" x2="28" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+      <line x1="28" y1="20" x2="56" y2="52" stroke="#1c1c1c" stroke-width="2.5"/>
+      <line x1="56" y1="52" x2="84" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+      <line x1="84" y1="20" x2="112" y2="52" stroke="#1c1c1c" stroke-width="2.5"/>
+      <line x1="112" y1="52" x2="140" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+      <line x1="140" y1="20" x2="160" y2="44" stroke="#1c1c1c" stroke-width="2.5"/>
+      <!-- Red position numbers -->
+      <text x="0" y="64" text-anchor="middle" font-size="9" fill="#b3261e" font-style="italic">1</text>
+      <text x="28" y="14" text-anchor="middle" font-size="9" fill="#b3261e" font-style="italic">2</text>
+      <text x="56" y="64" text-anchor="middle" font-size="9" fill="#b3261e" font-style="italic">3</text>
+      <text x="84" y="14" text-anchor="middle" font-size="9" fill="#b3261e" font-style="italic">4</text>
+      <text x="112" y="64" text-anchor="middle" font-size="9" fill="#b3261e" font-style="italic">5</text>
+      <text x="152" y="36" text-anchor="start" font-size="9" fill="#b3261e" font-style="italic">6</text>
+      <!-- CH3 branch going DOWN from C2 (28,20) -->
+      <line x1="28" y1="20" x2="28" y2="46" stroke="#1c1c1c" stroke-width="2"/>
+      <text x="28" y="56" text-anchor="middle" font-size="10" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="7.5">3</tspan></text>
+      <!-- C2H5 branch going UP from C3 (56,52): 2 bonds -->
+      <line x1="56" y1="52" x2="70" y2="30" stroke="#1c1c1c" stroke-width="2"/>
+      <line x1="70" y1="30" x2="84" y2="8" stroke="#1c1c1c" stroke-width="2"/>
+      <!-- Cl label below C5 (112,52) -->
+      <line x1="112" y1="52" x2="112" y2="68" stroke="#1c1c1c" stroke-width="2"/>
+      <text x="112" y="76" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">Cl</text>
+    </svg>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 58 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">İskelet-Kizgi Formülü · Karışık Alıştırmalar</h1>
+
+  <h2 class="section-title" style="margin:0 0 1.5mm 0">Alıştırmalar</h2>
+  <p style="margin:0 0 2mm 0;font-size:10.5pt"><strong>1.</strong> Aşağıda iskelet formülleri verilen bileşikleri adlandırınız.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1mm 4mm;margin:0 0 3mm 0">
+    <!-- 1a: 2,6-dimethylheptane skeletal: C1–C7 zigzag, CH3 at C2 and C6 -->
+    <div>
+      <div style="font-weight:700;font-size:10.5pt;margin-bottom:1mm">a)</div>
+      <svg width="48mm" height="22mm" viewBox="-6 -18 112 56" style="overflow:visible;display:block">
+        <line x1="0" y1="32" x2="16" y2="16" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="16" y1="16" x2="32" y2="32" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="32" y1="32" x2="48" y2="16" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="48" y1="16" x2="64" y2="32" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="64" y1="32" x2="80" y2="16" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="80" y1="16" x2="100" y2="32" stroke="#1c1c1c" stroke-width="2.5"/>
+        <!-- CH3 branch UP at C2 (16,16) -->
+        <line x1="16" y1="16" x2="16" y2="2" stroke="#1c1c1c" stroke-width="2"/>
+        <!-- CH3 branch UP at C6 (80,16) -->
+        <line x1="80" y1="16" x2="80" y2="2" stroke="#1c1c1c" stroke-width="2"/>
+      </svg>
+      <div style="border-bottom:1px solid var(--line);width:44mm;margin:0.5mm 0 0 0"></div>
+    </div>
+    <!-- 1b: 1,2,3-trimethylcyclobutane: diamond ring, CH3 at C1(left),C2(top),C3(right) -->
+    <div>
+      <div style="font-weight:700;font-size:10.5pt;margin-bottom:1mm">b)</div>
+      <svg width="44mm" height="28mm" viewBox="-22 -16 110 96" style="overflow:visible;display:block">
+        <polygon points="12,42 42,12 72,42 42,72" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <!-- CH3 at C1 (left,12,42) going left -->
+        <line x1="12" y1="42" x2="-4" y2="42" stroke="#1c1c1c" stroke-width="2"/>
+        <!-- CH3 at C2 (top,42,12) going upper-left -->
+        <line x1="42" y1="12" x2="28" y2="0" stroke="#1c1c1c" stroke-width="2"/>
+        <!-- CH3 at C3 (right,72,42) going right -->
+        <line x1="72" y1="42" x2="88" y2="42" stroke="#1c1c1c" stroke-width="2"/>
+      </svg>
+      <div style="border-bottom:1px solid var(--line);width:44mm;margin:0.5mm 0 0 0"></div>
+    </div>
+    <!-- 1c: 2,3-dimethylhexane: zigzag C1-C4, branch at C4(upper-left), Y at C5 -->
+    <div>
+      <div style="font-weight:700;font-size:10.5pt;margin-bottom:1mm">c)</div>
+      <svg width="44mm" height="26mm" viewBox="-4 -10 106 70" style="overflow:visible;display:block">
+        <line x1="0" y1="48" x2="18" y2="28" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="18" y1="28" x2="36" y2="48" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="36" y1="48" x2="54" y2="28" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="54" y1="28" x2="72" y2="48" stroke="#1c1c1c" stroke-width="2.5"/>
+        <!-- Branch at C4(54,28) going upper-left -->
+        <line x1="54" y1="28" x2="40" y2="14" stroke="#1c1c1c" stroke-width="2"/>
+        <!-- Y junction at C5(72,48): C6 upper-right and C7 lower-right -->
+        <line x1="72" y1="48" x2="90" y2="28" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="72" y1="48" x2="90" y2="60" stroke="#1c1c1c" stroke-width="2.5"/>
+      </svg>
+      <div style="border-bottom:1px solid var(--line);width:44mm;margin:0.5mm 0 0 0"></div>
+    </div>
+  </div>
+
+  <!-- Karışık Alıştırmalar -->
+  <h2 class="section-title" style="margin:1mm 0 1.5mm 0">Karışık Alıştırmalar</h2>
+
+  <!-- Q1: draw skeletal formula -->
+  <p style="margin:0 0 1mm 0;"><strong>1.</strong> CH(CH<sub>3</sub>)<sub>2</sub>–C(CH<sub>3</sub>)<sub>2</sub>–CH(C<sub>2</sub>H<sub>5</sub>)–CH<sub>2</sub>–CH<sub>3</sub> bileşiğinin iskelet formülü ne olur?</p>
+  <div style="border-bottom:1px solid var(--line);width:110mm;margin:0 0 4mm 0;height:14mm"></div>
+
+  <!-- Q2: draw skeletal formula -->
+  <p style="margin:0 0 1mm 0;"><strong>2.</strong> 2-metil-4-izopropil heptan bileşiğinin iskelet formülü ne olur?</p>
+  <div style="border-bottom:1px solid var(--line);width:110mm;margin:0 0 4mm 0;height:14mm"></div>
+
+  <!-- Q3: skeletal formula given, which names are valid? -->
+  <p style="margin:0 0 1mm 0;"><strong>3.</strong> İskelet formülü yanda verilen bileşik ile ilgili;</p>
+  <div style="display:flex;align-items:center;gap:6mm;margin:0 0 1mm 0">
+    <svg width="24mm" height="18mm" viewBox="-4 -16 58 52" style="overflow:visible;display:block">
+      <!-- 2,2-dimethylbutane: C1–C2(gem-dimethyl)–C3–C4 with 2 CH3 at C2 -->
+      <line x1="0" y1="28" x2="22" y2="8" stroke="#1c1c1c" stroke-width="2.5"/>
+      <line x1="22" y1="8" x2="44" y2="28" stroke="#1c1c1c" stroke-width="2.5"/>
+      <!-- gem-dimethyl UP and DOWN at C2 (22,8) -->
+      <line x1="22" y1="8" x2="22" y2="-8" stroke="#1c1c1c" stroke-width="2"/>
+      <!-- second methyl continues along upper-right -->
+      <line x1="44" y1="28" x2="52" y2="20" stroke="#1c1c1c" stroke-width="2.5"/>
+    </svg>
+    <div style="font-size:10.5pt">
+      <div><strong>I.</strong> 2,2-dimetil bütan</div>
+      <div><strong>II.</strong> neobütan</div>
+      <div><strong>III.</strong> etil trimetil metan</div>
+    </div>
+  </div>
+  <p style="margin:0 0 3mm 0;font-size:10pt">adlandırmalarından hangileri kullanılabilir?</p>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 59 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Karışık Alıştırmalar</h1>
+
+  <!-- Q4: which are NOT IUPAC correct -->
+  <p style="margin:0 0 1.5mm 0;"><strong>4.</strong> Aşağıda verilen bileşik adlandırmalarından hangileri IUPAC sistemine uygun <em>değildir?</em></p>
+  <div style="font-size:10.5pt;margin:0 0 4mm 0">
+    <div><strong>I.</strong> 2-etil-4-metil heptan</div>
+    <div><strong>II.</strong> 4-kloro-2-metil pentan</div>
+    <div><strong>III.</strong> 2-siklopentil bütan</div>
+  </div>
+
+  <!-- Q5: ethylcyclobutane statements -->
+  <p style="margin:0 0 1.5mm 0;"><strong>5.</strong> Yanda verilen bileşik ile ilgili;</p>
+  <div style="display:flex;align-items:flex-start;gap:8mm;margin:0 0 1.5mm 0">
+    <!-- Ethylcyclobutane SVG: square ring + ethyl chain -->
+    <svg width="34mm" height="30mm" viewBox="-4 -10 90 80" style="overflow:visible;display:block;margin-top:2mm">
+      <!-- Ethyl chain: CH3–CH2– going in from left -->
+      <text x="0" y="20" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+      <line x1="22" y1="18" x2="34" y2="18" stroke="#1c1c1c" stroke-width="2"/>
+      <text x="40" y="20" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">2</tspan></text>
+      <line x1="58" y1="18" x2="64" y2="18" stroke="#1c1c1c" stroke-width="2"/>
+      <!-- Cyclobutane square: top-left(64,10), top-right(80,10), bot-right(80,40), bot-left(64,40) -->
+      <polygon points="64,10 80,10 80,40 64,40" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+    </svg>
+    <div style="font-size:10.5pt;margin-top:2mm">
+      <div><strong>I.</strong> Adı etil siklobütan dır.</div>
+      <div style="margin-top:1mm"><strong>II.</strong> Yapısında sp<sup>2</sup> ve sp<sup>3</sup> hibritleşmesi yapmış C atomları bulunur.</div>
+      <div style="margin-top:1mm"><strong>III.</strong> Genel formülü C<sub>n</sub>H<sub>2n+2</sub> dir.</div>
+    </div>
+  </div>
+  <p style="margin:0 0 5mm 0;font-size:10pt">yargılarından hangileri doğrudur?</p>
+
+  <!-- Q6: R1 R2 groups for 3,3,5-trimethylheptane -->
+  <p style="margin:0 0 1.5mm 0;"><strong>6.</strong> IUPAC'a göre 3,3,5-trimetil heptan olarak adlandırılan bileşik için aşağıdaki formülde R<sub>1</sub> ve R<sub>2</sub> grupları ne olmalıdır?</p>
+  <div style="display:flex;align-items:flex-start;gap:10mm;margin:0 0 4mm 0">
+    <div class="iupac-chain has-up has-down" style="margin-top:4mm">
+      <div class="atom">CH<sub>3</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">C
+        <div class="branch up"><div class="lbl-row"><span>R<sub>1</sub></span></div><div class="bline"></div></div>
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>R<sub>2</sub></span></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub></div>
+    </div>
+    <table style="font-size:10.5pt;border-collapse:collapse;margin-top:2mm">
+      <tr><th style="padding:0.5mm 3mm;text-align:center"></th><th style="padding:0.5mm 3mm;text-align:center">R<sub>1</sub></th><th style="padding:0.5mm 3mm;text-align:center">R<sub>2</sub></th></tr>
+      <tr><td style="padding:0.5mm 2mm"><strong>A)</strong></td><td style="padding:0.5mm 3mm">CH<sub>3</sub></td><td style="padding:0.5mm 3mm">CH<sub>3</sub></td></tr>
+      <tr><td style="padding:0.5mm 2mm"><strong>B)</strong></td><td style="padding:0.5mm 3mm">C<sub>2</sub>H<sub>5</sub></td><td style="padding:0.5mm 3mm">C<sub>2</sub>H<sub>5</sub></td></tr>
+      <tr><td style="padding:0.5mm 2mm"><strong>C)</strong></td><td style="padding:0.5mm 3mm">CH<sub>3</sub></td><td style="padding:0.5mm 3mm">C<sub>2</sub>H<sub>5</sub></td></tr>
+      <tr><td style="padding:0.5mm 2mm"><strong>D)</strong></td><td style="padding:0.5mm 3mm">CH<sub>3</sub></td><td style="padding:0.5mm 3mm">C<sub>3</sub>H<sub>7</sub></td></tr>
+    </table>
+  </div>
+
+  <h2 class="section-title" style="margin:3mm 0 1.5mm 0">Cevaplar</h2>
+  <div class="answers-note">
+    <span><strong>1a.</strong> 2,6-dimetilheptan</span>
+    <span><strong>1b.</strong> 1,2,3-trimetilsiklobütan</span>
+    <span><strong>1c.</strong> 2,3-dimetilhekzan</span>
+    <span><strong>3.</strong> I ve III</span>
+    <span><strong>4.</strong> I, II ve III</span>
+    <span><strong>5.</strong> Yalnız I</span>
+    <span><strong>6.</strong> C</span>
   </div>
 
   <div class="page-foot"><span>Organik Kimya</span></div>
