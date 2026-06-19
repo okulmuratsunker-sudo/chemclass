@@ -70,7 +70,7 @@
     font-size:8.5pt;
     color:#9a9a9a;
   }
-  .page-foot::after{ content:"Sayfa " counter(pagenum) " / 44"; }
+  .page-foot::after{ content:"Sayfa " counter(pagenum) " / 45"; }
 
   /* ---------- bullet notes ---------- */
   ul.notes{
@@ -680,13 +680,14 @@
   }
   .answers-note span{ display:inline-block; margin:0 2.5mm; white-space:nowrap; }
 
-  /* ---------- sayfa 46: numaralandırma kuralları ---------- */
-  .page-46 .note-block{ padding:5mm 6mm; margin-bottom:8mm; font-size:12pt; }
-  .page-46 .iupac-chain{ font-size:19pt; gap:2mm; }
-  .page-46 .iupac-chain.has-down{ margin-bottom:9mm; }
-  .page-46 .iupac-chain.has-up{ margin-top:9mm; }
-  .page-46 .iupac-chain .branch .bline{ height:5mm; }
-  .page-46 .iupac-chain .num{ font-size:11pt; }
+  /* ---------- numaralandırma kuralları: dallanmış zincir gridleri ---------- */
+  .note-structure{ display:flex; justify-content:center; margin:4mm 0 1mm 0; }
+  .note3-row{ display:flex; justify-content:center; align-items:center; gap:14mm; margin:4mm 0 1mm 0; flex-wrap:wrap; }
+  .struct-grid{ display:inline-grid; font-size:11pt; font-weight:700; justify-content:center; align-items:center; }
+  .struct-grid .satom{ padding:0.4mm 1.5mm; text-align:center; white-space:nowrap; line-height:1.15; }
+  .struct-grid .sbond-h{ font-weight:400; text-align:center; }
+  .struct-grid .sbond-v{ display:flex; justify-content:center; height:100%; }
+  .struct-grid .sbond-v::before{ content:""; width:0; border-left:1.3px solid var(--ink); }
 
   /* ---------- sayfa 47: özel adlandırma ve karbon türleri ---------- */
   .page-47 .iupac-chain.small{ font-size:12pt; }
@@ -4516,6 +4517,112 @@
     <span><strong>4.</strong> 3-etil hekzan</span>
     <span><strong>5.</strong> 4-etil-3-metil heptan</span>
     <span><strong>6.</strong> 2,4,6-trimetil-5-etil oktan</span>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 45 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Alkanların Adlandırılması</h1>
+
+  <div class="note-block" style="margin-top:6mm">
+    <p><strong>Not:</strong> Eğer uzun zincirde zincirin her iki ucunda da eşit uzaklıkta dallanma varsa, grupların bağlı olduğu karbon numaraları toplamı en küçük olacak şekilde (yığılma) numaralandırma yapılır.</p>
+    <div class="note-structure">
+      <div class="iupac-chain has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note-block">
+    <p><strong>Not:</strong> Eğer farklı alkil kökleri veya fonksiyonel gruplar karbon zincirinin her iki ucuna da eşit uzaklıkta ise, alfabetik sırada önce gelen grup küçük sayılı karbona gelecek şekilde numaralandırma yapılır.</p>
+    <div class="note-structure">
+      <div class="iupac-chain has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>Br</span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note-block">
+    <p><strong>Not:</strong> Eğer yapıda eşit uzunlukta birden fazla zincir varsa, üzerinde dallanmanın fazla olduğu zincir esas alınır.</p>
+    <div class="note3-row">
+      <div class="struct-grid" style="grid-template-columns:auto 4mm auto 4mm auto 4mm auto; grid-template-rows:auto 3mm auto 3mm auto">
+        <div class="satom" style="grid-row:1; grid-column:1">CH<sub>3</sub></div>
+        <div class="sbond-h" style="grid-row:1; grid-column:2">–</div>
+        <div class="satom" style="grid-row:1; grid-column:3">CH<sub>2</sub></div>
+        <div class="sbond-h" style="grid-row:1; grid-column:4">–</div>
+        <div class="satom" style="grid-row:1; grid-column:5">CH</div>
+        <div class="sbond-h" style="grid-row:1; grid-column:6">–</div>
+        <div class="satom" style="grid-row:1; grid-column:7">CH<sub>2</sub></div>
+        <div class="sbond-v" style="grid-row:2; grid-column:5"></div>
+        <div class="sbond-v" style="grid-row:2; grid-column:7"></div>
+        <div class="satom" style="grid-row:3; grid-column:3">CH<sub>3</sub></div>
+        <div class="sbond-h" style="grid-row:3; grid-column:4">–</div>
+        <div class="satom" style="grid-row:3; grid-column:5">CH</div>
+        <div class="satom" style="grid-row:3; grid-column:7">CH<sub>2</sub></div>
+        <div class="sbond-v" style="grid-row:4; grid-column:5"></div>
+        <div class="sbond-v" style="grid-row:4; grid-column:7"></div>
+        <div class="satom" style="grid-row:5; grid-column:5">CH<sub>3</sub></div>
+        <div class="satom" style="grid-row:5; grid-column:7">CH<sub>3</sub></div>
+      </div>
+      <div class="struct-grid" style="grid-template-columns:auto 4mm auto 4mm auto 4mm auto 4mm auto; grid-template-rows:auto 3mm auto 3mm auto 3mm auto 3mm auto 3mm auto">
+        <div class="satom" style="grid-row:1; grid-column:5">CH<sub>3</sub></div>
+        <div class="sbond-v" style="grid-row:2; grid-column:5"></div>
+        <div class="satom" style="grid-row:3; grid-column:3">CH<sub>3</sub></div>
+        <div class="sbond-h" style="grid-row:3; grid-column:4">–</div>
+        <div class="satom" style="grid-row:3; grid-column:5">CH</div>
+        <div class="sbond-v" style="grid-row:4; grid-column:5"></div>
+        <div class="satom" style="grid-row:5; grid-column:1">CH<sub>3</sub></div>
+        <div class="sbond-h" style="grid-row:5; grid-column:2">–</div>
+        <div class="satom" style="grid-row:5; grid-column:3">CH<sub>2</sub></div>
+        <div class="sbond-h" style="grid-row:5; grid-column:4">–</div>
+        <div class="satom" style="grid-row:5; grid-column:5">CH</div>
+        <div class="sbond-h" style="grid-row:5; grid-column:6">–</div>
+        <div class="satom" style="grid-row:5; grid-column:7">CH</div>
+        <div class="sbond-h" style="grid-row:5; grid-column:8">–</div>
+        <div class="satom" style="grid-row:5; grid-column:9">CH<sub>3</sub></div>
+        <div class="sbond-v" style="grid-row:6; grid-column:7"></div>
+        <div class="satom" style="grid-row:7; grid-column:7">CH<sub>2</sub></div>
+        <div class="sbond-v" style="grid-row:8; grid-column:7"></div>
+        <div class="satom" style="grid-row:9; grid-column:5">CH<sub>3</sub></div>
+        <div class="sbond-h" style="grid-row:9; grid-column:6">–</div>
+        <div class="satom" style="grid-row:9; grid-column:7">CH</div>
+        <div class="sbond-v" style="grid-row:10; grid-column:7"></div>
+        <div class="satom" style="grid-row:11; grid-column:7">CH<sub>3</sub></div>
+      </div>
+    </div>
   </div>
 
   <div class="page-foot"><span>Organik Kimya</span></div>
