@@ -667,6 +667,19 @@
   .ex-item .ex-num{ align-self:flex-start; font-weight:700; color:var(--red); margin-bottom:1mm; }
   .ex-item .answer-box{ margin-top:1mm; padding:1mm 3mm; font-size:8.5pt; }
 
+  .answers-note{
+    border:1.5px solid #1e7e34;
+    background:#eaf6ec;
+    color:#1e7e34;
+    font-weight:700;
+    border-radius:5px;
+    padding:2mm 4mm;
+    font-size:10pt;
+    line-height:1.7;
+    text-align:center;
+  }
+  .answers-note span{ display:inline-block; margin:0 2.5mm; white-space:nowrap; }
+
   /* ---------- sayfa 46: numaralandırma kuralları ---------- */
   .page-46 .note-block{ padding:5mm 6mm; margin-bottom:8mm; font-size:12pt; }
   .page-46 .iupac-chain{ font-size:19pt; gap:2mm; }
@@ -4386,7 +4399,7 @@
   </ul>
 
   <h2 class="section-title" style="margin-top:1mm">Alıştırmalar</h2>
-  <div class="ex-grid">
+  <div class="ex-grid" style="gap:1.5mm 8mm">
     <div class="ex-item">
       <div class="ex-num">1.</div>
       <div class="iupac-chain has-down">
@@ -4402,7 +4415,6 @@
         <div class="bond">–</div>
         <div class="atom">CH<sub>3</sub></div>
       </div>
-      <div class="answer-box">Cevap: 2,3-dimetil pentan</div>
     </div>
     <div class="ex-item">
       <div class="ex-num">4.</div>
@@ -4420,7 +4432,6 @@
         <div class="bond">–</div>
         <div class="atom">CH<sub>3</sub></div>
       </div>
-      <div class="answer-box">Cevap: 3-etil hekzan</div>
     </div>
     <div class="ex-item">
       <div class="ex-num">2.</div>
@@ -4438,7 +4449,6 @@
         <div class="bond">–</div>
         <div class="atom">CH<sub>3</sub></div>
       </div>
-      <div class="answer-box">Cevap: 2,2,3-trimetil pentan</div>
     </div>
     <div class="ex-item">
       <div class="ex-num">5.</div>
@@ -4456,7 +4466,6 @@
         <div class="bond">–</div>
         <div class="atom">CH<sub>3</sub></div>
       </div>
-      <div class="answer-box">Cevap: 4-etil-3-metil heptan</div>
     </div>
     <div class="ex-item">
       <div class="ex-num">3.</div>
@@ -4473,7 +4482,6 @@
         <div class="bond">–</div>
         <div class="atom">Br</div>
       </div>
-      <div class="answer-box">Cevap: 3-bromo-2-metil pentan</div>
     </div>
     <div class="ex-item">
       <div class="ex-num">6.</div>
@@ -4497,8 +4505,17 @@
         <div class="bond">–</div>
         <div class="atom">CH<sub>3</sub></div>
       </div>
-      <div class="answer-box">Cevap: 2,4,6-trimetil-5-etil oktan</div>
     </div>
+  </div>
+
+  <h2 class="section-title" style="margin:1.5mm 0">Cevaplar</h2>
+  <div class="answers-note">
+    <span><strong>1.</strong> 2,3-dimetil pentan</span>
+    <span><strong>2.</strong> 2,2,3-trimetil pentan</span>
+    <span><strong>3.</strong> 3-bromo-2-metil pentan</span>
+    <span><strong>4.</strong> 3-etil hekzan</span>
+    <span><strong>5.</strong> 4-etil-3-metil heptan</span>
+    <span><strong>6.</strong> 2,4,6-trimetil-5-etil oktan</span>
   </div>
 
   <div class="page-foot"><span>Organik Kimya</span></div>
