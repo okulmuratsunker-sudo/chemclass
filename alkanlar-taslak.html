@@ -215,14 +215,11 @@
   .cyclo-item{ display:flex; flex-direction:column; align-items:center; text-align:center; }
   .cyclo-name{ color:var(--red); font-weight:700; font-size:10pt; margin-top:1.5mm; }
 
-  /* ---------- renkli "mol-card" şablonu (turuncu/yeşil) ---------- */
+  /* ---------- renkli "mol-card" şablonu (turuncu) ---------- */
   :root{
     --orange:#c2660b;
     --orange-soft:#fdf1e0;
     --orange-line:#ecc792;
-    --leaf:#1e7e34;
-    --leaf-soft:#eaf6ec;
-    --leaf-line:#a8d9b3;
   }
   .mol-grid{ display:grid; gap:4mm 6mm; margin:0 0 4mm 0; }
   .mol-card{
@@ -233,7 +230,6 @@
     align-items:center;
   }
   .mol-card.c-orange{ background:var(--orange-soft); border:1px solid var(--orange-line); }
-  .mol-card.c-leaf{ background:var(--leaf-soft); border:1px solid var(--leaf-line); }
   .mol-card .qbadge{
     align-self:flex-start;
     display:inline-flex; align-items:center; justify-content:center;
@@ -241,7 +237,6 @@
     font-weight:700; font-size:9.5pt; color:#fff; margin-bottom:1.5mm;
   }
   .mol-card.c-orange .qbadge{ background:var(--orange); }
-  .mol-card.c-leaf .qbadge{ background:var(--leaf); }
   .mol-card .ans-line{ border-bottom:1.5px solid #fff; width:90%; margin-top:2mm; }
   .mol-card svg{ display:block; }
 
@@ -249,9 +244,7 @@
   .judge-list{ display:flex; flex-direction:column; gap:1.8mm; }
   .judge-item{ display:flex; align-items:baseline; gap:2.5mm; padding:1.3mm 3.5mm; border-radius:2mm; font-size:10.5pt; }
   .judge-item.c-orange{ background:var(--orange-soft); }
-  .judge-item.c-leaf{ background:var(--leaf-soft); }
   .judge-item b{ color:var(--orange); }
-  .judge-item.c-leaf b{ color:var(--leaf); }
 
   /* ---------- teori notu (turuncu şerit kutu) ---------- */
   .theory-box{
@@ -1627,43 +1620,33 @@
         <line x1="42" y1="10" x2="42" y2="-6" stroke="#1c1c1c" stroke-width="2"/>
         <text x="42" y="-11" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">Br</text>
         <line x1="72.43" y1="32.11" x2="88.6" y2="26.86" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="79.28" y="25.68" text-anchor="middle" font-size="10">CH</text>
         <line x1="88.6" y1="26.86" x2="99.71" y2="15.35" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="101.71" y="14.35" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
         <line x1="88.6" y1="26.86" x2="104.36" y2="29.64" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="107.36" y="33.64" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
       </svg>
       <div class="ans-line"></div>
     </div>
     <!-- 3b: cyclobutane (diamond) + Br (left) + isopropyl (top) -->
-    <div class="mol-card c-leaf">
+    <div class="mol-card c-orange">
       <div class="qbadge">b</div>
       <svg width="32mm" height="37mm" viewBox="-18 -33.13 104 119.13" style="overflow:visible">
         <polygon points="42,14 70,42 42,70 14,42" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
         <line x1="14" y1="42" x2="-2" y2="42" stroke="#1c1c1c" stroke-width="2"/>
         <text x="-5" y="46" text-anchor="end" font-size="11" font-weight="700" font-family="serif">Br</text>
         <line x1="42" y1="14" x2="42" y2="-3" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="38" y="5.5" text-anchor="end" font-size="10">CH</text>
         <line x1="42" y1="-3" x2="34.49" y2="-17.13" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="32.49" y="-18.13" text-anchor="end" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
         <line x1="42" y1="-3" x2="49.51" y2="-17.13" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="51.51" y="-18.13" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
       </svg>
       <div class="ans-line"></div>
     </div>
     <!-- 3c: cyclohexane + sec-bütil (–CH(CH3)–CH2–CH3) -->
-    <div class="mol-card c-leaf">
+    <div class="mol-card c-orange">
       <div class="qbadge">c</div>
       <svg width="38mm" height="34mm" viewBox="-3.44 -20.43 125.89 112.43" style="overflow:visible">
         <polygon points="42,8 71.44,25 71.44,59 42,76 12.56,59 12.56,25" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
         <line x1="71.44" y1="25" x2="80.45" y2="10.58" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="77.45" y="5.38" text-anchor="middle" font-size="10">CH</text>
         <line x1="80.45" y1="10.58" x2="88.45" y2="24.44" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="90.45" y="33.44" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
         <line x1="80.45" y1="10.58" x2="97.44" y2="9.99" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="100.44" y="13.99" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">2</tspan></text>
         <line x1="97.44" y1="9.99" x2="106.45" y2="-4.43" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="108.45" y="-5.43" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
       </svg>
       <div class="ans-line"></div>
     </div>
@@ -1673,13 +1656,9 @@
       <svg width="38mm" height="32mm" viewBox="-3.44 -19.58 132.87 111.58" style="overflow:visible">
         <polygon points="42,8 71.44,25 71.44,59 42,76 12.56,59 12.56,25" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
         <line x1="71.44" y1="25" x2="80.45" y2="10.58" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="82.45" y="9.58" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">2</tspan></text>
         <line x1="80.45" y1="10.58" x2="97.44" y2="9.99" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="98.07" y="27.98" text-anchor="middle" font-size="10">CH</text>
         <line x1="97.44" y1="9.99" x2="105.92" y2="-3.58" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="107.92" y="-4.58" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
         <line x1="97.44" y1="9.99" x2="113.43" y2="9.43" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="116.43" y="13.43" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
       </svg>
       <div class="ans-line"></div>
     </div>
@@ -1782,23 +1761,18 @@
         <line x1="74.64" y1="32" x2="93.3" y2="20.34" stroke="#1c1c1c" stroke-width="2.5"/>
         <line x1="93.3" y1="20.34" x2="111.96" y2="32" stroke="#1c1c1c" stroke-width="2.5"/>
         <line x1="18.66" y1="20.34" x2="18.66" y2="5.34" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="18.66" y="0.34" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
         <line x1="93.3" y1="20.34" x2="93.3" y2="5.34" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="93.3" y="0.34" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
       </svg>
       <div class="ans-line"></div>
     </div>
     <!-- 1b: 1,2,3-trimetilsiklobütan: diamond ring, CH3 at C1(sol),C2(üst),C3(sağ) -->
-    <div class="mol-card c-leaf">
+    <div class="mol-card c-orange">
       <div class="qbadge">b</div>
       <svg width="38mm" height="35mm" viewBox="-15 -15 114 99" style="overflow:visible">
         <polygon points="42,14 70,42 42,70 14,42" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
         <line x1="14" y1="42" x2="-1" y2="42" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="-4" y="46" text-anchor="end" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
         <line x1="42" y1="14" x2="42" y2="-1" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="42" y="-6" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
         <line x1="70" y1="42" x2="85" y2="42" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="88" y="46" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
       </svg>
       <div class="ans-line"></div>
     </div>
@@ -1812,9 +1786,7 @@
         <line x1="55.98" y1="20.34" x2="74.64" y2="32" stroke="#1c1c1c" stroke-width="2.5"/>
         <line x1="74.64" y1="32" x2="93.3" y2="20.34" stroke="#1c1c1c" stroke-width="2.5"/>
         <line x1="18.66" y1="20.34" x2="18.66" y2="4.34" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="18.66" y="-0.66" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
         <line x1="37.32" y1="32" x2="37.32" y2="48" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="37.32" y="59" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
       </svg>
       <div class="ans-line"></div>
     </div>
@@ -1834,20 +1806,18 @@
   <!-- Q3: skeletal formula given (fixed gem-dimethyl fork), which names are valid? -->
   <p style="margin:0 0 1.5mm 0;"><strong>3.</strong> İskelet formülü yanda verilen bileşik ile ilgili;</p>
   <div style="display:flex;align-items:center;gap:6mm;margin:0 0 1.5mm 0">
-    <div class="mol-card c-leaf" style="padding:3mm 4mm">
+    <div class="mol-card c-orange" style="padding:3mm 4mm">
       <svg width="30mm" height="20mm" viewBox="-14 -10.46 78.88 52.46" style="overflow:visible;display:block">
         <line x1="0" y1="28" x2="16.96" y2="17.4" stroke="#1c1c1c" stroke-width="2.5"/>
         <line x1="16.96" y1="17.4" x2="33.92" y2="28" stroke="#1c1c1c" stroke-width="2.5"/>
         <line x1="33.92" y1="28" x2="50.88" y2="17.4" stroke="#1c1c1c" stroke-width="2.5"/>
         <line x1="16.96" y1="17.4" x2="8.96" y2="3.54" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="6.96" y="2.54" text-anchor="end" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
         <line x1="16.96" y1="17.4" x2="24.96" y2="3.54" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="26.96" y="2.54" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
       </svg>
     </div>
     <div class="judge-list" style="flex:1">
       <div class="judge-item c-orange"><b>I.</b> 2,2-dimetil bütan</div>
-      <div class="judge-item c-leaf"><b>II.</b> neobütan</div>
+      <div class="judge-item"><b>II.</b> neobütan</div>
       <div class="judge-item c-orange"><b>III.</b> etil trimetil metan</div>
     </div>
   </div>
@@ -1865,7 +1835,7 @@
   <p style="margin:0 0 1.5mm 0;"><strong>4.</strong> Aşağıda verilen bileşik adlandırmalarından hangileri IUPAC sistemine uygun <em>değildir?</em></p>
   <div class="judge-list" style="margin:0 0 4mm 0">
     <div class="judge-item c-orange"><b>I.</b> 2-etil-4-metil heptan</div>
-    <div class="judge-item c-leaf"><b>II.</b> 4-kloro-2-metil pentan</div>
+    <div class="judge-item"><b>II.</b> 4-kloro-2-metil pentan</div>
     <div class="judge-item c-orange"><b>III.</b> 2-siklopentil bütan</div>
   </div>
 
@@ -1877,14 +1847,12 @@
         <polygon points="42,18 66,42 42,66 18,42" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
         <line x1="18" y1="42" x2="2.99" y2="49.98" stroke="#1c1c1c" stroke-width="2"/>
         <line x1="2.99" y1="49.98" x2="-12.02" y2="42" stroke="#1c1c1c" stroke-width="2"/>
-        <text x="2.99" y="60.98" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">2</tspan></text>
-        <text x="-15.02" y="46" text-anchor="end" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
       </svg>
     </div>
     <div class="judge-list" style="flex:1">
-      <div class="judge-item c-leaf"><b>I.</b> Adı etil siklobütan dır.</div>
+      <div class="judge-item"><b>I.</b> Adı etil siklobütan dır.</div>
       <div class="judge-item c-orange"><b>II.</b> Yapısında sp<sup>2</sup> ve sp<sup>3</sup> hibritleşmesi yapmış C atomları bulunur.</div>
-      <div class="judge-item c-leaf"><b>III.</b> Genel formülü C<sub>n</sub>H<sub>2n+2</sub> dir.</div>
+      <div class="judge-item"><b>III.</b> Genel formülü C<sub>n</sub>H<sub>2n+2</sub> dir.</div>
     </div>
   </div>
   <p style="margin:0 0 4mm 0;font-size:10pt">yargılarından hangileri doğrudur?</p>
@@ -1914,7 +1882,7 @@
       <tr><th style="padding:0.8mm 3mm;text-align:center;color:var(--orange)"></th><th style="padding:0.8mm 3mm;text-align:center;color:var(--orange)">R<sub>1</sub></th><th style="padding:0.8mm 3mm;text-align:center;color:var(--orange)">R<sub>2</sub></th></tr>
       <tr style="background:var(--orange-soft)"><td style="padding:0.8mm 2mm;border-radius:2mm 0 0 2mm"><strong>A)</strong></td><td style="padding:0.8mm 3mm">CH<sub>3</sub></td><td style="padding:0.8mm 3mm;border-radius:0 2mm 2mm 0">CH<sub>3</sub></td></tr>
       <tr><td style="padding:0.8mm 2mm"><strong>B)</strong></td><td style="padding:0.8mm 3mm">C<sub>2</sub>H<sub>5</sub></td><td style="padding:0.8mm 3mm">C<sub>2</sub>H<sub>5</sub></td></tr>
-      <tr style="background:var(--leaf-soft)"><td style="padding:0.8mm 2mm;border-radius:2mm 0 0 2mm"><strong>C)</strong></td><td style="padding:0.8mm 3mm">CH<sub>3</sub></td><td style="padding:0.8mm 3mm;border-radius:0 2mm 2mm 0">C<sub>2</sub>H<sub>5</sub></td></tr>
+      <tr style="background:var(--orange-soft)"><td style="padding:0.8mm 2mm;border-radius:2mm 0 0 2mm"><strong>C)</strong></td><td style="padding:0.8mm 3mm">CH<sub>3</sub></td><td style="padding:0.8mm 3mm;border-radius:0 2mm 2mm 0">C<sub>2</sub>H<sub>5</sub></td></tr>
       <tr><td style="padding:0.8mm 2mm"><strong>D)</strong></td><td style="padding:0.8mm 3mm">CH<sub>3</sub></td><td style="padding:0.8mm 3mm">C<sub>3</sub>H<sub>7</sub></td></tr>
     </table>
   </div>
