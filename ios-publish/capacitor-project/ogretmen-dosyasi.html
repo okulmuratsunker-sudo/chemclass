@@ -697,13 +697,6 @@ function ocAddClass(){
   toast(`✓ "${name}" sınıfı oluşturuldu — şimdi öğrenci ekleyin`);
   render();
 }
-function ocDeleteEmptyClass(name){
-  if(studentClasses().includes(name)){toast('Bu sınıfta öğrenci var, önce öğrencileri taşıyın/silin',true);return;}
-  if(!confirm(`"${name}" sınıfını silmek istiyor musunuz?`))return;
-  ocSaveExtra(ocLoadExtra().filter(c=>c!==name));
-  if(ocSelectedClass===name)ocSelectedClass=null;
-  render();
-}
 function renderClasses(){
   const classes=allClasses();
   if(ocSelectedClass&&!classes.includes(ocSelectedClass))ocSelectedClass=null;
@@ -725,7 +718,7 @@ function renderClasses(){
       const count=students.filter(s=>s.class_name===c).length;
       return`<div class="s-item ${ocSelectedClass===c?'sel':''}" onclick="ocSelectedClass='${esc(c).replace(/'/g,"\\'")}';render()">
   <div style="flex:1"><div class="s-name">${esc(c)}</div><div class="s-sub">${count} öğrenci</div></div>
-  ${count===0?`<button class="btn-xs btn-danger" onclick="event.stopPropagation();ocDeleteEmptyClass('${esc(c).replace(/'/g,"\\'")}')">Sil</button>`:''}
+  <button class="btn-xs btn-danger" onclick="event.stopPropagation();deleteClassWithStudents('${esc(c).replace(/'/g,"\\'")}')">🗑 Sil</button>
 </div>`;
     }).join('')}</div>`;
   }
@@ -736,6 +729,7 @@ function renderClasses(){
   <div class="card-title">③ "${esc(ocSelectedClass)}" Sınıfına Öğrenci Ekle
     <div style="display:flex;gap:8px">
       <button class="btn btn-outline btn-sm" onclick="ocOpenImportFor('${esc(ocSelectedClass).replace(/'/g,"\\'")}')">📄 Excel/CSV Yükle</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteClassWithStudents('${esc(ocSelectedClass).replace(/'/g,"\\'")}')">🗑 Sınıfı ve Öğrencilerini Sil</button>
     </div>
   </div>
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
@@ -744,8 +738,8 @@ function renderClasses(){
     <button class="btn btn-primary" onclick="ocAddStudentToSelected()">+ Öğrenci Ekle</button>
   </div>
   <div id="oc-stu-msg" style="font-size:.82rem;color:var(--danger);margin-bottom:10px"></div>
-  <div class="tbl-wrap"><table><thead><tr><th>No</th><th>Ad Soyad</th></tr></thead><tbody>
-  ${list.length?list.map(s=>`<tr><td>${esc(s.student_number||'—')}</td><td>${esc(s.name)}</td></tr>`).join(''):'<tr><td colspan="2" style="color:var(--text2);text-align:center;padding:16px">Bu sınıfta henüz öğrenci yok.</td></tr>'}
+  <div class="tbl-wrap"><table><thead><tr><th>No</th><th>Ad Soyad</th><th></th></tr></thead><tbody>
+  ${list.length?list.map(s=>`<tr><td>${esc(s.student_number||'—')}</td><td>${esc(s.name)}</td><td><button class="btn-xs btn-danger" onclick="deleteStudentWithConfirm('${s.id}')">🗑</button></td></tr>`).join(''):'<tr><td colspan="3" style="color:var(--text2);text-align:center;padding:16px">Bu sınıfta henüz öğrenci yok.</td></tr>'}
   </tbody></table></div>
 </div>`;
   }
@@ -809,9 +803,81 @@ ${classes.map(c=>{
   </div>
   ${d1!==null?`<div style="font-size:.8rem;font-weight:700;color:${lv.color}">${d1} — ${lv.lbl}</div>`:''}
   <div class="score-chip ${scCls}">${sv>=0?'+':''}${sv} ⭐</div>
+  <button class="btn-xs btn-danger" onclick="event.stopPropagation();deleteStudentWithConfirm('${st.id}')" title="Öğrenciyi sil">🗑</button>
 </div>`;
   });
   return h+'</div>';
+}
+
+/* ── Öğrenci ve ilişkili tüm kayıtlarını silme (tekli/toplu kullanılır) ── */
+async function deleteStudentRecords(sid){
+  await Promise.all([
+    sb.from('teacher_grades').delete().eq('student_id',sid),
+    sb.from('student_scores').delete().eq('student_id',sid),
+    sb.from('score_history').delete().eq('student_id',sid),
+    sb.from('teacher_photos').delete().eq('student_id',sid),
+    sb.from('question_scores').delete().eq('student_id',sid),
+  ]);
+  await sb.from('teacher_students').delete().eq('id',sid);
+  students=students.filter(s=>s.id!==sid);
+  grades=grades.filter(g=>g.student_id!==sid);
+  scores=scores.filter(s=>s.student_id!==sid);
+  scoreHistory=scoreHistory.filter(h=>h.student_id!==sid);
+  photos=photos.filter(p=>p.student_id!==sid);
+  questionScores=questionScores.filter(q=>q.student_id!==sid);
+}
+async function deleteStudentWithConfirm(sid){
+  const st=students.find(s=>s.id===sid);if(!st)return;
+  if(!confirm(`"${st.name}" öğrencisini ve TÜM notlarını/puanlarını kalıcı olarak silmek istiyor musunuz? Bu işlem geri alınamaz.`))return;
+  try{
+    await deleteStudentRecords(sid);
+    ofSaveCache();toast(`✓ ${st.name} silindi`);
+    closeModal('mo-student');render();
+  }catch(err){toast('Hata: '+err.message,true);}
+}
+async function deleteClassWithStudents(cls){
+  const list=students.filter(s=>s.class_name===cls);
+  if(!list.length){
+    if(confirm(`"${cls}" sınıfını silmek istiyor musunuz?`)){
+      ocSaveExtra(ocLoadExtra().filter(c=>c!==cls));
+      if(ocSelectedClass===cls)ocSelectedClass=null;
+      render();
+    }
+    return;
+  }
+  if(!confirm(`"${cls}" sınıfındaki ${list.length} öğrenciyi ve TÜM notlarını/puanlarını kalıcı olarak silmek istiyor musunuz? Bu işlem geri alınamaz.`))return;
+  toast(`Siliniyor… (${list.length} öğrenci)`);
+  try{
+    for(const st of list)await deleteStudentRecords(st.id);
+    ocSaveExtra(ocLoadExtra().filter(c=>c!==cls));
+    if(ocSelectedClass===cls)ocSelectedClass=null;
+    ofSaveCache();toast(`✓ "${cls}" sınıfı ve ${list.length} öğrenci silindi`);
+    render();
+  }catch(err){toast('Hata: '+err.message,true);}
+}
+
+/* ── Not sıfırlama (tekli/toplu) ── */
+async function resetStudentGrade(sid,sem){
+  const g=getGrade(sid,sem);
+  if(!g){toast('Bu dönem için zaten not yok',true);return;}
+  const st=students.find(s=>s.id===sid);
+  if(!confirm(`${st?.name||'Öğrenci'} için ${sem}. dönem TÜM notlarını (yazılı, sözlü, performans, proje) sıfırlamak istiyor musunuz?`))return;
+  try{
+    await sb.from('teacher_grades').delete().eq('id',g.id);
+    grades=grades.filter(x=>x.id!==g.id);
+    toast('✓ Not sıfırlandı');render();
+  }catch(err){toast('Hata: '+err.message,true);}
+}
+async function resetClassGrades(cls,sem){
+  const list=students.filter(s=>s.class_name===cls);
+  const ids=list.map(s=>s.id).filter(id=>getGrade(id,sem));
+  if(!ids.length){toast('Bu sınıfta/dönemde sıfırlanacak not yok',true);return;}
+  if(!confirm(`"${cls}" sınıfının ${sem}. dönem TÜM notlarını (${ids.length} öğrenci) sıfırlamak istiyor musunuz? Bu işlem geri alınamaz.`))return;
+  try{
+    await sb.from('teacher_grades').delete().eq('semester',sem).in('student_id',ids);
+    grades=grades.filter(g=>!(g.semester===sem&&ids.includes(g.student_id)));
+    toast(`✓ ${ids.length} öğrencinin ${sem}. dönem notları sıfırlandı`);render();
+  }catch(err){toast('Hata: '+err.message,true);}
 }
 
 function showStudentModal(sid){
@@ -846,7 +912,10 @@ ${MCOLS.map(({k,l})=>`<div style="background:var(--surface2);border-radius:8px;p
   h+=`<div class="field"><label class="field-label">📝 Öğretmen Gözlem Notu</label>
   <textarea class="inp" id="st-notes-area" rows="3" placeholder="Veli görüşmesi, davranış, gelişim notları…">${esc(st.notes||'')}</textarea>
 </div>
-<div class="row-btns"><button class="btn btn-primary" onclick="saveStudentNote('${sid}')">Notu Kaydet</button></div>`;
+<div class="row-btns">
+  <button class="btn btn-danger" onclick="deleteStudentWithConfirm('${sid}')">🗑 Öğrenciyi Sil</button>
+  <button class="btn btn-primary" onclick="saveStudentNote('${sid}')">Notu Kaydet</button>
+</div>`;
   document.getElementById('mo-student-body').innerHTML=h;
   openModal('mo-student');
 }
@@ -892,14 +961,24 @@ async function saveNewStudent(){
 // ════════════════════════════════════════
 // NOT DEFTERİ
 // ════════════════════════════════════════
+let gradesClassFilter=null;
 function renderGrades(){
   const q=searchQ.toLowerCase();
-  const list=students.filter(s=>!q||s.name.toLowerCase().includes(q));
+  const classes=studentClasses();
+  if(gradesClassFilter&&!classes.includes(gradesClassFilter))gradesClassFilter=null;
+  let list=students.filter(s=>!q||s.name.toLowerCase().includes(q));
+  if(gradesClassFilter)list=list.filter(s=>s.class_name===gradesClassFilter);
+  list=[...list].sort((a,b)=>(parseInt(a.student_number)||0)-(parseInt(b.student_number)||0));
   let h=`<div class="page-title">📝 Not Defteri
 <div class="sem-tabs">
   <button class="sem-tab ${sem===1?'active':''}" onclick="sem=1;render()">1. Dönem</button>
   <button class="sem-tab ${sem===2?'active':''}" onclick="sem=2;render()">2. Dönem</button>
 </div></div>
+<div class="nm-filter-row">
+<button class="nm-filter-chip ${!gradesClassFilter?'active':''}" onclick="gradesClassFilter=null;render()">Tümü</button>
+${classes.map(c=>`<button class="nm-filter-chip ${gradesClassFilter===c?'active':''}" onclick="gradesClassFilter='${esc(c).replace(/'/g,"\\'")}'; render()">${esc(c)}</button>`).join('')}
+${gradesClassFilter?`<button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="resetClassGrades('${esc(gradesClassFilter).replace(/'/g,"\\'")}',${sem})">🗑 "${esc(gradesClassFilter)}" — ${sem}. Dönem Notlarını Sıfırla</button>`:''}
+</div>
 <div class="search-wrap"><span class="search-ico">🔍</span>
 <input class="search-inp" placeholder="Öğrenci ara…" value="${esc(searchQ)}" oninput="searchQ=this.value;render()"></div>
 <div class="card"><div class="tbl-wrap"><table>
@@ -911,6 +990,7 @@ function renderGrades(){
   <th colspan="2" class="grp-perf" style="text-align:center">Performans</th>
   <th colspan="2" class="grp-proj" style="text-align:center">Proje</th>
   <th rowspan="2" class="grp-donem" style="min-width:68px">Dönem Notu</th>
+  <th rowspan="2"></th>
 </tr>
 <tr>
   <th class="grp-yaz">1</th><th class="grp-yaz">2</th>
@@ -929,6 +1009,7 @@ function renderGrades(){
     onchange="saveGrade('${st.id}',${sem},'${c.k}',this.value)"
     onkeydown="if(event.key==='Enter')this.blur()"></td>`).join('')}
   <td><span class="donem-chip ${dnLv.cls||''} ${dn===null?'empty':''}">${dn??'—'}</span></td>
+  <td>${g?`<button class="btn-xs btn-danger" onclick="resetStudentGrade('${st.id}',${sem})" title="Bu öğrencinin ${sem}.dönem notlarını sıfırla">🗑</button>`:''}</td>
 </tr>`;
   });
   return h+`</tbody></table></div></div>
