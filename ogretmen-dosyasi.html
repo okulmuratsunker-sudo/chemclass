@@ -309,6 +309,7 @@ select.inp{cursor:pointer}
     <span class="menu-lbl">📋 Öğretmen Dosyası</span>
     <button class="btn btn-outline btn-sm" onclick="closeMenu()">✕ Kapat</button>
   </div>
+  <button class="menu-item-btn" data-page="classes" onclick="goto('classes')"><span class="mi-ico">🏫</span>Sınıflarım</button>
   <button class="menu-item-btn" data-page="students" onclick="goto('students')"><span class="mi-ico">👥</span>Öğrenciler</button>
   <button class="menu-item-btn" data-page="grades" onclick="goto('grades')"><span class="mi-ico">📝</span>Not Defteri</button>
   <button class="menu-item-btn" data-page="analysis" onclick="goto('analysis')"><span class="mi-ico">🔬</span>Madde Analizi</button>
@@ -609,6 +610,7 @@ const EXAM_LABELS={w1:'Yazılı 1',w2:'Yazılı 2'};
 function render(){
   const m=document.getElementById('main');
   if(page==='dashboard')m.innerHTML=renderDash();
+  else if(page==='classes')m.innerHTML=renderClasses();
   else if(page==='students')m.innerHTML=renderStudents();
   else if(page==='grades')m.innerHTML=renderGrades();
   else if(page==='analysis')m.innerHTML=renderAnalysis();
@@ -668,6 +670,111 @@ function schedGrid(todayIdx){
 function studentClasses(){
   return[...new Set(students.map(s=>s.class_name).filter(Boolean))].sort();
 }
+
+// ════════════════════════════════════════
+// SINIFLARIM (sınıf oluşturma + öğrenci ekleme tek yerde)
+// "Sınıf" ayrı bir tablo değil — teacher_students.class_name alanından türetiliyor.
+// Henüz hiç öğrencisi olmayan, sadece "oluşturulmuş" sınıfları hatırlamak için
+// localStorage'da küçük bir liste tutuyoruz (OC_KEY). İlk öğrenci eklenince zaten
+// studentClasses() da o sınıfı gösterir; bu liste sadece "boşken de görünsün" diye var.
+// ════════════════════════════════════════
+const OC_KEY='oc_extra_classes';
+let ocSelectedClass=null;
+function ocLoadExtra(){try{return JSON.parse(localStorage.getItem(OC_KEY)||'[]');}catch(e){return[];}}
+function ocSaveExtra(list){try{localStorage.setItem(OC_KEY,JSON.stringify(list));}catch(e){}}
+function allClasses(){
+  return[...new Set([...studentClasses(),...ocLoadExtra()])].sort();
+}
+function ocAddClass(){
+  const inp=document.getElementById('oc-new-class');
+  const name=inp.value.trim();
+  const msgEl=document.getElementById('oc-msg');
+  if(!name){msgEl.textContent='Sınıf adı yazın.';return;}
+  if(allClasses().includes(name)){msgEl.textContent='Bu sınıf zaten var.';return;}
+  const extra=ocLoadExtra();extra.push(name);ocSaveExtra(extra);
+  inp.value='';msgEl.textContent='';
+  ocSelectedClass=name;
+  toast(`✓ "${name}" sınıfı oluşturuldu — şimdi öğrenci ekleyin`);
+  render();
+}
+function ocDeleteEmptyClass(name){
+  if(studentClasses().includes(name)){toast('Bu sınıfta öğrenci var, önce öğrencileri taşıyın/silin',true);return;}
+  if(!confirm(`"${name}" sınıfını silmek istiyor musunuz?`))return;
+  ocSaveExtra(ocLoadExtra().filter(c=>c!==name));
+  if(ocSelectedClass===name)ocSelectedClass=null;
+  render();
+}
+function renderClasses(){
+  const classes=allClasses();
+  if(ocSelectedClass&&!classes.includes(ocSelectedClass))ocSelectedClass=null;
+  let h=`<div class="page-title">🏫 Sınıflarım</div>
+<div class="card" style="margin-bottom:16px">
+  <div class="card-title">① Yeni Sınıf Oluştur</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <input class="inp" id="oc-new-class" style="max-width:260px" placeholder="Örn: 9-D, AL-10/C" onkeydown="if(event.key==='Enter')ocAddClass()">
+    <button class="btn btn-primary" onclick="ocAddClass()">+ Sınıf Oluştur</button>
+  </div>
+  <div id="oc-msg" style="font-size:.82rem;color:var(--danger);margin-top:8px"></div>
+</div>
+<div class="card">
+  <div class="card-title">② Sınıflar <span style="font-size:.8rem;font-weight:400;color:var(--text2)">${classes.length} sınıf</span></div>`;
+  if(!classes.length){
+    h+=`<div class="empty"><div class="empty-ico">🏫</div>Henüz sınıf yok. Yukarıdan bir sınıf oluşturun.</div>`;
+  }else{
+    h+=`<div class="s-list">${classes.map(c=>{
+      const count=students.filter(s=>s.class_name===c).length;
+      return`<div class="s-item ${ocSelectedClass===c?'sel':''}" onclick="ocSelectedClass='${esc(c).replace(/'/g,"\\'")}';render()">
+  <div style="flex:1"><div class="s-name">${esc(c)}</div><div class="s-sub">${count} öğrenci</div></div>
+  ${count===0?`<button class="btn-xs btn-danger" onclick="event.stopPropagation();ocDeleteEmptyClass('${esc(c).replace(/'/g,"\\'")}')">Sil</button>`:''}
+</div>`;
+    }).join('')}</div>`;
+  }
+  h+=`</div>`;
+  if(ocSelectedClass){
+    const list=students.filter(s=>s.class_name===ocSelectedClass).sort((a,b)=>(parseInt(a.student_number)||0)-(parseInt(b.student_number)||0));
+    h+=`<div class="card" style="margin-top:16px">
+  <div class="card-title">③ "${esc(ocSelectedClass)}" Sınıfına Öğrenci Ekle
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline btn-sm" onclick="ocOpenImportFor('${esc(ocSelectedClass).replace(/'/g,"\\'")}')">📄 Excel/CSV Yükle</button>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+    <input class="inp" id="oc-stu-no" style="max-width:140px" placeholder="Öğrenci No" inputmode="numeric">
+    <input class="inp" id="oc-stu-name" style="max-width:260px" placeholder="Ad Soyad" onkeydown="if(event.key==='Enter')ocAddStudentToSelected()">
+    <button class="btn btn-primary" onclick="ocAddStudentToSelected()">+ Öğrenci Ekle</button>
+  </div>
+  <div id="oc-stu-msg" style="font-size:.82rem;color:var(--danger);margin-bottom:10px"></div>
+  <div class="tbl-wrap"><table><thead><tr><th>No</th><th>Ad Soyad</th></tr></thead><tbody>
+  ${list.length?list.map(s=>`<tr><td>${esc(s.student_number||'—')}</td><td>${esc(s.name)}</td></tr>`).join(''):'<tr><td colspan="2" style="color:var(--text2);text-align:center;padding:16px">Bu sınıfta henüz öğrenci yok.</td></tr>'}
+  </tbody></table></div>
+</div>`;
+  }
+  return h;
+}
+async function ocAddStudentToSelected(){
+  const no=document.getElementById('oc-stu-no').value.trim();
+  const name=document.getElementById('oc-stu-name').value.trim();
+  const msgEl=document.getElementById('oc-stu-msg');
+  if(!no||!name){msgEl.textContent='Numara ve ad soyad zorunlu.';return;}
+  const dup=students.find(s=>(s.class_name||'')===ocSelectedClass&&String(s.student_number)===no);
+  if(dup){msgEl.textContent=`Bu sınıfta ${no} numaralı öğrenci zaten var: ${dup.name}`;return;}
+  msgEl.textContent='';
+  try{
+    const{data,error}=await sb.from('teacher_students').insert({name,student_number:no,class_name:ocSelectedClass}).select().single();
+    if(error){msgEl.textContent='Hata: '+error.message;return;}
+    students.push(data);ofSaveCache();
+    toast(`✓ ${name} eklendi`);
+    document.getElementById('oc-stu-no').value='';document.getElementById('oc-stu-name').value='';
+    render();
+    setTimeout(()=>document.getElementById('oc-stu-no')?.focus(),50);
+  }catch(err){msgEl.textContent='Hata: '+err.message;}
+}
+function ocOpenImportFor(cls){
+  ocSelectedClass=cls;
+  window.nmImportTargetClass=cls;
+  openModal('mo-nm-import');
+}
+
 function renderStudents(){
   const q=searchQ.toLowerCase();
   const list=students.filter(s=>!q||s.name.toLowerCase().includes(q)||(s.student_number||'').includes(q));
@@ -1454,7 +1561,7 @@ async function nmImportRows(parsedStudents,defaultClassName,detectedSemester){
   const msgEl=document.getElementById('nm-import-msg');
   const seen=new Set();const dupNumbers=[];const toInsert=[];const matchedExisting=[];
   parsedStudents.forEach(p=>{
-    const cls=p.class_name||defaultClassName||'—';
+    const cls=defaultClassName||p.class_name||'—';
     const no=String(p.no).trim(),name=String(p.name).trim();
     if(!no||!name)return;
     const key=cls+'|'+no;
@@ -1517,8 +1624,8 @@ function nmHandleFile(file){
       // 1) e-Okul Puan/Not Çizelgesi formatı dene
       const eokul=nmParseEokulSheet(ws);
       if(eokul&&eokul.students.length){
-        if(!eokul.hasOdevCol)await nmImportRows(eokul.students,eokul.className,eokul.semester);
-        else await nmImportRows(eokul.students,eokul.className,eokul.semester);
+        await nmImportRows(eokul.students,window.nmImportTargetClass||eokul.className,eokul.semester);
+        window.nmImportTargetClass=null;
         msgEl.textContent+=' (Not: Ödev/Classroom puanı bu dosyadan içe aktarılmadı — "Sözlü Hesaplama" sekmesinden ayrıca girin.)';
         return;
       }
@@ -1545,7 +1652,8 @@ function nmHandleFile(file){
         parsed.push({no,name,class_name:cls,y1:null,y2:null});
       }
       if(!parsed.length){msgEl.textContent='Geçerli öğrenci satırı bulunamadı.';return;}
-      await nmImportRows(parsed,null,null);
+      await nmImportRows(parsed,window.nmImportTargetClass||null,null);
+      window.nmImportTargetClass=null;
     }catch(err){msgEl.textContent='Hata: '+err.message;}
   };
   if(file.name.toLowerCase().endsWith('.csv'))reader.readAsText(file,'utf-8');
