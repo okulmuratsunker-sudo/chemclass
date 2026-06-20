@@ -741,11 +741,12 @@ async function saveStudentNote(sid){
 }
 
 function openAddStudentModal(){
-  document.getElementById('as-class').value='';document.getElementById('as-number').value='';
+  document.getElementById('as-class').value=(typeof nmClass!=='undefined'&&nmClass)?nmClass:'';
+  document.getElementById('as-number').value='';
   document.getElementById('as-name').value='';document.getElementById('as-msg').textContent='';
   document.getElementById('as-class-list').innerHTML=studentClasses().map(c=>`<option value="${esc(c)}">`).join('');
   openModal('mo-add-student');
-  setTimeout(()=>document.getElementById('as-class')?.focus(),50);
+  setTimeout(()=>document.getElementById(document.getElementById('as-class').value?'as-number':'as-class')?.focus(),50);
 }
 async function saveNewStudent(){
   const cls=document.getElementById('as-class').value.trim();
@@ -1733,13 +1734,19 @@ function nmRestoreJSON(file){
 /* ---------- RENDER ---------- */
 function nmClassSelector(){
   const classes=nmClasses();
-  if(!classes.length)return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.<br>
+  if(!classes.length){
+    return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.<br>
 <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="openModal('mo-nm-import')">📄 Excel/CSV Yükle</button>
-<button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="goto('students')">veya Öğrenciler'den ekle</button></div>`;
+<button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="openAddStudentModal()">+ Sınıf / Öğrenci Ekle</button></div>`;
+  }
   if(!nmClass)nmClass=classes[0];
-  return `<select class="inp" style="max-width:220px;display:inline-block" onchange="nmClass=this.value;render()">
+  return `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<select class="inp" style="max-width:220px;display:inline-block" onchange="nmClass=this.value;render()">
 ${classes.map(c=>`<option value="${esc(c)}" ${c===nmClass?'selected':''}>${esc(c)}</option>`).join('')}
-</select>`;
+</select>
+<button class="btn btn-outline btn-sm" onclick="openAddStudentModal()" title="Yeni sınıf veya bu sınıfa öğrenci ekle">+ Sınıf/Öğrenci</button>
+<button class="btn btn-outline btn-sm" onclick="openModal('mo-nm-import')" title="Excel/CSV ile toplu ekle">📄 İçe Aktar</button>
+</div>`;
 }
 function nmSemSelector(){
   return `<div class="sem-tabs">
