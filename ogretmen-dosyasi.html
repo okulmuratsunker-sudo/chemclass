@@ -11,6 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="Öğretmen">
 <link rel="apple-touch-icon" href="icon-ogretmen-180.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{
   --bg:#f4f6fb;--surface:#fff;--surface2:#eef1f8;--border:#e0e5f0;
@@ -240,6 +241,31 @@ select.inp{cursor:pointer}
 #offlineBanner{position:fixed;top:0;left:0;right:0;z-index:9999;background:var(--danger);color:#fff;text-align:center;padding:9px 16px;font-size:13px;font-weight:700;display:none;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
 #offlineBanner.show{display:flex}
 .offline-badge{background:rgba(255,255,255,.22);border-radius:12px;padding:2px 10px;font-size:11px}
+
+/* ════════ NOT MERKEZİ MODÜLÜ ════════ */
+.nm-tabs{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px}
+.nm-tab{padding:8px 16px;border-radius:var(--rsm);border:1.5px solid var(--border);background:none;cursor:pointer;font-size:.84rem;font-weight:600;color:var(--text2);font-family:inherit;white-space:nowrap;transition:all .15s}
+.nm-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.nm-quick{display:flex;flex-direction:column;gap:12px;max-width:480px;margin:0 auto}
+.nm-quick-row{display:flex;gap:10px}
+.nm-quick-row .inp{font-size:1.3rem;text-align:center;padding:16px;font-weight:700}
+.nm-student-preview{background:var(--accent-soft);border:1.5px solid var(--accent);border-radius:var(--rsm);padding:12px 16px;text-align:center;font-weight:700;min-height:48px;display:flex;align-items:center;justify-content:center}
+.nm-student-preview.err{background:rgba(224,82,82,.08);border-color:var(--danger);color:var(--danger)}
+.nm-progress-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.nm-progress-chip{background:var(--surface2);border-radius:50px;padding:6px 14px;font-size:.8rem;font-weight:600;color:var(--text2)}
+.nm-progress-chip b{color:var(--accent)}
+.nm-hist-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:.82rem}
+.nm-hist-item:last-child{border-bottom:none}
+.nm-hist-time{color:var(--text3);font-size:.74rem;flex-shrink:0}
+.nm-manual-badge{font-size:.68rem;font-weight:700;background:var(--warn);color:#fff;border-radius:50px;padding:2px 8px}
+.nm-missing{color:var(--danger);font-weight:700}
+.nm-ok{color:var(--success);font-weight:700}
+.nm-filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.nm-filter-chip{padding:6px 13px;border-radius:50px;border:1.5px solid var(--border);background:none;cursor:pointer;font-size:.78rem;font-weight:600;color:var(--text2);font-family:inherit}
+.nm-filter-chip.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.nm-drop{border:2px dashed var(--border);border-radius:var(--rsm);padding:30px;text-align:center;color:var(--text2);cursor:pointer}
+.nm-drop:hover{border-color:var(--accent)}
+.nm-paste-area{width:100%;min-height:120px;font-family:'DM Mono',monospace;font-size:.82rem}
 </style>
 </head>
 <body>
@@ -288,6 +314,7 @@ select.inp{cursor:pointer}
   <button class="menu-item-btn" data-page="analysis" onclick="goto('analysis')"><span class="mi-ico">🔬</span>Madde Analizi</button>
   <button class="menu-item-btn" data-page="scores" onclick="goto('scores')"><span class="mi-ico">⭐</span>Puan Sistemi</button>
   <button class="menu-item-btn" data-page="plans" onclick="goto('plans')"><span class="mi-ico">📚</span>Ders Planları</button>
+  <button class="menu-item-btn" data-page="notmerkezi" onclick="goto('notmerkezi')"><span class="mi-ico">🗂️</span>Not Merkezi</button>
 </div>
 
 <main id="main"><div class="loading">Yükleniyor…</div></main>
@@ -322,6 +349,42 @@ select.inp{cursor:pointer}
     <div class="row-btns">
       <button class="btn btn-outline" onclick="closeModal('mo-plan')">İptal</button>
       <button class="btn btn-primary" onclick="savePlan()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Not Merkezi: Sözlü Önizleme Modal -->
+<div class="overlay" id="mo-nm-preview">
+  <div class="modal modal-wide" style="max-width:900px">
+    <div class="modal-hd"><span>Sözlü Hesaplama Önizleme</span><button class="modal-close" onclick="closeModal('mo-nm-preview')">×</button></div>
+    <div id="nm-preview-body" style="max-height:60vh;overflow:auto"></div>
+    <div class="row-btns">
+      <button class="btn btn-outline" onclick="closeModal('mo-nm-preview')">İptal</button>
+      <button class="btn btn-primary" onclick="nmConfirmOralCalc()">✓ Onayla ve Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Not Merkezi: Excel/CSV Yükleme Modal -->
+<div class="overlay" id="mo-nm-import">
+  <div class="modal">
+    <div class="modal-hd"><span>Öğrenci Listesi Yükle</span><button class="modal-close" onclick="closeModal('mo-nm-import')">×</button></div>
+    <div class="nm-drop" onclick="document.getElementById('nm-file-inp').click()">📄 Excel (.xlsx) veya CSV dosyası seçin<br><small>e-Okul öğrenci listesi formatı desteklenir</small></div>
+    <input type="file" id="nm-file-inp" accept=".xlsx,.xls,.csv" style="display:none" onchange="nmHandleFile(this.files[0])">
+    <div id="nm-import-msg" style="margin-top:12px;font-size:.84rem;color:var(--text2)"></div>
+  </div>
+</div>
+
+<!-- Not Merkezi: Classroom Yapıştırma Modal -->
+<div class="overlay" id="mo-nm-paste">
+  <div class="modal modal-wide">
+    <div class="modal-hd"><span>Classroom Puanı Yapıştır</span><button class="modal-close" onclick="closeModal('mo-nm-paste')">×</button></div>
+    <p style="font-size:.82rem;color:var(--text2);margin-bottom:10px">Excel/Sheets'ten "öğrenci no [TAB] puan" formatında kopyalayıp yapıştırın.</p>
+    <textarea class="inp nm-paste-area" id="nm-paste-text" placeholder="101&#9;85&#10;102&#9;90"></textarea>
+    <div id="nm-paste-warn" style="margin-top:8px;font-size:.8rem;color:var(--danger)"></div>
+    <div class="row-btns">
+      <button class="btn btn-outline" onclick="closeModal('mo-nm-paste')">İptal</button>
+      <button class="btn btn-primary" onclick="nmApplyPaste()">Uygula</button>
     </div>
   </div>
 </div>
@@ -532,8 +595,8 @@ function render(){
   else if(page==='grades')m.innerHTML=renderGrades();
   else if(page==='analysis')m.innerHTML=renderAnalysis();
   else if(page==='scores')m.innerHTML=renderScores();
-  else if(page==='schedule')m.innerHTML=renderSchedule();
   else if(page==='plans')m.innerHTML=renderPlans();
+  else if(page==='notmerkezi'){m.innerHTML=nmRender();nmAfterRender();}
 }
 
 // ════════════════════════════════════════
@@ -706,7 +769,7 @@ async function saveGrade(sid,s,col,val){
     let g=grades.find(x=>x.student_id===sid&&x.semester===s);
     const nv=val===''||val===null?null:parseFloat(val);
     if(g){g[col]=nv;ofQueue({t:'update',table:'teacher_grades',id:g.id,data:{[col]:nv,updated_at:new Date().toISOString()}});}
-    else{const row={student_id:sid,semester:s,[col]:nv,updated_at:new Date().toISOString()};grades.push(row);ofQueue({t:'insert',table:'teacher_grades',data:row});}
+    else{const tmpId='tmp_'+Date.now();const row={id:tmpId,student_id:sid,semester:s,[col]:nv,updated_at:new Date().toISOString()};grades.push(row);ofQueue({t:'insert',table:'teacher_grades',tmpId,data:{student_id:sid,semester:s,[col]:nv,updated_at:row.updated_at}});}
     ofSaveCache();render();return;
   }
   const nv=val===''?null:parseFloat(val);
@@ -988,9 +1051,11 @@ async function deleteQuestion(id){
 // ── Soru puanı kaydet
 async function saveQScore(qid,sid,maxPts,inputEl){
   const val=inputEl.value.trim();
-  const nv=val===''?null:parseFloat(val);
-  if(nv!==null&&(isNaN(nv)||nv<0)){toast('Puan negatif olamaz',true);inputEl.classList.add('over');return}
-  if(nv!==null&&nv>maxPts){inputEl.classList.add('over')}else{inputEl.classList.remove('over')}
+  let nv=val===''?null:parseFloat(val);
+  if(nv!==null&&isNaN(nv)){toast('Geçerli bir puan girin',true);inputEl.value='';return}
+  if(nv!==null&&nv<0){toast('Puan negatif olamaz',true);nv=0;inputEl.value=0;}
+  if(nv!==null&&nv>maxPts){toast(`Puan en fazla ${maxPts} olabilir`,true);nv=maxPts;inputEl.value=maxPts;}
+  inputEl.classList.remove('over');
 
   const existing=questionScores.find(s=>s.question_id===qid&&s.student_id===sid);
   if(nv===null){
@@ -1102,15 +1167,6 @@ async function saveScore(){
   closeModal('mo-score');render();toast(`✓ ${delta>=0?'+':''}${delta} puan eklendi`);
 }
 
-// ════════════════════════════════════════
-// DERS PROGRAMI
-// ════════════════════════════════════════
-function renderSchedule(){
-  const dow=new Date().getDay(),todayIdx=dow===0||dow===6?-1:dow-1;
-  return`<div class="page-title">🗓️ Ders Programı<button class="btn ${editSched?'btn-success':'btn-outline'}" onclick="toggleSchedEdit()">${editSched?'✓ Kaydet':'✏️ Düzenle'}</button></div>
-<div class="card">${schedGrid(todayIdx)}</div>`+(editSched?'<div style="margin-top:10px;font-size:.78rem;color:var(--text2)">💡 Değişiklikleri yazdıktan sonra ✓ Kaydet\'e basın.</div>':'');
-}
-
 async function toggleSchedEdit(){
   if(!navigator.onLine&&editSched){toast('Program düzenleme için internet bağlantısı gerekli',true);editSched=false;render();return;}
   if(!editSched){editSched=true;render();return}
@@ -1186,6 +1242,506 @@ async function deletePlan(id){
 const _s=document.createElement('style');
 _s.textContent=`.exam-btn{padding:6px 14px;border-radius:var(--rsm);border:1.5px solid var(--border);background:none;cursor:pointer;font-size:.82rem;color:var(--text2);font-weight:600;font-family:inherit;transition:all .15s;white-space:nowrap}.exam-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}.exam-btn:hover:not(.active){border-color:var(--accent);color:var(--accent)}`;
 document.head.appendChild(_s);
+
+// ════════════════════════════════════════
+// NOT MERKEZİ MODÜLÜ
+// (notStorage / notUtils / notExport / notMerkezi birleşik — tek dosya yapısına uyumlu)
+// İleride ayrı dosyalara (notStorage.js, notUtils.js, notExport.js, notMerkezi.js)
+// bölünebilecek şekilde isimlendirildi; tüm fonksiyonlar nm* önekiyle isole edilmiştir.
+// ════════════════════════════════════════
+
+/* ---------- notStorage: veri katmanı ---------- */
+const NM_KEY='nm_v1_data';
+let nmData={grades:{},roster:[],history:[],manual:{},settings:{round:'nearest'}};
+let nmPage='yazili',nmClass=null,nmExamType='w1',nmFilter=null,nmLastFound=null;
+
+function nmLoad(){
+  try{
+    const raw=JSON.parse(localStorage.getItem(NM_KEY)||'{}');
+    nmData={
+      grades:raw.grades||{},roster:raw.roster||[],
+      history:raw.history||[],manual:raw.manual||{},
+      settings:raw.settings||{round:'nearest'}
+    };
+  }catch(e){nmData={grades:{},roster:[],history:[],manual:{},settings:{round:'nearest'}};}
+}
+function nmSave(){try{localStorage.setItem(NM_KEY,JSON.stringify(nmData));}catch(e){}}
+
+// Mevcut Öğretmen Dosyası öğrenci listesini kullan; yoksa içe aktarılan roster'a düş
+function nmRoster(){
+  if(students&&students.length)return students.map(s=>({id:s.id,name:s.name,student_number:s.student_number||'',class_name:s.class_name||'—'}));
+  return nmData.roster;
+}
+function nmClasses(){
+  const set=new Set(nmRoster().map(s=>s.class_name||'—'));
+  return[...set].sort();
+}
+function nmStudentsInClass(cls){
+  return nmRoster().filter(s=>(s.class_name||'—')===cls)
+    .sort((a,b)=>(parseInt(a.student_number)||0)-(parseInt(b.student_number)||0));
+}
+function nmFindByNumber(cls,no){
+  return nmStudentsInClass(cls).find(s=>String(s.student_number)===String(no).trim())||null;
+}
+function nmGrade(sid){
+  if(!nmData.grades[sid])nmData.grades[sid]={w1:null,w2:null,classroom:null,oral1:null,oral2:null};
+  return nmData.grades[sid];
+}
+function nmSetGrade(sid,field,val){
+  const g=nmGrade(sid);g[field]=val;nmSave();
+}
+function nmAddHistory(entry){
+  nmData.history.unshift({...entry,time:new Date().toISOString()});
+  if(nmData.history.length>200)nmData.history.length=200;
+  nmSave();
+}
+
+/* ---------- notUtils: hesaplama yardımcıları ---------- */
+function nmValidScore(v){
+  if(v===null||v===undefined||v==='')return true;
+  const n=parseFloat(v);
+  return!isNaN(n)&&n>=0&&n<=100;
+}
+function nmRound(v){
+  const mode=nmData.settings.round||'nearest';
+  if(mode==='down')return Math.floor(v);
+  if(mode==='up')return Math.ceil(v);
+  return Math.round(v);
+}
+function nmClamp100(v){return v>100?100:v<0?0:v;}
+function nmWrittenAvg(g){
+  const vals=[g.w1,g.w2].filter(x=>x!==null&&x!==undefined&&x!=='');
+  if(!vals.length)return null;
+  return vals.reduce((a,b)=>a+parseFloat(b),0)/vals.length;
+}
+function nmCalcOral(g){
+  const avg=nmWrittenAvg(g);
+  if(avg===null)return null;
+  const cls=parseFloat(g.classroom)||0;
+  const v=nmClamp100(avg+cls/2);
+  const r=nmRound(v);
+  return{oral1:r,oral2:r};
+}
+
+/* ---------- notExport: dışa aktarma / kopyalama ---------- */
+function nmCopyToClipboard(text){
+  navigator.clipboard?.writeText(text).then(()=>toast('✓ Panoya kopyalandı'))
+    .catch(()=>toast('Kopyalama başarısız',true));
+}
+function nmExportCSV(rows,filename){
+  const csv=rows.map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();
+}
+function nmExportXLSX(rows,filename){
+  if(typeof XLSX==='undefined'){toast('Excel kütüphanesi yüklenemedi, CSV kullanın',true);return;}
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Notlar');
+  XLSX.writeFile(wb,filename);
+}
+
+/* ---------- içe aktarma: Excel/CSV öğrenci listesi ---------- */
+function nmHandleFile(file){
+  if(!file)return;
+  const msgEl=document.getElementById('nm-import-msg');
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      let rows;
+      if(file.name.toLowerCase().endsWith('.csv')){
+        const text=e.target.result;
+        rows=text.split(/\r?\n/).filter(l=>l.trim()).map(l=>l.split(/[,;\t]/).map(c=>c.replace(/^"|"$/g,'').trim()));
+      }else{
+        const wb=XLSX.read(e.target.result,{type:'array'});
+        rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
+      }
+      if(!rows||!rows.length){msgEl.textContent='Dosya boş veya okunamadı.';return;}
+      // Başlık satırını bul (Sınıf/No/Ad gibi anahtar kelimeler)
+      let headerIdx=0;
+      for(let i=0;i<Math.min(rows.length,5);i++){
+        const joined=rows[i].join(' ').toLowerCase();
+        if(joined.includes('numara')||joined.includes('sınıf')||joined.includes('ad')){headerIdx=i;break;}
+      }
+      const header=rows[headerIdx].map(h=>String(h||'').toLowerCase());
+      const idxNo=header.findIndex(h=>h.includes('numara')||h.includes('no'));
+      const idxName=header.findIndex(h=>h.includes('ad')&&h.includes('soyad')||h.includes('adı soyadı')||h.includes('ad soyad'));
+      const idxNameAlt=idxName>=0?idxName:header.findIndex(h=>h.includes('ad'));
+      const idxClass=header.findIndex(h=>h.includes('sınıf')||h.includes('sube')||h.includes('şube'));
+      if(idxNo<0||idxNameAlt<0){msgEl.textContent='Sütunlar tanınamadı. "Numara" ve "Ad Soyad" sütunları gerekli.';return;}
+      const imported=[];const seen=new Set();const dups=[];
+      for(let i=headerIdx+1;i<rows.length;i++){
+        const r=rows[i];if(!r||!r.length)continue;
+        const no=String(r[idxNo]||'').trim();const name=String(r[idxNameAlt]||'').trim();
+        const cls=idxClass>=0?String(r[idxClass]||'').trim():'—';
+        if(!no||!name)continue;
+        const key=cls+'|'+no;
+        if(seen.has(key)){dups.push(no);continue;}
+        seen.add(key);
+        imported.push({id:'nm_'+cls+'_'+no,name,student_number:no,class_name:cls||'—'});
+      }
+      if(!imported.length){msgEl.textContent='Geçerli öğrenci satırı bulunamadı.';return;}
+      nmData.roster=imported;nmSave();
+      msgEl.textContent=`✓ ${imported.length} öğrenci içe aktarıldı.`+(dups.length?` (${dups.length} mükerrer numara atlandı: ${dups.join(', ')})`:'');
+      toast(`✓ ${imported.length} öğrenci yüklendi`);
+      setTimeout(()=>{closeModal('mo-nm-import');render();},1200);
+    }catch(err){msgEl.textContent='Hata: '+err.message;}
+  };
+  if(file.name.toLowerCase().endsWith('.csv'))reader.readAsText(file,'utf-8');
+  else reader.readAsArrayBuffer(file);
+}
+
+/* ---------- Classroom puanı yapıştırma ---------- */
+function nmApplyPaste(){
+  const text=document.getElementById('nm-paste-text').value;
+  if(!nmClass){toast('Önce sınıf seçin',true);return;}
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());
+  const notFound=[];let applied=0;
+  lines.forEach(line=>{
+    const parts=line.split(/\t|,|;/).map(p=>p.trim());
+    if(parts.length<2)return;
+    const[no,val]=parts;
+    const st=nmFindByNumber(nmClass,no);
+    if(!st){notFound.push(no);return;}
+    const n=parseFloat(val);
+    if(isNaN(n)||n<0||n>100)return;
+    nmSetGrade(st.id,'classroom',n);applied++;
+  });
+  const warnEl=document.getElementById('nm-paste-warn');
+  warnEl.textContent=notFound.length?`Bulunamayan numaralar: ${notFound.join(', ')}`:'';
+  toast(`✓ ${applied} öğrenciye Classroom puanı işlendi`);
+  if(!notFound.length){closeModal('mo-nm-paste');render();}
+}
+
+/* ---------- yazılı not girişi: kayıt ---------- */
+function nmSubmitWritten(){
+  const noEl=document.getElementById('nm-input-no'),valEl=document.getElementById('nm-input-val');
+  const no=noEl.value.trim();
+  if(!no)return;
+  if(!nmClass){toast('Önce sınıf seçin',true);return;}
+  const st=nmFindByNumber(nmClass,no);
+  if(!st){
+    document.getElementById('nm-preview-box').className='nm-student-preview err';
+    document.getElementById('nm-preview-box').textContent='❌ Bu numarada öğrenci bulunamadı: '+no;
+    return;
+  }
+  const val=valEl.value.trim();
+  if(val===''){
+    document.getElementById('nm-preview-box').className='nm-student-preview';
+    document.getElementById('nm-preview-box').textContent=`${st.student_number} — ${st.name}`;
+    return;
+  }
+  if(!nmValidScore(val)){toast('Not 0-100 arasında olmalı',true);valEl.value='';valEl.focus();return;}
+  const n=Math.round(parseFloat(val)*10)/10;
+  const g=nmGrade(st.id);
+  const field=nmExamType==='w1'?'w1':'w2';
+  const existing=g[field];
+  if(existing!==null&&existing!==undefined&&!confirm(`${st.name} için mevcut not: ${existing}. Değiştirmek istiyor musunuz?`)){
+    noEl.value='';valEl.value='';noEl.focus();return;
+  }
+  nmSetGrade(st.id,field,n);
+  nmAddHistory({studentId:st.id,name:st.name,className:nmClass,type:nmExamType==='w1'?'1. Yazılı':'2. Yazılı',value:n});
+  toast(`✓ ${st.name}: ${n}`);
+  noEl.value='';valEl.value='';
+  document.getElementById('nm-preview-box').className='nm-student-preview';
+  document.getElementById('nm-preview-box').textContent='Hazır — öğrenci numarası girin';
+  render();
+  setTimeout(()=>document.getElementById('nm-input-no')?.focus(),50);
+}
+function nmCheckNumber(){
+  const no=document.getElementById('nm-input-no').value.trim();
+  const box=document.getElementById('nm-preview-box');
+  if(!no){box.className='nm-student-preview';box.textContent='Hazır — öğrenci numarası girin';return;}
+  if(!nmClass){return;}
+  const st=nmFindByNumber(nmClass,no);
+  if(st){box.className='nm-student-preview';box.textContent=`${st.student_number} — ${st.name}`;}
+  else{box.className='nm-student-preview err';box.textContent='❌ Bulunamadı: '+no;}
+}
+
+/* ---------- sözlü hesaplama: önizleme + onay ---------- */
+let nmPreviewRows=[];
+function nmOpenOralPreview(){
+  if(!nmClass){toast('Önce sınıf seçin',true);return;}
+  const list=nmStudentsInClass(nmClass);
+  nmPreviewRows=list.map(st=>{
+    const g=nmGrade(st.id);
+    const avg=nmWrittenAvg(g);
+    const calc=nmCalcOral(g);
+    return{st,g,avg,calc};
+  });
+  const missing=nmPreviewRows.filter(r=>r.avg===null);
+  let h=`<table><thead><tr><th>No</th><th>Ad Soyad</th><th>1.Yazılı</th><th>2.Yazılı</th><th>Ort.</th><th>Classroom</th><th>Eski S1</th><th>Eski S2</th><th>Yeni S1</th><th>Yeni S2</th></tr></thead><tbody>`;
+  nmPreviewRows.forEach(({st,g,avg,calc})=>{
+    h+=`<tr>
+  <td>${esc(st.student_number)}</td><td>${esc(st.name)}</td>
+  <td>${g.w1??'—'}</td><td>${g.w2??'—'}</td>
+  <td>${avg!==null?avg.toFixed(1):'<span class="nm-missing">Yok</span>'}</td>
+  <td>${g.classroom??0}</td>
+  <td>${g.oral1??'—'}</td><td>${g.oral2??'—'}</td>
+  <td style="font-weight:700">${calc?calc.oral1:'—'}</td>
+  <td style="font-weight:700">${calc?calc.oral2:'—'}</td>
+</tr>`;
+  });
+  h+='</tbody></table>';
+  if(missing.length)h=`<p class="nm-missing" style="margin-bottom:10px">⚠️ ${missing.length} öğrencinin hiç yazılı notu yok, sözlüleri hesaplanmayacak.</p>`+h;
+  document.getElementById('nm-preview-body').innerHTML=h;
+  openModal('mo-nm-preview');
+}
+function nmConfirmOralCalc(){
+  let applied=0;
+  nmPreviewRows.forEach(({st,avg,calc})=>{
+    if(avg===null)return;
+    if(nmData.manual[st.id])return; // manuel düzenlenmiş öğrenciyi ezme
+    nmSetGrade(st.id,'oral1',calc.oral1);
+    nmSetGrade(st.id,'oral2',calc.oral2);
+    applied++;
+  });
+  closeModal('mo-nm-preview');
+  toast(`✓ ${applied} öğrencinin sözlüsü hesaplandı`);
+  render();
+}
+function nmSetManualOral(sid,field,val){
+  if(!nmValidScore(val)){toast('Not 0-100 arasında olmalı',true);return;}
+  const n=val===''?null:parseFloat(val);
+  nmSetGrade(sid,field,n);
+  nmData.manual[sid]=true;nmSave();
+  render();
+}
+function nmResetAuto(sid){
+  const g=nmGrade(sid);const calc=nmCalcOral(g);
+  if(!calc){toast('Yazılı notu olmadan otomatik hesaplanamaz',true);return;}
+  nmSetGrade(sid,'oral1',calc.oral1);nmSetGrade(sid,'oral2',calc.oral2);
+  delete nmData.manual[sid];nmSave();
+  toast('✓ Otomatik hesaplamaya döndürüldü');render();
+}
+
+/* ---------- e-Okul kopyalama ---------- */
+function nmEokulCopy(){
+  const field=document.getElementById('nm-eokul-field').value;
+  if(!nmClass){toast('Önce sınıf seçin',true);return;}
+  const list=nmStudentsInClass(nmClass);
+  let emptyCount=0;
+  const lines=list.map(st=>{
+    const g=nmGrade(st.id);
+    let v;
+    if(field==='avg')v=nmWrittenAvg(g);
+    else v=g[field];
+    if(v===null||v===undefined||v===''){emptyCount++;return'';}
+    return String(v);
+  });
+  if(emptyCount>0)toast(`⚠️ ${emptyCount} öğrencide bu not eksik (boş satır olarak korundu)`,true);
+  nmCopyToClipboard(lines.join('\n'));
+}
+
+/* ---------- dışa aktarma ---------- */
+function nmExport(type){
+  if(!nmClass){toast('Önce sınıf seçin',true);return;}
+  const list=nmStudentsInClass(nmClass);
+  const header=['Okul No','Ad Soyad','Sınıf','1.Yazılı','2.Yazılı','Yazılı Ort.','Classroom','1.Sözlü','2.Sözlü'];
+  const rows=[header];
+  list.forEach(st=>{
+    const g=nmGrade(st.id);
+    rows.push([st.student_number,st.name,st.class_name,g.w1??'',g.w2??'',nmWrittenAvg(g)?.toFixed(1)??'',g.classroom??'',g.oral1??'',g.oral2??'']);
+  });
+  const fname=`not-merkezi-${nmClass}-${new Date().toISOString().slice(0,10)}`;
+  if(type==='xlsx')nmExportXLSX(rows,fname+'.xlsx');
+  else nmExportCSV(rows,fname+'.csv');
+}
+
+/* ---------- yedekleme / geri yükleme ---------- */
+function nmBackupJSON(){
+  const blob=new Blob([JSON.stringify(nmData,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`not-merkezi-yedek-${new Date().toISOString().slice(0,10)}.json`;a.click();
+}
+function nmRestoreJSON(file){
+  if(!file)return;
+  if(!confirm('Mevcut Not Merkezi verileri silinip yedekten geri yüklenecek. Onaylıyor musunuz?'))return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      nmData={grades:data.grades||{},roster:data.roster||[],history:data.history||[],manual:data.manual||{},settings:data.settings||{round:'nearest'}};
+      nmSave();toast('✓ Yedek geri yüklendi');render();
+    }catch(err){toast('Geçersiz yedek dosyası',true);}
+  };
+  reader.readAsText(file);
+}
+
+/* ---------- RENDER ---------- */
+function nmClassSelector(){
+  const classes=nmClasses();
+  if(!classes.length)return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.<br>
+<button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="openModal('mo-nm-import')">📄 Excel/CSV Yükle</button></div>`;
+  if(!nmClass)nmClass=classes[0];
+  return `<select class="inp" style="max-width:220px;display:inline-block" onchange="nmClass=this.value;render()">
+${classes.map(c=>`<option value="${esc(c)}" ${c===nmClass?'selected':''}>${esc(c)}</option>`).join('')}
+</select>`;
+}
+
+function nmRender(){
+  const tabs=[['yazili','✍️ Yazılı Not Girişi'],['sozlu','🗣️ Sözlü Hesaplama'],['liste','📋 Not Listesi'],['eokul','🏫 E-Okul Kopyalama'],['disa','📤 Dışa Aktarma'],['yedek','💾 Yedekle / Geri Yükle']];
+  let h=`<div class="page-title">🗂️ Not Merkezi</div>
+<div class="nm-tabs">${tabs.map(([k,l])=>`<button class="nm-tab ${nmPage===k?'active':''}" onclick="nmPage='${k}';render()">${l}</button>`).join('')}</div>`;
+  if(nmPage==='yazili')h+=nmRenderYazili();
+  else if(nmPage==='sozlu')h+=nmRenderSozlu();
+  else if(nmPage==='liste')h+=nmRenderListe();
+  else if(nmPage==='eokul')h+=nmRenderEokul();
+  else if(nmPage==='disa')h+=nmRenderDisa();
+  else if(nmPage==='yedek')h+=nmRenderYedek();
+  return h;
+}
+function nmAfterRender(){
+  if(nmPage==='yazili')setTimeout(()=>document.getElementById('nm-input-no')?.focus(),30);
+}
+
+function nmRenderYazili(){
+  if(!nmRoster().length)return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.<br>
+<button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="openModal('mo-nm-import')">📄 Excel/CSV Yükle</button></div>`;
+  const list=nmClass?nmStudentsInClass(nmClass):[];
+  const w1Count=list.filter(s=>nmGrade(s.id).w1!==null&&nmGrade(s.id).w1!==undefined).length;
+  const w2Count=list.filter(s=>nmGrade(s.id).w2!==null&&nmGrade(s.id).w2!==undefined).length;
+  const hist=nmData.history.filter(h=>!nmClass||h.className===nmClass).slice(0,10);
+  return `<div class="card" style="margin-bottom:16px">
+  <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
+    <div>${nmClassSelector()}</div>
+    <div class="sem-tabs">
+      <button class="sem-tab ${nmExamType==='w1'?'active':''}" onclick="nmExamType='w1';render()">1. Yazılı</button>
+      <button class="sem-tab ${nmExamType==='w2'?'active':''}" onclick="nmExamType='w2';render()">2. Yazılı</button>
+    </div>
+  </div>
+  <div class="nm-progress-row">
+    <span class="nm-progress-chip">1.Yazılı: <b>${w1Count} / ${list.length}</b></span>
+    <span class="nm-progress-chip">2.Yazılı: <b>${w2Count} / ${list.length}</b></span>
+  </div>
+  <div class="nm-quick">
+    <div id="nm-preview-box" class="nm-student-preview">Hazır — öğrenci numarası girin</div>
+    <div class="nm-quick-row">
+      <input class="inp" id="nm-input-no" placeholder="Öğrenci No" inputmode="numeric"
+        oninput="nmCheckNumber()" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('nm-input-val').focus();}">
+      <input class="inp" id="nm-input-val" type="number" min="0" max="100" step="0.5" placeholder="Not"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();nmSubmitWritten();}else if(event.key==='Escape'){this.value='';document.getElementById('nm-input-no').value='';}">
+    </div>
+    <button class="btn btn-primary" onclick="nmSubmitWritten()">Kaydet (Enter)</button>
+  </div>
+</div>
+<div class="card"><div class="card-title">🕓 Son Girilenler</div>
+${hist.length?hist.map(h=>`<div class="nm-hist-item">
+  <span style="font-weight:700">${esc(h.name)}</span>
+  <span style="color:var(--text2)">${esc(h.className)} • ${esc(h.type)}</span>
+  <span style="margin-left:auto;font-weight:800;color:var(--accent)">${h.value}</span>
+  <span class="nm-hist-time">${fmtDate(h.time)} ${new Date(h.time).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}</span>
+</div>`).join(''):'<div class="empty" style="padding:20px">Henüz kayıt yok.</div>'}
+</div>`;
+}
+
+function nmRenderSozlu(){
+  if(!nmRoster().length)return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.</div>`;
+  return `<div class="card" style="margin-bottom:16px">
+  <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+    <div>${nmClassSelector()}</div>
+    <select class="inp" style="max-width:200px" onchange="nmData.settings.round=this.value;nmSave()">
+      <option value="nearest" ${nmData.settings.round==='nearest'?'selected':''}>En yakın tam sayı</option>
+      <option value="down" ${nmData.settings.round==='down'?'selected':''}>Aşağı yuvarla</option>
+      <option value="up" ${nmData.settings.round==='up'?'selected':''}>Yukarı yuvarla</option>
+    </select>
+    <button class="btn btn-outline btn-sm" onclick="openModal('mo-nm-paste')">📋 Classroom Yapıştır</button>
+  </div>
+  <p style="font-size:.82rem;color:var(--text2);margin-bottom:10px">Sözlü = Yazılı Ortalaması + (Classroom Puanı / 2) — her iki sözlüye eşit dağıtılır, 100'ü geçemez.</p>
+  <button class="btn btn-primary" onclick="nmOpenOralPreview()">🧮 Tüm Sınıf İçin Sözlüleri Hesapla</button>
+</div>
+<div class="card"><div class="card-title">Sınıf — Classroom Puanları</div>
+<div class="tbl-wrap"><table><thead><tr><th>No</th><th>Ad Soyad</th><th>Yazılı Ort.</th><th>Classroom</th><th>1.Sözlü</th><th>2.Sözlü</th><th></th></tr></thead><tbody>
+${(nmClass?nmStudentsInClass(nmClass):[]).map(st=>{
+  const g=nmGrade(st.id);const avg=nmWrittenAvg(g);const manual=nmData.manual[st.id];
+  return`<tr>
+  <td>${esc(st.student_number)}</td><td>${esc(st.name)}</td>
+  <td>${avg!==null?avg.toFixed(1):'—'}</td>
+  <td><input class="grade-inp" type="number" min="0" max="100" value="${g.classroom??''}" placeholder="0"
+    onchange="nmSetGrade('${st.id}','classroom',this.value===''?null:parseFloat(this.value));render()"></td>
+  <td><input class="grade-inp" type="number" min="0" max="100" value="${g.oral1??''}" placeholder="—"
+    onchange="nmSetManualOral('${st.id}','oral1',this.value)"></td>
+  <td><input class="grade-inp" type="number" min="0" max="100" value="${g.oral2??''}" placeholder="—"
+    onchange="nmSetManualOral('${st.id}','oral2',this.value)"></td>
+  <td>${manual?'<span class="nm-manual-badge">Manuel</span> <button class="btn-xs btn-outline" onclick="nmResetAuto(\''+st.id+'\')">↺</button>':''}</td>
+</tr>`;
+}).join('')}
+</tbody></table></div></div>`;
+}
+
+function nmRenderListe(){
+  if(!nmRoster().length)return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.</div>`;
+  let list=nmClass?nmStudentsInClass(nmClass):nmRoster().sort((a,b)=>(parseInt(a.student_number)||0)-(parseInt(b.student_number)||0));
+  const q=(searchQ||'').toLowerCase();
+  if(q)list=list.filter(s=>s.name.toLowerCase().includes(q)||String(s.student_number).includes(q));
+  if(nmFilter==='missing_w1')list=list.filter(s=>nmGrade(s.id).w1===null||nmGrade(s.id).w1===undefined);
+  else if(nmFilter==='missing_w2')list=list.filter(s=>nmGrade(s.id).w2===null||nmGrade(s.id).w2===undefined);
+  else if(nmFilter==='missing_classroom')list=list.filter(s=>nmGrade(s.id).classroom===null||nmGrade(s.id).classroom===undefined);
+  else if(nmFilter==='missing_oral')list=list.filter(s=>nmGrade(s.id).oral1===null||nmGrade(s.id).oral1===undefined);
+  else if(nmFilter==='manual')list=list.filter(s=>nmData.manual[s.id]);
+  const filters=[['missing_w1','Eksik 1.Yazılı'],['missing_w2','Eksik 2.Yazılı'],['missing_classroom','Classroom Girilmeyen'],['missing_oral','Sözlü Hesaplanmamış'],['manual','Manuel Düzenlenen']];
+  return `<div style="margin-bottom:14px">${nmClassSelector()}</div>
+<div class="search-wrap"><span class="search-ico">🔍</span>
+<input class="search-inp" placeholder="Okul no veya ad soyad ara…" value="${esc(searchQ||'')}" oninput="searchQ=this.value;render()"></div>
+<div class="nm-filter-row">
+${filters.map(([k,l])=>`<button class="nm-filter-chip ${nmFilter===k?'active':''}" onclick="nmFilter=nmFilter==='${k}'?null:'${k}';render()">${l}</button>`).join('')}
+</div>
+<div class="card"><div class="tbl-wrap"><table>
+<thead><tr><th>Okul No</th><th>Ad Soyad</th><th>Sınıf</th><th>1.Yazılı</th><th>2.Yazılı</th><th>Yazılı Ort.</th><th>Classroom</th><th>1.Sözlü</th><th>2.Sözlü</th><th>Durum</th></tr></thead>
+<tbody>${list.map(st=>{
+  const g=nmGrade(st.id);const avg=nmWrittenAvg(g);const manual=nmData.manual[st.id];
+  const cell=v=>v===null||v===undefined?'<span class="nm-missing">—</span>':`<span class="nm-ok">${v}</span>`;
+  return`<tr>
+  <td>${esc(st.student_number)}</td><td>${esc(st.name)}</td><td>${esc(st.class_name)}</td>
+  <td>${cell(g.w1)}</td><td>${cell(g.w2)}</td><td>${avg!==null?avg.toFixed(1):'<span class="nm-missing">—</span>'}</td>
+  <td>${cell(g.classroom)}</td><td>${cell(g.oral1)}</td><td>${cell(g.oral2)}</td>
+  <td>${manual?'<span class="nm-manual-badge">Manuel</span>':''}</td>
+</tr>`;
+}).join('')}</tbody></table></div></div>`;
+}
+
+function nmRenderEokul(){
+  if(!nmRoster().length)return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.</div>`;
+  return `<div class="card">
+  <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+    ${nmClassSelector()}
+    <select class="inp" id="nm-eokul-field" style="max-width:220px">
+      <option value="w1">1. Yazılı</option><option value="w2">2. Yazılı</option>
+      <option value="avg">Yazılı Ortalaması</option>
+      <option value="oral1">1. Sözlü</option><option value="oral2">2. Sözlü</option>
+      <option value="classroom">Classroom Puanı</option>
+    </select>
+    <button class="btn btn-primary" onclick="nmEokulCopy()">📋 Panoya Kopyala</button>
+  </div>
+  <p style="font-size:.82rem;color:var(--text2)">Seçilen alan, okul numarasına göre sıralı tek sütun olarak panoya kopyalanır — e-Okul'a doğrudan yapıştırmaya uygundur.</p>
+</div>`;
+}
+
+function nmRenderDisa(){
+  if(!nmRoster().length)return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.</div>`;
+  return `<div class="card">
+  <div style="margin-bottom:14px">${nmClassSelector()}</div>
+  <div class="row-btns" style="justify-content:flex-start">
+    <button class="btn btn-primary" onclick="nmExport('xlsx')">📊 Excel (.xlsx) İndir</button>
+    <button class="btn btn-outline" onclick="nmExport('csv')">📄 CSV İndir</button>
+  </div>
+</div>`;
+}
+
+function nmRenderYedek(){
+  return `<div class="card">
+  <div class="card-title">💾 Yedekle</div>
+  <p style="font-size:.82rem;color:var(--text2);margin-bottom:12px">Not Merkezi verilerini (notlar, geçmiş, manuel işaretler) JSON dosyası olarak indirin.</p>
+  <button class="btn btn-primary" onclick="nmBackupJSON()">⬇️ JSON Yedek İndir</button>
+</div>
+<div class="card" style="margin-top:16px">
+  <div class="card-title">♻️ Geri Yükle</div>
+  <p style="font-size:.82rem;color:var(--text2);margin-bottom:12px">Önceden indirilmiş bir JSON yedek dosyasını seçin. Mevcut Not Merkezi verileri üzerine yazılır.</p>
+  <input type="file" accept=".json" onchange="nmRestoreJSON(this.files[0])">
+</div>`;
+}
+
+nmLoad();
 
 // ── Init with auth check
 (async()=>{
