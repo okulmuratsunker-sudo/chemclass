@@ -811,12 +811,12 @@ ${classes.map(c=>{
 
 /* ── Öğrenci ve ilişkili tüm kayıtlarını silme (tekli/toplu kullanılır) ── */
 async function deleteStudentRecords(sid){
+  // Not: teacher_photos ve question_scores tabloları şu an veritabanında yok
+  // (Madde Analizi/fotoğraf özelliği bu tablolara bağlıydı, ayrıca ele alınmalı).
   await Promise.all([
     sb.from('teacher_grades').delete().eq('student_id',sid),
     sb.from('student_scores').delete().eq('student_id',sid),
     sb.from('score_history').delete().eq('student_id',sid),
-    sb.from('teacher_photos').delete().eq('student_id',sid),
-    sb.from('question_scores').delete().eq('student_id',sid),
   ]);
   await sb.from('teacher_students').delete().eq('id',sid);
   students=students.filter(s=>s.id!==sid);
