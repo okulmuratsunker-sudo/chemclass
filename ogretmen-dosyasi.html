@@ -397,6 +397,24 @@ select.inp{cursor:pointer}
   </div>
 </div>
 
+<!-- Öğrenci / Sınıf Ekle -->
+<div class="overlay" id="mo-add-student">
+  <div class="modal">
+    <div class="modal-hd"><span>Öğrenci / Sınıf Ekle</span><button class="modal-close" onclick="closeModal('mo-add-student')">×</button></div>
+    <div class="field"><label class="field-label">Sınıf</label>
+      <input class="inp" id="as-class" list="as-class-list" placeholder="Sınıf seç veya yeni yaz (örn: 9-D)">
+      <datalist id="as-class-list"></datalist>
+    </div>
+    <div class="field"><label class="field-label">Öğrenci Numarası</label><input class="inp" id="as-number" placeholder="101"></div>
+    <div class="field"><label class="field-label">Ad Soyad</label><input class="inp" id="as-name" placeholder="Ad Soyad" onkeydown="if(event.key==='Enter')saveNewStudent()"></div>
+    <div id="as-msg" style="font-size:.82rem;color:var(--danger);margin-bottom:8px"></div>
+    <div class="row-btns">
+      <button class="btn btn-outline" onclick="closeModal('mo-add-student')">Kapat</button>
+      <button class="btn btn-primary" onclick="saveNewStudent()">Ekle</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -647,10 +665,14 @@ function schedGrid(todayIdx){
 // ════════════════════════════════════════
 // STUDENTS
 // ════════════════════════════════════════
+function studentClasses(){
+  return[...new Set(students.map(s=>s.class_name).filter(Boolean))].sort();
+}
 function renderStudents(){
   const q=searchQ.toLowerCase();
   const list=students.filter(s=>!q||s.name.toLowerCase().includes(q)||(s.student_number||'').includes(q));
-  let h=`<div class="page-title">👥 Öğrenciler <span style="font-size:.83rem;font-weight:400;color:var(--text2)">${students.length} öğrenci</span></div>
+  let h=`<div class="page-title">👥 Öğrenciler <span style="font-size:.83rem;font-weight:400;color:var(--text2)">${students.length} öğrenci</span>
+<button class="btn btn-primary btn-sm" onclick="openAddStudentModal()">+ Öğrenci / Sınıf Ekle</button></div>
 <div class="search-wrap"><span class="search-ico">🔍</span>
 <input class="search-inp" placeholder="İsim veya numara ara…" value="${esc(searchQ)}" oninput="searchQ=this.value;render()"></div>
 <div class="s-list">`;
@@ -716,6 +738,34 @@ async function saveStudentNote(sid){
   const{error}=await sb.from('teacher_students').update({notes:note}).eq('id',sid);
   if(error){toast('Hata: '+error.message,true);return}
   toast('✓ Not kaydedildi');
+}
+
+function openAddStudentModal(){
+  document.getElementById('as-class').value='';document.getElementById('as-number').value='';
+  document.getElementById('as-name').value='';document.getElementById('as-msg').textContent='';
+  document.getElementById('as-class-list').innerHTML=studentClasses().map(c=>`<option value="${esc(c)}">`).join('');
+  openModal('mo-add-student');
+  setTimeout(()=>document.getElementById('as-class')?.focus(),50);
+}
+async function saveNewStudent(){
+  const cls=document.getElementById('as-class').value.trim();
+  const no=document.getElementById('as-number').value.trim();
+  const name=document.getElementById('as-name').value.trim();
+  const msgEl=document.getElementById('as-msg');
+  if(!cls||!no||!name){msgEl.textContent='Sınıf, numara ve ad soyad zorunlu.';return;}
+  const dup=students.find(s=>(s.class_name||'')===cls&&String(s.student_number)===no);
+  if(dup){msgEl.textContent=`Bu sınıfta ${no} numaralı öğrenci zaten var: ${dup.name}`;return;}
+  msgEl.textContent='';
+  try{
+    const{data,error}=await sb.from('teacher_students').insert({name,student_number:no,class_name:cls}).select().single();
+    if(error){msgEl.textContent='Hata: '+error.message;return;}
+    students.push(data);ofSaveCache();
+    toast(`✓ ${name} eklendi (${cls})`);
+    document.getElementById('as-number').value='';document.getElementById('as-name').value='';
+    document.getElementById('as-name')?.blur();
+    render();
+    setTimeout(()=>document.getElementById('as-number')?.focus(),50);
+  }catch(err){msgEl.textContent='Hata: '+err.message;}
 }
 
 // ════════════════════════════════════════
@@ -1248,47 +1298,50 @@ document.head.appendChild(_s);
 // (notStorage / notUtils / notExport / notMerkezi birleşik — tek dosya yapısına uyumlu)
 // İleride ayrı dosyalara (notStorage.js, notUtils.js, notExport.js, notMerkezi.js)
 // bölünebilecek şekilde isimlendirildi; tüm fonksiyonlar nm* önekiyle isole edilmiştir.
+//
+// ÖNEMLİ TASARIM KARARI: Not Merkezi kendi gölge öğrenci/not tablosunu TUTMAZ.
+// Yazılı (w1/w2) ve Sözlü (oral) notları doğrudan ana uygulamanın `students`/`grades`
+// dizileri ve teacher_grades tablosu üzerinden okunup yazılır (getGrade/saveGrade
+// fonksiyonları). Böylece Not Merkezi'ne girilen her not, Not Defteri'nde de anında
+// görünür. Sadece ana şemada yer almayan "Classroom ödev puanı" ve "manuel sözlü
+// işareti" Not Merkezi'ye özgü olarak localStorage'da (dönem+öğrenci bazlı) tutulur.
+// Not: Ana Not Defteri şemasında tek bir "oral" alanı var (1.Sözlü/2.Sözlü ayrı değil),
+// bu yüzden hesaplanan sözlü tek bir değer olarak yazılır.
 // ════════════════════════════════════════
 
-/* ---------- notStorage: veri katmanı ---------- */
-const NM_KEY='nm_v1_data';
-let nmData={grades:{},roster:[],history:[],manual:{},settings:{round:'nearest'}};
-let nmPage='yazili',nmClass=null,nmExamType='w1',nmFilter=null,nmLastFound=null;
+/* ---------- notStorage: Not Merkezi'ne özgü veri katmanı ---------- */
+const NM_KEY='nm_v2_data';
+let nmData={classroom:{},manual:{},history:[],settings:{round:'nearest'}};
+let nmPage='yazili',nmClass=null,nmSem=1,nmExamType='w1',nmFilter=null;
 
 function nmLoad(){
   try{
     const raw=JSON.parse(localStorage.getItem(NM_KEY)||'{}');
     nmData={
-      grades:raw.grades||{},roster:raw.roster||[],
-      history:raw.history||[],manual:raw.manual||{},
-      settings:raw.settings||{round:'nearest'}
+      classroom:raw.classroom||{},manual:raw.manual||{},
+      history:raw.history||[],settings:raw.settings||{round:'nearest'}
     };
-  }catch(e){nmData={grades:{},roster:[],history:[],manual:{},settings:{round:'nearest'}};}
+  }catch(e){nmData={classroom:{},manual:{},history:[],settings:{round:'nearest'}};}
 }
 function nmSave(){try{localStorage.setItem(NM_KEY,JSON.stringify(nmData));}catch(e){}}
+function nmKey(sid,sem){return sid+'_'+sem;}
 
-// Mevcut Öğretmen Dosyası öğrenci listesini kullan; yoksa içe aktarılan roster'a düş
-function nmRoster(){
-  if(students&&students.length)return students.map(s=>({id:s.id,name:s.name,student_number:s.student_number||'',class_name:s.class_name||'—'}));
-  return nmData.roster;
-}
 function nmClasses(){
-  const set=new Set(nmRoster().map(s=>s.class_name||'—'));
-  return[...set].sort();
+  return[...new Set(students.map(s=>s.class_name).filter(Boolean))].sort();
 }
 function nmStudentsInClass(cls){
-  return nmRoster().filter(s=>(s.class_name||'—')===cls)
+  return students.filter(s=>(s.class_name||'—')===cls)
     .sort((a,b)=>(parseInt(a.student_number)||0)-(parseInt(b.student_number)||0));
 }
 function nmFindByNumber(cls,no){
   return nmStudentsInClass(cls).find(s=>String(s.student_number)===String(no).trim())||null;
 }
-function nmGrade(sid){
-  if(!nmData.grades[sid])nmData.grades[sid]={w1:null,w2:null,classroom:null,oral1:null,oral2:null};
-  return nmData.grades[sid];
-}
-function nmSetGrade(sid,field,val){
-  const g=nmGrade(sid);g[field]=val;nmSave();
+function nmClassroom(sid,sem){return nmData.classroom[nmKey(sid,sem)]??null;}
+function nmSetClassroom(sid,sem,val){nmData.classroom[nmKey(sid,sem)]=val;nmSave();}
+function nmIsManual(sid,sem){return!!nmData.manual[nmKey(sid,sem)];}
+function nmSetManualFlag(sid,sem,on){
+  if(on)nmData.manual[nmKey(sid,sem)]=true;else delete nmData.manual[nmKey(sid,sem)];
+  nmSave();
 }
 function nmAddHistory(entry){
   nmData.history.unshift({...entry,time:new Date().toISOString()});
@@ -1310,17 +1363,18 @@ function nmRound(v){
 }
 function nmClamp100(v){return v>100?100:v<0?0:v;}
 function nmWrittenAvg(g){
+  if(!g)return null;
   const vals=[g.w1,g.w2].filter(x=>x!==null&&x!==undefined&&x!=='');
   if(!vals.length)return null;
   return vals.reduce((a,b)=>a+parseFloat(b),0)/vals.length;
 }
-function nmCalcOral(g){
+function nmCalcOral(sid,sem){
+  const g=getGrade(sid,sem);
   const avg=nmWrittenAvg(g);
   if(avg===null)return null;
-  const cls=parseFloat(g.classroom)||0;
+  const cls=parseFloat(nmClassroom(sid,sem))||0;
   const v=nmClamp100(avg+cls/2);
-  const r=nmRound(v);
-  return{oral1:r,oral2:r};
+  return nmRound(v);
 }
 
 /* ---------- notExport: dışa aktarma / kopyalama ---------- */
@@ -1341,23 +1395,135 @@ function nmExportXLSX(rows,filename){
   XLSX.writeFile(wb,filename);
 }
 
-/* ---------- içe aktarma: Excel/CSV öğrenci listesi ---------- */
+/* ---------- e-Okul "Puan/Not Çizelgesi" formatını algıla ---------- */
+// Bu format çok satırlı bir başlık bloğu + "Y1..Y6 / S1..S6 / Ödev" sütun etiketleri içerir.
+// Sütunları isimle (hücre metniyle) buluyoruz; merge'lenmiş hücreler nedeniyle sabit
+// sütun indeksine güvenmek hataya açık olurdu.
+function nmParseEokulSheet(ws){
+  if(!ws||!ws['!ref'])return null;
+  const range=XLSX.utils.decode_range(ws['!ref']);
+  let headerRow=-1,colY1=-1,colY2=-1,colOdev=-1,className='',semester=null;
+  for(let R=range.s.r;R<=range.e.r;R++){
+    for(let C=range.s.c;C<=range.e.c;C++){
+      const cell=ws[XLSX.utils.encode_cell({r:R,c:C})];
+      if(!cell||cell.v===undefined||cell.v===null)continue;
+      const v=String(cell.v).trim();
+      if(v==='Y1'){headerRow=R;colY1=C;}
+      if(v==='Y2'&&headerRow===R)colY2=C;
+      if(v==='Ödev')colOdev=C;
+      if(/Sınıfı\s*\/\s*Şubesi/i.test(v)){
+        for(let CC=C;CC<=range.e.c;CC++){
+          const c2=ws[XLSX.utils.encode_cell({r:R,c:CC})];
+          if(c2&&typeof c2.v==='string'&&c2.v.includes(':')){className=c2.v.replace(':','').trim();break;}
+        }
+      }
+      if(semester===null){
+        const semMatch=v.match(/(I{1,2})\.\s*DÖNEM\s*PUAN/i);
+        if(semMatch)semester=semMatch[1].toUpperCase()==='II'?2:1;
+      }
+    }
+  }
+  if(headerRow<0||colY1<0)return null; // bu format değil
+  const colOkulNo=1,colAd=2; // B: Okul Numarası, C: Adı Soyadı (sabit — e-Okul export şablonu)
+  const out=[];
+  for(let R=headerRow+1;R<=range.e.r;R++){
+    const noCell=ws[XLSX.utils.encode_cell({r:R,c:colOkulNo})];
+    const nameCell=ws[XLSX.utils.encode_cell({r:R,c:colAd})];
+    if(!noCell||!nameCell)continue;
+    const no=String(noCell.v??'').trim();
+    const name=String(nameCell.v??'').trim();
+    if(!no||!name||!/^\d+$/.test(no))continue;
+    const y1c=ws[XLSX.utils.encode_cell({r:R,c:colY1})];
+    const y2c=colY2>=0?ws[XLSX.utils.encode_cell({r:R,c:colY2})]:null;
+    out.push({
+      no,name,class_name:className||'—',
+      y1:y1c&&typeof y1c.v==='number'?y1c.v:null,
+      y2:y2c&&typeof y2c.v==='number'?y2c.v:null
+    });
+  }
+  return{className:className||'—',semester,students:out,hasOdevCol:colOdev>=0};
+}
+
+/* ---------- içe aktarma: e-Okul Excel / basit CSV öğrenci listesi ---------- */
+// Not: hem e-Okul "Puan/Not Çizelgesi" formatını (Y1/Y2 notlarıyla birlikte) hem de
+// basit "Sınıf,Numara,Ad Soyad" tipi düz listeleri okuyabilir. İçe aktarılan öğrenciler
+// GERÇEK öğrenci olarak teacher_students tablosuna eklenir — Not Merkezi'ne özgü gölge
+// bir liste oluşturulmaz; böylece Not Defteri / Puan Sistemi ile aynı veriyi paylaşırlar.
+async function nmImportRows(parsedStudents,defaultClassName,detectedSemester){
+  const msgEl=document.getElementById('nm-import-msg');
+  const seen=new Set();const dupNumbers=[];const toInsert=[];const matchedExisting=[];
+  parsedStudents.forEach(p=>{
+    const cls=p.class_name||defaultClassName||'—';
+    const no=String(p.no).trim(),name=String(p.name).trim();
+    if(!no||!name)return;
+    const key=cls+'|'+no;
+    if(seen.has(key)){dupNumbers.push(no);return;}
+    seen.add(key);
+    const existing=students.find(s=>(s.class_name||'—')===cls&&String(s.student_number)===no);
+    if(existing)matchedExisting.push({existing,p});
+    else toInsert.push({...p,class_name:cls});
+  });
+  if(!toInsert.length&&!matchedExisting.length){
+    msgEl.textContent='Geçerli öğrenci satırı bulunamadı.';return;
+  }
+  let createdCount=0,gradeWriteCount=0;
+  for(const p of toInsert){
+    try{
+      const{data,error}=await sb.from('teacher_students').insert({
+        name:p.name,student_number:p.no,class_name:p.class_name
+      }).select().single();
+      if(error){dupNumbers.push(p.no+' (hata: '+error.message+')');continue;}
+      students.push(data);createdCount++;
+      if((p.y1!==null&&p.y1!==undefined)||(p.y2!==null&&p.y2!==undefined)){
+        const sem=detectedSemester||nmSem;
+        if(p.y1!==null&&p.y1!==undefined){await saveGrade(data.id,sem,'w1',p.y1);gradeWriteCount++;}
+        if(p.y2!==null&&p.y2!==undefined){await saveGrade(data.id,sem,'w2',p.y2);gradeWriteCount++;}
+      }
+    }catch(err){dupNumbers.push(p.no+' (hata: '+err.message+')');}
+  }
+  for(const{existing,p}of matchedExisting){
+    if((p.y1===null||p.y1===undefined)&&(p.y2===null||p.y2===undefined))continue;
+    const sem=detectedSemester||nmSem;
+    if(p.y1!==null&&p.y1!==undefined){await saveGrade(existing.id,sem,'w1',p.y1);gradeWriteCount++;}
+    if(p.y2!==null&&p.y2!==undefined){await saveGrade(existing.id,sem,'w2',p.y2);gradeWriteCount++;}
+  }
+  if(detectedSemester)nmSem=detectedSemester;
+  if(defaultClassName)nmClass=defaultClassName;
+  let msg=`✓ ${createdCount} yeni öğrenci eklendi`;
+  if(matchedExisting.length)msg+=`, ${matchedExisting.length} mevcut öğrenciyle eşleşti`;
+  if(gradeWriteCount)msg+=`, ${gradeWriteCount} not Not Defteri'ne işlendi`;
+  if(dupNumbers.length)msg+=`. Atlanan/mükerrer: ${dupNumbers.join(', ')}`;
+  msgEl.textContent=msg;
+  toast(`✓ İçe aktarma tamamlandı (${createdCount} yeni öğrenci)`);
+  ofSaveCache();
+  setTimeout(()=>{closeModal('mo-nm-import');render();},1500);
+}
+
 function nmHandleFile(file){
   if(!file)return;
   const msgEl=document.getElementById('nm-import-msg');
+  msgEl.textContent='Okunuyor…';
   const reader=new FileReader();
-  reader.onload=function(e){
+  reader.onload=async function(e){
     try{
-      let rows;
+      let wb;
       if(file.name.toLowerCase().endsWith('.csv')){
-        const text=e.target.result;
-        rows=text.split(/\r?\n/).filter(l=>l.trim()).map(l=>l.split(/[,;\t]/).map(c=>c.replace(/^"|"$/g,'').trim()));
+        wb=XLSX.read(e.target.result,{type:'string'});
       }else{
-        const wb=XLSX.read(e.target.result,{type:'array'});
-        rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
+        wb=XLSX.read(e.target.result,{type:'array'});
       }
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      // 1) e-Okul Puan/Not Çizelgesi formatı dene
+      const eokul=nmParseEokulSheet(ws);
+      if(eokul&&eokul.students.length){
+        if(!eokul.hasOdevCol)await nmImportRows(eokul.students,eokul.className,eokul.semester);
+        else await nmImportRows(eokul.students,eokul.className,eokul.semester);
+        msgEl.textContent+=' (Not: Ödev/Classroom puanı bu dosyadan içe aktarılmadı — "Sözlü Hesaplama" sekmesinden ayrıca girin.)';
+        return;
+      }
+      // 2) Basit düz liste formatı (Sınıf, Numara, Ad Soyad)
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
       if(!rows||!rows.length){msgEl.textContent='Dosya boş veya okunamadı.';return;}
-      // Başlık satırını bul (Sınıf/No/Ad gibi anahtar kelimeler)
       let headerIdx=0;
       for(let i=0;i<Math.min(rows.length,5);i++){
         const joined=rows[i].join(' ').toLowerCase();
@@ -1365,26 +1531,20 @@ function nmHandleFile(file){
       }
       const header=rows[headerIdx].map(h=>String(h||'').toLowerCase());
       const idxNo=header.findIndex(h=>h.includes('numara')||h.includes('no'));
-      const idxName=header.findIndex(h=>h.includes('ad')&&h.includes('soyad')||h.includes('adı soyadı')||h.includes('ad soyad'));
+      const idxName=header.findIndex(h=>(h.includes('ad')&&h.includes('soyad'))||h.includes('adı soyadı'));
       const idxNameAlt=idxName>=0?idxName:header.findIndex(h=>h.includes('ad'));
       const idxClass=header.findIndex(h=>h.includes('sınıf')||h.includes('sube')||h.includes('şube'));
       if(idxNo<0||idxNameAlt<0){msgEl.textContent='Sütunlar tanınamadı. "Numara" ve "Ad Soyad" sütunları gerekli.';return;}
-      const imported=[];const seen=new Set();const dups=[];
+      const parsed=[];
       for(let i=headerIdx+1;i<rows.length;i++){
         const r=rows[i];if(!r||!r.length)continue;
-        const no=String(r[idxNo]||'').trim();const name=String(r[idxNameAlt]||'').trim();
-        const cls=idxClass>=0?String(r[idxClass]||'').trim():'—';
+        const no=String(r[idxNo]??'').trim();const name=String(r[idxNameAlt]??'').trim();
+        const cls=idxClass>=0?String(r[idxClass]??'').trim():'';
         if(!no||!name)continue;
-        const key=cls+'|'+no;
-        if(seen.has(key)){dups.push(no);continue;}
-        seen.add(key);
-        imported.push({id:'nm_'+cls+'_'+no,name,student_number:no,class_name:cls||'—'});
+        parsed.push({no,name,class_name:cls,y1:null,y2:null});
       }
-      if(!imported.length){msgEl.textContent='Geçerli öğrenci satırı bulunamadı.';return;}
-      nmData.roster=imported;nmSave();
-      msgEl.textContent=`✓ ${imported.length} öğrenci içe aktarıldı.`+(dups.length?` (${dups.length} mükerrer numara atlandı: ${dups.join(', ')})`:'');
-      toast(`✓ ${imported.length} öğrenci yüklendi`);
-      setTimeout(()=>{closeModal('mo-nm-import');render();},1200);
+      if(!parsed.length){msgEl.textContent='Geçerli öğrenci satırı bulunamadı.';return;}
+      await nmImportRows(parsed,null,null);
     }catch(err){msgEl.textContent='Hata: '+err.message;}
   };
   if(file.name.toLowerCase().endsWith('.csv'))reader.readAsText(file,'utf-8');
@@ -1405,7 +1565,7 @@ function nmApplyPaste(){
     if(!st){notFound.push(no);return;}
     const n=parseFloat(val);
     if(isNaN(n)||n<0||n>100)return;
-    nmSetGrade(st.id,'classroom',n);applied++;
+    nmSetClassroom(st.id,nmSem,n);applied++;
   });
   const warnEl=document.getElementById('nm-paste-warn');
   warnEl.textContent=notFound.length?`Bulunamayan numaralar: ${notFound.join(', ')}`:'';
@@ -1413,8 +1573,8 @@ function nmApplyPaste(){
   if(!notFound.length){closeModal('mo-nm-paste');render();}
 }
 
-/* ---------- yazılı not girişi: kayıt ---------- */
-function nmSubmitWritten(){
+/* ---------- yazılı not girişi: kayıt (doğrudan Not Defteri'ne yazar) ---------- */
+async function nmSubmitWritten(){
   const noEl=document.getElementById('nm-input-no'),valEl=document.getElementById('nm-input-val');
   const no=noEl.value.trim();
   if(!no)return;
@@ -1433,14 +1593,15 @@ function nmSubmitWritten(){
   }
   if(!nmValidScore(val)){toast('Not 0-100 arasında olmalı',true);valEl.value='';valEl.focus();return;}
   const n=Math.round(parseFloat(val)*10)/10;
-  const g=nmGrade(st.id);
   const field=nmExamType==='w1'?'w1':'w2';
-  const existing=g[field];
+  const existingGrade=getGrade(st.id,nmSem);
+  const existing=existingGrade?.[field];
   if(existing!==null&&existing!==undefined&&!confirm(`${st.name} için mevcut not: ${existing}. Değiştirmek istiyor musunuz?`)){
     noEl.value='';valEl.value='';noEl.focus();return;
   }
-  nmSetGrade(st.id,field,n);
-  nmAddHistory({studentId:st.id,name:st.name,className:nmClass,type:nmExamType==='w1'?'1. Yazılı':'2. Yazılı',value:n});
+  const err=await saveGrade(st.id,nmSem,field,n);
+  if(err){toast('Hata: '+err,true);return;}
+  nmAddHistory({studentId:st.id,name:st.name,className:nmClass,semester:nmSem,type:nmExamType==='w1'?'1. Yazılı':'2. Yazılı',value:n});
   toast(`✓ ${st.name}: ${n}`);
   noEl.value='';valEl.value='';
   document.getElementById('nm-preview-box').className='nm-student-preview';
@@ -1458,60 +1619,60 @@ function nmCheckNumber(){
   else{box.className='nm-student-preview err';box.textContent='❌ Bulunamadı: '+no;}
 }
 
-/* ---------- sözlü hesaplama: önizleme + onay ---------- */
+/* ---------- sözlü hesaplama: önizleme + onay (doğrudan Not Defteri'ne yazar) ---------- */
 let nmPreviewRows=[];
 function nmOpenOralPreview(){
   if(!nmClass){toast('Önce sınıf seçin',true);return;}
   const list=nmStudentsInClass(nmClass);
   nmPreviewRows=list.map(st=>{
-    const g=nmGrade(st.id);
+    const g=getGrade(st.id,nmSem);
     const avg=nmWrittenAvg(g);
-    const calc=nmCalcOral(g);
+    const calc=nmCalcOral(st.id,nmSem);
     return{st,g,avg,calc};
   });
   const missing=nmPreviewRows.filter(r=>r.avg===null);
-  let h=`<table><thead><tr><th>No</th><th>Ad Soyad</th><th>1.Yazılı</th><th>2.Yazılı</th><th>Ort.</th><th>Classroom</th><th>Eski S1</th><th>Eski S2</th><th>Yeni S1</th><th>Yeni S2</th></tr></thead><tbody>`;
+  let h=`<table><thead><tr><th>No</th><th>Ad Soyad</th><th>1.Yazılı</th><th>2.Yazılı</th><th>Ort.</th><th>Classroom</th><th>Eski Sözlü</th><th>Yeni Sözlü</th></tr></thead><tbody>`;
   nmPreviewRows.forEach(({st,g,avg,calc})=>{
     h+=`<tr>
   <td>${esc(st.student_number)}</td><td>${esc(st.name)}</td>
-  <td>${g.w1??'—'}</td><td>${g.w2??'—'}</td>
+  <td>${g?.w1??'—'}</td><td>${g?.w2??'—'}</td>
   <td>${avg!==null?avg.toFixed(1):'<span class="nm-missing">Yok</span>'}</td>
-  <td>${g.classroom??0}</td>
-  <td>${g.oral1??'—'}</td><td>${g.oral2??'—'}</td>
-  <td style="font-weight:700">${calc?calc.oral1:'—'}</td>
-  <td style="font-weight:700">${calc?calc.oral2:'—'}</td>
+  <td>${nmClassroom(st.id,nmSem)??0}</td>
+  <td>${g?.oral??'—'}</td>
+  <td style="font-weight:700">${calc??'—'}</td>
 </tr>`;
   });
   h+='</tbody></table>';
-  if(missing.length)h=`<p class="nm-missing" style="margin-bottom:10px">⚠️ ${missing.length} öğrencinin hiç yazılı notu yok, sözlüleri hesaplanmayacak.</p>`+h;
+  if(missing.length)h=`<p class="nm-missing" style="margin-bottom:10px">⚠️ ${missing.length} öğrencinin hiç yazılı notu yok, sözlüsü hesaplanmayacak.</p>`+h;
   document.getElementById('nm-preview-body').innerHTML=h;
   openModal('mo-nm-preview');
 }
-function nmConfirmOralCalc(){
+async function nmConfirmOralCalc(){
   let applied=0;
-  nmPreviewRows.forEach(({st,avg,calc})=>{
-    if(avg===null)return;
-    if(nmData.manual[st.id])return; // manuel düzenlenmiş öğrenciyi ezme
-    nmSetGrade(st.id,'oral1',calc.oral1);
-    nmSetGrade(st.id,'oral2',calc.oral2);
-    applied++;
-  });
+  for(const{st,avg,calc}of nmPreviewRows){
+    if(avg===null)continue;
+    if(nmIsManual(st.id,nmSem))continue; // manuel düzenlenmiş öğrenciyi ezme
+    const err=await saveGrade(st.id,nmSem,'oral',calc);
+    if(!err)applied++;
+  }
   closeModal('mo-nm-preview');
   toast(`✓ ${applied} öğrencinin sözlüsü hesaplandı`);
   render();
 }
-function nmSetManualOral(sid,field,val){
+async function nmSetManualOral(sid,val){
   if(!nmValidScore(val)){toast('Not 0-100 arasında olmalı',true);return;}
   const n=val===''?null:parseFloat(val);
-  nmSetGrade(sid,field,n);
-  nmData.manual[sid]=true;nmSave();
+  const err=await saveGrade(sid,nmSem,'oral',n);
+  if(err){toast('Hata: '+err,true);return;}
+  nmSetManualFlag(sid,nmSem,true);
   render();
 }
-function nmResetAuto(sid){
-  const g=nmGrade(sid);const calc=nmCalcOral(g);
-  if(!calc){toast('Yazılı notu olmadan otomatik hesaplanamaz',true);return;}
-  nmSetGrade(sid,'oral1',calc.oral1);nmSetGrade(sid,'oral2',calc.oral2);
-  delete nmData.manual[sid];nmSave();
+async function nmResetAuto(sid){
+  const calc=nmCalcOral(sid,nmSem);
+  if(calc===null){toast('Yazılı notu olmadan otomatik hesaplanamaz',true);return;}
+  const err=await saveGrade(sid,nmSem,'oral',calc);
+  if(err){toast('Hata: '+err,true);return;}
+  nmSetManualFlag(sid,nmSem,false);
   toast('✓ Otomatik hesaplamaya döndürüldü');render();
 }
 
@@ -1522,10 +1683,11 @@ function nmEokulCopy(){
   const list=nmStudentsInClass(nmClass);
   let emptyCount=0;
   const lines=list.map(st=>{
-    const g=nmGrade(st.id);
+    const g=getGrade(st.id,nmSem);
     let v;
     if(field==='avg')v=nmWrittenAvg(g);
-    else v=g[field];
+    else if(field==='classroom')v=nmClassroom(st.id,nmSem);
+    else v=g?.[field];
     if(v===null||v===undefined||v===''){emptyCount++;return'';}
     return String(v);
   });
@@ -1537,18 +1699,18 @@ function nmEokulCopy(){
 function nmExport(type){
   if(!nmClass){toast('Önce sınıf seçin',true);return;}
   const list=nmStudentsInClass(nmClass);
-  const header=['Okul No','Ad Soyad','Sınıf','1.Yazılı','2.Yazılı','Yazılı Ort.','Classroom','1.Sözlü','2.Sözlü'];
+  const header=['Okul No','Ad Soyad','Sınıf','1.Yazılı','2.Yazılı','Yazılı Ort.','Classroom','Sözlü'];
   const rows=[header];
   list.forEach(st=>{
-    const g=nmGrade(st.id);
-    rows.push([st.student_number,st.name,st.class_name,g.w1??'',g.w2??'',nmWrittenAvg(g)?.toFixed(1)??'',g.classroom??'',g.oral1??'',g.oral2??'']);
+    const g=getGrade(st.id,nmSem);
+    rows.push([st.student_number,st.name,st.class_name,g?.w1??'',g?.w2??'',nmWrittenAvg(g)?.toFixed(1)??'',nmClassroom(st.id,nmSem)??'',g?.oral??'']);
   });
-  const fname=`not-merkezi-${nmClass}-${new Date().toISOString().slice(0,10)}`;
+  const fname=`not-merkezi-${nmClass}-d${nmSem}-${new Date().toISOString().slice(0,10)}`;
   if(type==='xlsx')nmExportXLSX(rows,fname+'.xlsx');
   else nmExportCSV(rows,fname+'.csv');
 }
 
-/* ---------- yedekleme / geri yükleme ---------- */
+/* ---------- yedekleme / geri yükleme (Not Merkezi'ne özgü veriler) ---------- */
 function nmBackupJSON(){
   const blob=new Blob([JSON.stringify(nmData,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
@@ -1556,12 +1718,12 @@ function nmBackupJSON(){
 }
 function nmRestoreJSON(file){
   if(!file)return;
-  if(!confirm('Mevcut Not Merkezi verileri silinip yedekten geri yüklenecek. Onaylıyor musunuz?'))return;
+  if(!confirm('Mevcut Not Merkezi ayarları (Classroom puanları, manuel işaretler, geçmiş) silinip yedekten geri yüklenecek. Not Defteri\'ndeki yazılı/sözlü notları bundan etkilenmez. Onaylıyor musunuz?'))return;
   const reader=new FileReader();
   reader.onload=e=>{
     try{
       const data=JSON.parse(e.target.result);
-      nmData={grades:data.grades||{},roster:data.roster||[],history:data.history||[],manual:data.manual||{},settings:data.settings||{round:'nearest'}};
+      nmData={classroom:data.classroom||{},manual:data.manual||{},history:data.history||[],settings:data.settings||{round:'nearest'}};
       nmSave();toast('✓ Yedek geri yüklendi');render();
     }catch(err){toast('Geçersiz yedek dosyası',true);}
   };
@@ -1572,11 +1734,18 @@ function nmRestoreJSON(file){
 function nmClassSelector(){
   const classes=nmClasses();
   if(!classes.length)return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.<br>
-<button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="openModal('mo-nm-import')">📄 Excel/CSV Yükle</button></div>`;
+<button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="openModal('mo-nm-import')">📄 Excel/CSV Yükle</button>
+<button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="goto('students')">veya Öğrenciler'den ekle</button></div>`;
   if(!nmClass)nmClass=classes[0];
   return `<select class="inp" style="max-width:220px;display:inline-block" onchange="nmClass=this.value;render()">
 ${classes.map(c=>`<option value="${esc(c)}" ${c===nmClass?'selected':''}>${esc(c)}</option>`).join('')}
 </select>`;
+}
+function nmSemSelector(){
+  return `<div class="sem-tabs">
+<button class="sem-tab ${nmSem===1?'active':''}" onclick="nmSem=1;render()">1. Dönem</button>
+<button class="sem-tab ${nmSem===2?'active':''}" onclick="nmSem=2;render()">2. Dönem</button>
+</div>`;
 }
 
 function nmRender(){
@@ -1596,15 +1765,17 @@ function nmAfterRender(){
 }
 
 function nmRenderYazili(){
-  if(!nmRoster().length)return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.<br>
-<button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="openModal('mo-nm-import')">📄 Excel/CSV Yükle</button></div>`;
+  if(!students.length)return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.<br>
+<button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="openModal('mo-nm-import')">📄 Excel/CSV Yükle</button>
+<button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="goto('students')">veya Öğrenciler'den ekle</button></div>`;
   const list=nmClass?nmStudentsInClass(nmClass):[];
-  const w1Count=list.filter(s=>nmGrade(s.id).w1!==null&&nmGrade(s.id).w1!==undefined).length;
-  const w2Count=list.filter(s=>nmGrade(s.id).w2!==null&&nmGrade(s.id).w2!==undefined).length;
-  const hist=nmData.history.filter(h=>!nmClass||h.className===nmClass).slice(0,10);
+  const w1Count=list.filter(s=>{const g=getGrade(s.id,nmSem);return g?.w1!==null&&g?.w1!==undefined;}).length;
+  const w2Count=list.filter(s=>{const g=getGrade(s.id,nmSem);return g?.w2!==null&&g?.w2!==undefined;}).length;
+  const hist=nmData.history.filter(h=>(!nmClass||h.className===nmClass)&&h.semester===nmSem).slice(0,10);
   return `<div class="card" style="margin-bottom:16px">
   <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
     <div>${nmClassSelector()}</div>
+    ${nmSemSelector()}
     <div class="sem-tabs">
       <button class="sem-tab ${nmExamType==='w1'?'active':''}" onclick="nmExamType='w1';render()">1. Yazılı</button>
       <button class="sem-tab ${nmExamType==='w2'?'active':''}" onclick="nmExamType='w2';render()">2. Yazılı</button>
@@ -1636,10 +1807,11 @@ ${hist.length?hist.map(h=>`<div class="nm-hist-item">
 }
 
 function nmRenderSozlu(){
-  if(!nmRoster().length)return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.</div>`;
+  if(!students.length)return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.</div>`;
   return `<div class="card" style="margin-bottom:16px">
   <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
     <div>${nmClassSelector()}</div>
+    ${nmSemSelector()}
     <select class="inp" style="max-width:200px" onchange="nmData.settings.round=this.value;nmSave()">
       <option value="nearest" ${nmData.settings.round==='nearest'?'selected':''}>En yakın tam sayı</option>
       <option value="down" ${nmData.settings.round==='down'?'selected':''}>Aşağı yuvarla</option>
@@ -1647,22 +1819,20 @@ function nmRenderSozlu(){
     </select>
     <button class="btn btn-outline btn-sm" onclick="openModal('mo-nm-paste')">📋 Classroom Yapıştır</button>
   </div>
-  <p style="font-size:.82rem;color:var(--text2);margin-bottom:10px">Sözlü = Yazılı Ortalaması + (Classroom Puanı / 2) — her iki sözlüye eşit dağıtılır, 100'ü geçemez.</p>
+  <p style="font-size:.82rem;color:var(--text2);margin-bottom:10px">Sözlü = Yazılı Ortalaması + (Classroom Puanı / 2) — 100'ü geçemez. Hesaplanan sözlü, seçili dönemin "Sözlü" alanına (Not Defteri) yazılır.</p>
   <button class="btn btn-primary" onclick="nmOpenOralPreview()">🧮 Tüm Sınıf İçin Sözlüleri Hesapla</button>
 </div>
 <div class="card"><div class="card-title">Sınıf — Classroom Puanları</div>
-<div class="tbl-wrap"><table><thead><tr><th>No</th><th>Ad Soyad</th><th>Yazılı Ort.</th><th>Classroom</th><th>1.Sözlü</th><th>2.Sözlü</th><th></th></tr></thead><tbody>
+<div class="tbl-wrap"><table><thead><tr><th>No</th><th>Ad Soyad</th><th>Yazılı Ort.</th><th>Classroom</th><th>Sözlü</th><th></th></tr></thead><tbody>
 ${(nmClass?nmStudentsInClass(nmClass):[]).map(st=>{
-  const g=nmGrade(st.id);const avg=nmWrittenAvg(g);const manual=nmData.manual[st.id];
+  const g=getGrade(st.id,nmSem);const avg=nmWrittenAvg(g);const manual=nmIsManual(st.id,nmSem);
   return`<tr>
   <td>${esc(st.student_number)}</td><td>${esc(st.name)}</td>
   <td>${avg!==null?avg.toFixed(1):'—'}</td>
-  <td><input class="grade-inp" type="number" min="0" max="100" value="${g.classroom??''}" placeholder="0"
-    onchange="nmSetGrade('${st.id}','classroom',this.value===''?null:parseFloat(this.value));render()"></td>
-  <td><input class="grade-inp" type="number" min="0" max="100" value="${g.oral1??''}" placeholder="—"
-    onchange="nmSetManualOral('${st.id}','oral1',this.value)"></td>
-  <td><input class="grade-inp" type="number" min="0" max="100" value="${g.oral2??''}" placeholder="—"
-    onchange="nmSetManualOral('${st.id}','oral2',this.value)"></td>
+  <td><input class="grade-inp" type="number" min="0" max="100" value="${nmClassroom(st.id,nmSem)??''}" placeholder="0"
+    onchange="nmSetClassroom('${st.id}',nmSem,this.value===''?null:parseFloat(this.value));render()"></td>
+  <td><input class="grade-inp" type="number" min="0" max="100" value="${g?.oral??''}" placeholder="—"
+    onchange="nmSetManualOral('${st.id}',this.value)"></td>
   <td>${manual?'<span class="nm-manual-badge">Manuel</span> <button class="btn-xs btn-outline" onclick="nmResetAuto(\''+st.id+'\')">↺</button>':''}</td>
 </tr>`;
 }).join('')}
@@ -1670,45 +1840,45 @@ ${(nmClass?nmStudentsInClass(nmClass):[]).map(st=>{
 }
 
 function nmRenderListe(){
-  if(!nmRoster().length)return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.</div>`;
-  let list=nmClass?nmStudentsInClass(nmClass):nmRoster().sort((a,b)=>(parseInt(a.student_number)||0)-(parseInt(b.student_number)||0));
+  if(!students.length)return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.</div>`;
+  let list=nmClass?nmStudentsInClass(nmClass):[...students].sort((a,b)=>(parseInt(a.student_number)||0)-(parseInt(b.student_number)||0));
   const q=(searchQ||'').toLowerCase();
   if(q)list=list.filter(s=>s.name.toLowerCase().includes(q)||String(s.student_number).includes(q));
-  if(nmFilter==='missing_w1')list=list.filter(s=>nmGrade(s.id).w1===null||nmGrade(s.id).w1===undefined);
-  else if(nmFilter==='missing_w2')list=list.filter(s=>nmGrade(s.id).w2===null||nmGrade(s.id).w2===undefined);
-  else if(nmFilter==='missing_classroom')list=list.filter(s=>nmGrade(s.id).classroom===null||nmGrade(s.id).classroom===undefined);
-  else if(nmFilter==='missing_oral')list=list.filter(s=>nmGrade(s.id).oral1===null||nmGrade(s.id).oral1===undefined);
-  else if(nmFilter==='manual')list=list.filter(s=>nmData.manual[s.id]);
+  if(nmFilter==='missing_w1')list=list.filter(s=>{const g=getGrade(s.id,nmSem);return!g||g.w1===null||g.w1===undefined;});
+  else if(nmFilter==='missing_w2')list=list.filter(s=>{const g=getGrade(s.id,nmSem);return!g||g.w2===null||g.w2===undefined;});
+  else if(nmFilter==='missing_classroom')list=list.filter(s=>nmClassroom(s.id,nmSem)===null);
+  else if(nmFilter==='missing_oral')list=list.filter(s=>{const g=getGrade(s.id,nmSem);return!g||g.oral===null||g.oral===undefined;});
+  else if(nmFilter==='manual')list=list.filter(s=>nmIsManual(s.id,nmSem));
   const filters=[['missing_w1','Eksik 1.Yazılı'],['missing_w2','Eksik 2.Yazılı'],['missing_classroom','Classroom Girilmeyen'],['missing_oral','Sözlü Hesaplanmamış'],['manual','Manuel Düzenlenen']];
-  return `<div style="margin-bottom:14px">${nmClassSelector()}</div>
+  return `<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:14px">${nmClassSelector()}${nmSemSelector()}</div>
 <div class="search-wrap"><span class="search-ico">🔍</span>
 <input class="search-inp" placeholder="Okul no veya ad soyad ara…" value="${esc(searchQ||'')}" oninput="searchQ=this.value;render()"></div>
 <div class="nm-filter-row">
 ${filters.map(([k,l])=>`<button class="nm-filter-chip ${nmFilter===k?'active':''}" onclick="nmFilter=nmFilter==='${k}'?null:'${k}';render()">${l}</button>`).join('')}
 </div>
 <div class="card"><div class="tbl-wrap"><table>
-<thead><tr><th>Okul No</th><th>Ad Soyad</th><th>Sınıf</th><th>1.Yazılı</th><th>2.Yazılı</th><th>Yazılı Ort.</th><th>Classroom</th><th>1.Sözlü</th><th>2.Sözlü</th><th>Durum</th></tr></thead>
+<thead><tr><th>Okul No</th><th>Ad Soyad</th><th>Sınıf</th><th>1.Yazılı</th><th>2.Yazılı</th><th>Yazılı Ort.</th><th>Classroom</th><th>Sözlü</th><th>Durum</th></tr></thead>
 <tbody>${list.map(st=>{
-  const g=nmGrade(st.id);const avg=nmWrittenAvg(g);const manual=nmData.manual[st.id];
+  const g=getGrade(st.id,nmSem);const avg=nmWrittenAvg(g);const manual=nmIsManual(st.id,nmSem);
   const cell=v=>v===null||v===undefined?'<span class="nm-missing">—</span>':`<span class="nm-ok">${v}</span>`;
   return`<tr>
   <td>${esc(st.student_number)}</td><td>${esc(st.name)}</td><td>${esc(st.class_name)}</td>
-  <td>${cell(g.w1)}</td><td>${cell(g.w2)}</td><td>${avg!==null?avg.toFixed(1):'<span class="nm-missing">—</span>'}</td>
-  <td>${cell(g.classroom)}</td><td>${cell(g.oral1)}</td><td>${cell(g.oral2)}</td>
+  <td>${cell(g?.w1)}</td><td>${cell(g?.w2)}</td><td>${avg!==null?avg.toFixed(1):'<span class="nm-missing">—</span>'}</td>
+  <td>${cell(nmClassroom(st.id,nmSem))}</td><td>${cell(g?.oral)}</td>
   <td>${manual?'<span class="nm-manual-badge">Manuel</span>':''}</td>
 </tr>`;
 }).join('')}</tbody></table></div></div>`;
 }
 
 function nmRenderEokul(){
-  if(!nmRoster().length)return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.</div>`;
+  if(!students.length)return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.</div>`;
   return `<div class="card">
   <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
-    ${nmClassSelector()}
+    ${nmClassSelector()}${nmSemSelector()}
     <select class="inp" id="nm-eokul-field" style="max-width:220px">
       <option value="w1">1. Yazılı</option><option value="w2">2. Yazılı</option>
       <option value="avg">Yazılı Ortalaması</option>
-      <option value="oral1">1. Sözlü</option><option value="oral2">2. Sözlü</option>
+      <option value="oral">Sözlü</option>
       <option value="classroom">Classroom Puanı</option>
     </select>
     <button class="btn btn-primary" onclick="nmEokulCopy()">📋 Panoya Kopyala</button>
@@ -1718,9 +1888,9 @@ function nmRenderEokul(){
 }
 
 function nmRenderDisa(){
-  if(!nmRoster().length)return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.</div>`;
+  if(!students.length)return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.</div>`;
   return `<div class="card">
-  <div style="margin-bottom:14px">${nmClassSelector()}</div>
+  <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:14px">${nmClassSelector()}${nmSemSelector()}</div>
   <div class="row-btns" style="justify-content:flex-start">
     <button class="btn btn-primary" onclick="nmExport('xlsx')">📊 Excel (.xlsx) İndir</button>
     <button class="btn btn-outline" onclick="nmExport('csv')">📄 CSV İndir</button>
@@ -1731,12 +1901,12 @@ function nmRenderDisa(){
 function nmRenderYedek(){
   return `<div class="card">
   <div class="card-title">💾 Yedekle</div>
-  <p style="font-size:.82rem;color:var(--text2);margin-bottom:12px">Not Merkezi verilerini (notlar, geçmiş, manuel işaretler) JSON dosyası olarak indirin.</p>
+  <p style="font-size:.82rem;color:var(--text2);margin-bottom:12px">Not Merkezi'ye özgü verileri (Classroom puanları, manuel sözlü işaretleri, giriş geçmişi) JSON dosyası olarak indirin. Not Defteri'ndeki notlar zaten ana yedek/Supabase senkronuyla korunur.</p>
   <button class="btn btn-primary" onclick="nmBackupJSON()">⬇️ JSON Yedek İndir</button>
 </div>
 <div class="card" style="margin-top:16px">
   <div class="card-title">♻️ Geri Yükle</div>
-  <p style="font-size:.82rem;color:var(--text2);margin-bottom:12px">Önceden indirilmiş bir JSON yedek dosyasını seçin. Mevcut Not Merkezi verileri üzerine yazılır.</p>
+  <p style="font-size:.82rem;color:var(--text2);margin-bottom:12px">Önceden indirilmiş bir JSON yedek dosyasını seçin.</p>
   <input type="file" accept=".json" onchange="nmRestoreJSON(this.files[0])">
 </div>`;
 }
