@@ -775,14 +775,27 @@ function ocOpenImportFor(cls){
   openModal('mo-nm-import');
 }
 
+let studentsClassFilter=null;
 function renderStudents(){
   const q=searchQ.toLowerCase();
-  const list=students.filter(s=>!q||s.name.toLowerCase().includes(q)||(s.student_number||'').includes(q));
-  let h=`<div class="page-title">👥 Öğrenciler <span style="font-size:.83rem;font-weight:400;color:var(--text2)">${students.length} öğrenci</span>
+  const classes=studentClasses();
+  if(studentsClassFilter&&!classes.includes(studentsClassFilter))studentsClassFilter=null;
+  let list=students.filter(s=>!q||s.name.toLowerCase().includes(q)||(s.student_number||'').includes(q));
+  if(studentsClassFilter)list=list.filter(s=>s.class_name===studentsClassFilter);
+  list=[...list].sort((a,b)=>(parseInt(a.student_number)||0)-(parseInt(b.student_number)||0));
+  let h=`<div class="page-title">👥 Öğrenciler <span style="font-size:.83rem;font-weight:400;color:var(--text2)">${list.length} / ${students.length} öğrenci</span>
 <button class="btn btn-primary btn-sm" onclick="openAddStudentModal()">+ Öğrenci / Sınıf Ekle</button></div>
+<div class="nm-filter-row">
+<button class="nm-filter-chip ${!studentsClassFilter?'active':''}" onclick="studentsClassFilter=null;render()">Tümü (${students.length})</button>
+${classes.map(c=>{
+  const cnt=students.filter(s=>s.class_name===c).length;
+  return`<button class="nm-filter-chip ${studentsClassFilter===c?'active':''}" onclick="studentsClassFilter='${esc(c).replace(/'/g,"\\'")}'; render()">${esc(c)} (${cnt})</button>`;
+}).join('')}
+</div>
 <div class="search-wrap"><span class="search-ico">🔍</span>
 <input class="search-inp" placeholder="İsim veya numara ara…" value="${esc(searchQ)}" oninput="searchQ=this.value;render()"></div>
 <div class="s-list">`;
+  if(!list.length)h+=`<div class="empty"><div class="empty-ico">👥</div>Bu sınıfta/aramada öğrenci bulunamadı.</div>`;
   list.forEach(st=>{
     const sc=getScore(st.id),sv=sc?.score??0;
     const d1=calcDönem(getGrade(st.id,1)),lv=mebLevel(d1);
