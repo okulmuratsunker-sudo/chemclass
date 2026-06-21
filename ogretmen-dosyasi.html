@@ -398,24 +398,6 @@ select.inp{cursor:pointer}
   </div>
 </div>
 
-<!-- Öğrenci / Sınıf Ekle -->
-<div class="overlay" id="mo-add-student">
-  <div class="modal">
-    <div class="modal-hd"><span>Öğrenci / Sınıf Ekle</span><button class="modal-close" onclick="closeModal('mo-add-student')">×</button></div>
-    <div class="field"><label class="field-label">Sınıf</label>
-      <input class="inp" id="as-class" list="as-class-list" placeholder="Sınıf seç veya yeni yaz (örn: 9-D)">
-      <datalist id="as-class-list"></datalist>
-    </div>
-    <div class="field"><label class="field-label">Öğrenci Numarası</label><input class="inp" id="as-number" placeholder="101"></div>
-    <div class="field"><label class="field-label">Ad Soyad</label><input class="inp" id="as-name" placeholder="Ad Soyad" onkeydown="if(event.key==='Enter')saveNewStudent()"></div>
-    <div id="as-msg" style="font-size:.82rem;color:var(--danger);margin-bottom:8px"></div>
-    <div class="row-btns">
-      <button class="btn btn-outline" onclick="closeModal('mo-add-student')">Kapat</button>
-      <button class="btn btn-primary" onclick="saveNewStudent()">Ekle</button>
-    </div>
-  </div>
-</div>
-
 <div id="toast"></div>
 
 <script>
@@ -778,7 +760,7 @@ function renderStudents(){
   if(studentsClassFilter)list=list.filter(s=>s.class_name===studentsClassFilter);
   list=[...list].sort((a,b)=>(parseInt(a.student_number)||0)-(parseInt(b.student_number)||0));
   let h=`<div class="page-title">👥 Öğrenciler <span style="font-size:.83rem;font-weight:400;color:var(--text2)">${list.length} / ${students.length} öğrenci</span>
-<button class="btn btn-primary btn-sm" onclick="openAddStudentModal()">+ Öğrenci / Sınıf Ekle</button></div>
+<button class="btn btn-outline btn-sm" onclick="goto('classes')">🏫 Sınıf/Öğrenci Eklemek İçin Sınıflarım'a Git</button></div>
 <div class="nm-filter-row">
 <button class="nm-filter-chip ${!studentsClassFilter?'active':''}" onclick="studentsClassFilter=null;render()">Tümü (${students.length})</button>
 ${classes.map(c=>{
@@ -813,12 +795,19 @@ ${classes.map(c=>{
 async function deleteStudentRecords(sid){
   // Not: teacher_photos ve question_scores tabloları şu an veritabanında yok
   // (Madde Analizi/fotoğraf özelliği bu tablolara bağlıydı, ayrıca ele alınmalı).
-  await Promise.all([
+  const subResults=await Promise.all([
     sb.from('teacher_grades').delete().eq('student_id',sid),
     sb.from('student_scores').delete().eq('student_id',sid),
     sb.from('score_history').delete().eq('student_id',sid),
   ]);
-  await sb.from('teacher_students').delete().eq('id',sid);
+  const subErr=subResults.find(r=>r&&r.error);
+  if(subErr)throw new Error(subErr.error.message);
+  const{error}=await sb.from('teacher_students').delete().eq('id',sid);
+  if(error)throw new Error(error.message);
+  // Silme isteği başarıyla gönderildi ama gerçekten silinip silinmediğini doğrula
+  // (RLS sessizce 0 satır etkileyebilir, bu durumda hata fırlatmaz).
+  const{data:stillThere}=await sb.from('teacher_students').select('id').eq('id',sid).limit(1);
+  if(stillThere&&stillThere.length)throw new Error('Kayıt silinemedi (yetki sorunu olabilir).');
   students=students.filter(s=>s.id!==sid);
   grades=grades.filter(g=>g.student_id!==sid);
   scores=scores.filter(s=>s.student_id!==sid);
@@ -929,34 +918,6 @@ async function saveStudentNote(sid){
   toast('✓ Not kaydedildi');
 }
 
-function openAddStudentModal(){
-  document.getElementById('as-class').value=(typeof nmClass!=='undefined'&&nmClass)?nmClass:'';
-  document.getElementById('as-number').value='';
-  document.getElementById('as-name').value='';document.getElementById('as-msg').textContent='';
-  document.getElementById('as-class-list').innerHTML=studentClasses().map(c=>`<option value="${esc(c)}">`).join('');
-  openModal('mo-add-student');
-  setTimeout(()=>document.getElementById(document.getElementById('as-class').value?'as-number':'as-class')?.focus(),50);
-}
-async function saveNewStudent(){
-  const cls=document.getElementById('as-class').value.trim();
-  const no=document.getElementById('as-number').value.trim();
-  const name=document.getElementById('as-name').value.trim();
-  const msgEl=document.getElementById('as-msg');
-  if(!cls||!no||!name){msgEl.textContent='Sınıf, numara ve ad soyad zorunlu.';return;}
-  const dup=students.find(s=>(s.class_name||'')===cls&&String(s.student_number)===no);
-  if(dup){msgEl.textContent=`Bu sınıfta ${no} numaralı öğrenci zaten var: ${dup.name}`;return;}
-  msgEl.textContent='';
-  try{
-    const{data,error}=await sb.from('teacher_students').insert({name,student_number:no,class_name:cls}).select().single();
-    if(error){msgEl.textContent='Hata: '+error.message;return;}
-    students.push(data);ofSaveCache();
-    toast(`✓ ${name} eklendi (${cls})`);
-    document.getElementById('as-number').value='';document.getElementById('as-name').value='';
-    document.getElementById('as-name')?.blur();
-    render();
-    setTimeout(()=>document.getElementById('as-number')?.focus(),50);
-  }catch(err){msgEl.textContent='Hata: '+err.message;}
-}
 
 // ════════════════════════════════════════
 // NOT DEFTERİ
@@ -1937,18 +1898,13 @@ function nmRestoreJSON(file){
 function nmClassSelector(){
   const classes=nmClasses();
   if(!classes.length){
-    return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.<br>
-<button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="openModal('mo-nm-import')">📄 Excel/CSV Yükle</button>
-<button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="openAddStudentModal()">+ Sınıf / Öğrenci Ekle</button></div>`;
+    return `<div class="empty"><div class="empty-ico">👥</div>Önce sınıf/öğrenci listesi gerekli.<br>
+<button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="goto('classes')">🏫 Sınıflarım'a Git</button></div>`;
   }
   if(!nmClass)nmClass=classes[0];
-  return `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-<select class="inp" style="max-width:220px;display:inline-block" onchange="nmClass=this.value;render()">
+  return `<select class="inp" style="max-width:220px;display:inline-block" onchange="nmClass=this.value;render()">
 ${classes.map(c=>`<option value="${esc(c)}" ${c===nmClass?'selected':''}>${esc(c)}</option>`).join('')}
-</select>
-<button class="btn btn-outline btn-sm" onclick="openAddStudentModal()" title="Yeni sınıf veya bu sınıfa öğrenci ekle">+ Sınıf/Öğrenci</button>
-<button class="btn btn-outline btn-sm" onclick="openModal('mo-nm-import')" title="Excel/CSV ile toplu ekle">📄 İçe Aktar</button>
-</div>`;
+</select>`;
 }
 function nmSemSelector(){
   return `<div class="sem-tabs">
@@ -1974,9 +1930,8 @@ function nmAfterRender(){
 }
 
 function nmRenderYazili(){
-  if(!students.length)return `<div class="empty"><div class="empty-ico">👥</div>Önce öğrenci listesi gerekli.<br>
-<button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="openModal('mo-nm-import')">📄 Excel/CSV Yükle</button>
-<button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="goto('students')">veya Öğrenciler'den ekle</button></div>`;
+  if(!students.length)return `<div class="empty"><div class="empty-ico">👥</div>Önce sınıf/öğrenci listesi gerekli.<br>
+<button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="goto('classes')">🏫 Sınıflarım'a Git</button></div>`;
   const list=nmClass?nmStudentsInClass(nmClass):[];
   const w1Count=list.filter(s=>{const g=getGrade(s.id,nmSem);return g?.w1!==null&&g?.w1!==undefined;}).length;
   const w2Count=list.filter(s=>{const g=getGrade(s.id,nmSem);return g?.w2!==null&&g?.w2!==undefined;}).length;
