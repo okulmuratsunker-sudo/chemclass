@@ -1565,15 +1565,22 @@ function nmExportXLSX(rows,filename){
 function nmParseEokulSheet(ws){
   if(!ws||!ws['!ref'])return null;
   const range=XLSX.utils.decode_range(ws['!ref']);
-  let headerRow=-1,colY1=-1,colY2=-1,colOdev=-1,className='',semester=null;
+  let headerRow=-1,colY1=-1,colY2=-1,colOdev=-1,colP1=-1,colP2=-1,colProje=-1,colU1=-1;
+  let className='',semester=null;
   for(let R=range.s.r;R<=range.e.r;R++){
     for(let C=range.s.c;C<=range.e.c;C++){
       const cell=ws[XLSX.utils.encode_cell({r:R,c:C})];
       if(!cell||cell.v===undefined||cell.v===null)continue;
       const v=String(cell.v).trim();
       if(v==='Y1'){headerRow=R;colY1=C;}
-      if(v==='Y2'&&headerRow===R)colY2=C;
-      if(v==='Ödev')colOdev=C;
+      if(R===headerRow){
+        if(v==='Y2')colY2=C;
+        if(v==='Ödev')colOdev=C;
+        if(v==='P1')colP1=C;
+        if(v==='P2')colP2=C;
+        if(v==='Proje')colProje=C;
+        if(v==='U1')colU1=C;
+      }
       if(/Sınıfı\s*\/\s*Şubesi/i.test(v)){
         for(let CC=C;CC<=range.e.c;CC++){
           const c2=ws[XLSX.utils.encode_cell({r:R,c:CC})];
@@ -1588,6 +1595,14 @@ function nmParseEokulSheet(ws){
   }
   if(headerRow<0||colY1<0)return null; // bu format değil
   const colOkulNo=1,colAd=2; // B: Okul Numarası, C: Adı Soyadı (sabit — e-Okul export şablonu)
+  // e-Okul'da bazı sütunlar (özellikle U1-U3) bazen "Ağırlıklı Puan" gibi 0-100
+  // aralığı dışında değerler taşıyabiliyor — not olarak kabul etmeden önce reddediyoruz.
+  function toScore(cell){
+    if(!cell||cell.v===undefined||cell.v===null)return null;
+    const n=typeof cell.v==='number'?cell.v:parseFloat(cell.v);
+    if(isNaN(n)||n<0||n>100)return null;
+    return n;
+  }
   const out=[];
   for(let R=headerRow+1;R<=range.e.r;R++){
     const noCell=ws[XLSX.utils.encode_cell({r:R,c:colOkulNo})];
@@ -1596,12 +1611,14 @@ function nmParseEokulSheet(ws){
     const no=String(noCell.v??'').trim();
     const name=String(nameCell.v??'').trim();
     if(!no||!name||!/^\d+$/.test(no))continue;
-    const y1c=ws[XLSX.utils.encode_cell({r:R,c:colY1})];
-    const y2c=colY2>=0?ws[XLSX.utils.encode_cell({r:R,c:colY2})]:null;
     out.push({
       no,name,class_name:className||'—',
-      y1:y1c&&typeof y1c.v==='number'?y1c.v:null,
-      y2:y2c&&typeof y2c.v==='number'?y2c.v:null
+      y1:toScore(ws[XLSX.utils.encode_cell({r:R,c:colY1})]),
+      y2:colY2>=0?toScore(ws[XLSX.utils.encode_cell({r:R,c:colY2})]):null,
+      perf1:colP1>=0?toScore(ws[XLSX.utils.encode_cell({r:R,c:colP1})]):null,
+      perf2:colP2>=0?toScore(ws[XLSX.utils.encode_cell({r:R,c:colP2})]):null,
+      proje1:colProje>=0?toScore(ws[XLSX.utils.encode_cell({r:R,c:colProje})]):null,
+      proje2:colU1>=0?toScore(ws[XLSX.utils.encode_cell({r:R,c:colU1})]):null
     });
   }
   return{className:className||'—',semester,students:out,hasOdevCol:colOdev>=0};
@@ -1630,6 +1647,14 @@ async function nmImportRows(parsedStudents,defaultClassName,detectedSemester){
     msgEl.textContent='Geçerli öğrenci satırı bulunamadı.';return;
   }
   let createdCount=0,gradeWriteCount=0;
+  const gradeFields={w1:'y1',w2:'y2',perf:'perf1',perf2:'perf2',project:'proje1',proj2:'proje2'};
+  async function writeGrades(studentId,p,sem){
+    for(const[col,key]of Object.entries(gradeFields)){
+      const v=p[key];
+      if(v===null||v===undefined)continue;
+      await saveGrade(studentId,sem,col,v);gradeWriteCount++;
+    }
+  }
   for(const p of toInsert){
     try{
       const{data,error}=await sb.from('teacher_students').insert({
@@ -1637,18 +1662,13 @@ async function nmImportRows(parsedStudents,defaultClassName,detectedSemester){
       }).select().single();
       if(error){dupNumbers.push(p.no+' (hata: '+error.message+')');continue;}
       students.push(data);createdCount++;
-      if((p.y1!==null&&p.y1!==undefined)||(p.y2!==null&&p.y2!==undefined)){
-        const sem=detectedSemester||nmSem;
-        if(p.y1!==null&&p.y1!==undefined){await saveGrade(data.id,sem,'w1',p.y1);gradeWriteCount++;}
-        if(p.y2!==null&&p.y2!==undefined){await saveGrade(data.id,sem,'w2',p.y2);gradeWriteCount++;}
-      }
+      const sem=detectedSemester||nmSem;
+      await writeGrades(data.id,p,sem);
     }catch(err){dupNumbers.push(p.no+' (hata: '+err.message+')');}
   }
   for(const{existing,p}of matchedExisting){
-    if((p.y1===null||p.y1===undefined)&&(p.y2===null||p.y2===undefined))continue;
     const sem=detectedSemester||nmSem;
-    if(p.y1!==null&&p.y1!==undefined){await saveGrade(existing.id,sem,'w1',p.y1);gradeWriteCount++;}
-    if(p.y2!==null&&p.y2!==undefined){await saveGrade(existing.id,sem,'w2',p.y2);gradeWriteCount++;}
+    await writeGrades(existing.id,p,sem);
   }
   if(detectedSemester)nmSem=detectedSemester;
   if(defaultClassName)nmClass=defaultClassName;
