@@ -662,6 +662,31 @@
   .iupac-chain .num.top{ top:auto; bottom:100%; margin-bottom:1mm; }
   .iupac-chain .result{ font-weight:700; font-size:13pt; white-space:nowrap; }
 
+  /* ---------- sınıflandırma etiketi: atomu işaret eden ok+çizgi ---------- */
+  .iupac-chain .class-tag{ position:absolute; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; font-size:8.5pt; font-weight:700; color:var(--red); white-space:nowrap; line-height:1.2; }
+  .iupac-chain .class-tag.below{ top:100%; margin-top:0.8mm; }
+  .iupac-chain .class-tag.above{ bottom:100%; margin-bottom:0.8mm; }
+  .iupac-chain .class-tag .ptr{ width:0; height:2.3mm; border-left:1.4px solid var(--red); position:relative; margin:0.4mm 0; }
+  .iupac-chain .class-tag .ptr::after{ content:""; position:absolute; left:50%; transform:translateX(-50%); border:1mm solid transparent; }
+  .iupac-chain .class-tag.below .ptr::after{ top:-1.4mm; border-bottom:1.6mm solid var(--red); }
+  .iupac-chain .class-tag.above .ptr::after{ bottom:-1.4mm; border-top:1.6mm solid var(--red); }
+
+  /* ---------- alkil önek ağacı (Primer/Sekonder/Tersiyer Alkil) ---------- */
+  .alkil-tree{ display:flex; justify-content:space-around; align-items:flex-start; margin:7mm 0 2mm 0; text-align:center; }
+  .alkil-col{ display:flex; flex-direction:column; align-items:center; }
+  .alkil-head{ color:var(--red); font-weight:700; font-size:12.5pt; text-decoration:underline; white-space:nowrap; }
+  .fork3{ position:relative; width:32mm; height:5mm; margin-top:1.5mm; }
+  .fork3::before{ content:""; position:absolute; top:0; left:7%; right:7%; height:0; border-top:1.4px solid var(--ink); }
+  .fork3 .leg{ position:absolute; top:0; width:0; height:4mm; border-left:1.4px solid var(--ink); }
+  .fork3 .leg::after{ content:""; position:absolute; bottom:-1.5mm; left:50%; transform:translateX(-50%); border:1mm solid transparent; border-top:1.5mm solid var(--ink); }
+  .fork3 .leg.l{ left:7%; }
+  .fork3 .leg.m{ left:50%; }
+  .fork3 .leg.r{ left:93%; }
+  .fork-labels{ display:flex; justify-content:space-between; width:32mm; font-weight:700; font-size:11pt; margin-top:1mm; }
+  .fork1{ position:relative; width:0; height:5mm; border-left:1.4px solid var(--ink); margin-top:1.5mm; }
+  .fork1::after{ content:""; position:absolute; bottom:-1.5mm; left:50%; transform:translateX(-50%); border:1mm solid transparent; border-top:1.5mm solid var(--ink); }
+  .alkil-stack{ display:flex; flex-direction:column; align-items:center; font-weight:700; font-size:11pt; margin-top:1mm; line-height:1.7; }
+
   .ex-grid{ display:grid; grid-template-columns:1fr 1fr; gap:3mm 8mm; margin-top:1mm; }
   .ex-item{ border:1px solid var(--line); border-radius:2px; padding:3mm 2mm; display:flex; flex-direction:column; align-items:center; justify-content:center; }
   .ex-item .ex-num{ align-self:flex-start; font-weight:700; color:var(--red); margin-bottom:1mm; }
@@ -4682,18 +4707,18 @@
     <li>Bir alkanın hidrojen atomları, bağlı oldukları karbon atomları esas alınarak sınıflandırılır.</li>
   </ul>
 
-  <div style="display:flex; justify-content:center; margin-top:9mm">
+  <div style="display:flex; justify-content:center; margin-top:8mm">
     <div class="iupac-chain has-up" style="gap:7mm">
-      <div class="atom">CH<sub>3</sub><div class="num">primer C atomu</div></div>
+      <div class="atom">CH<sub>3</sub><div class="class-tag below"><span class="ptr"></span><span>primer C atomu</span></div></div>
       <div class="bond">–</div>
       <div class="atom">CH
         <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
-        <div class="num">tersiyer C atomu</div>
+        <div class="class-tag below"><span class="ptr"></span><span>tersiyer C atomu</span></div>
       </div>
       <div class="bond">–</div>
-      <div class="atom">CH<sub>2</sub><div class="num">sekonder C atomu</div></div>
+      <div class="atom">CH<sub>2</sub><div class="class-tag below"><span class="ptr"></span><span>sekonder C atomu</span></div></div>
       <div class="bond">–</div>
-      <div class="atom">CH<sub>3</sub><div class="num">primer C atomu</div></div>
+      <div class="atom">CH<sub>3</sub><div class="class-tag below"><span class="ptr"></span><span>primer C atomu</span></div></div>
     </div>
   </div>
 
@@ -4703,12 +4728,12 @@
       <div class="bond">–</div>
       <div class="atom">CH
         <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span><span class="arrow">→ primer H atomu</span></div></div>
-        <div class="num top">tersiyer H atomu</div>
+        <div class="class-tag above"><span>tersiyer H atomu</span><span class="ptr"></span></div>
       </div>
       <div class="bond">–</div>
-      <div class="atom">CH<sub>2</sub><div class="num top">sekonder H atomu</div></div>
+      <div class="atom">CH<sub>2</sub><div class="class-tag above"><span>sekonder H atomu</span><span class="ptr"></span></div></div>
       <div class="bond">–</div>
-      <div class="atom">CH<sub>3</sub><div class="num top">primer H atomu</div></div>
+      <div class="atom">CH<sub>3</sub><div class="class-tag above"><span>primer H atomu</span><span class="ptr"></span></div></div>
     </div>
   </div>
 
@@ -4725,18 +4750,21 @@
     <li>Primer karbon atomundan hidrojen eksilirse <strong>primer alkil</strong>, sekonder karbon atomundan hidrojen eksilirse <strong>sekonder alkil</strong>, tersiyer karbon atomundan hidrojen eksilirse <strong>tersiyer alkil</strong> oluşur.</li>
   </ul>
 
-  <div class="box-row" style="margin-top:6mm">
-    <div class="concept-box" style="text-align:center; padding:4mm 4mm; font-size:11pt">
-      <div class="box-title" style="color:var(--red); font-size:13pt">Primer Alkil</div>
-      <div>n– , izo– , neo–</div>
+  <div class="alkil-tree" style="margin:5mm 0 1mm 0">
+    <div class="alkil-col">
+      <div class="alkil-head">Primer Alkil</div>
+      <div class="fork3"><div class="leg l"></div><div class="leg m"></div><div class="leg r"></div></div>
+      <div class="fork-labels"><span>n–</span><span>izo–</span><span>neo–</span></div>
     </div>
-    <div class="concept-box" style="text-align:center; padding:4mm 4mm; font-size:11pt">
-      <div class="box-title" style="color:var(--red); font-size:13pt">Sekonder Alkil</div>
-      <div>sekonder veya sec–</div>
+    <div class="alkil-col">
+      <div class="alkil-head">Sekonder Alkil</div>
+      <div class="fork1"></div>
+      <div class="alkil-stack"><span>sekonder</span><span>veya</span><span>sec–</span></div>
     </div>
-    <div class="concept-box" style="text-align:center; padding:4mm 4mm; font-size:11pt">
-      <div class="box-title" style="color:var(--red); font-size:13pt">Tersiyer Alkil</div>
-      <div>tersiyer veya ter–</div>
+    <div class="alkil-col">
+      <div class="alkil-head">Tersiyer Alkil</div>
+      <div class="fork1"></div>
+      <div class="alkil-stack"><span>tersiyer</span><span>veya</span><span>ter–</span></div>
     </div>
   </div>
 
@@ -4765,14 +4793,14 @@
     </div>
   </div>
 
-  <ul class="notes" style="margin-top:9mm">
+  <ul class="notes" style="margin-top:7mm">
     <li>C<sub>4</sub>H<sub>10</sub> bileşiğinden türeyen alkil grupları:</li>
   </ul>
 
   <div class="group-grid cols2" style="margin-top:6mm; gap:10mm 8mm">
     <div class="group-item">
       <div class="iupac-chain" style="gap:2mm; margin-bottom:10mm">
-        <div class="atom">CH<sub>3</sub></div><div class="bond">–</div><div class="atom">CH<sub>2</sub></div><div class="bond">–</div><div class="atom">CH<sub>2</sub></div><div class="bond">–</div><div class="atom">CH<sub>2</sub><div class="num">primer C atomu</div></div>
+        <div class="atom">CH<sub>3</sub></div><div class="bond">–</div><div class="atom">CH<sub>2</sub></div><div class="bond">–</div><div class="atom">CH<sub>2</sub></div><div class="bond">–</div><div class="atom">CH<sub>2</sub><div class="class-tag below"><span class="ptr"></span><span>primer C atomu</span></div></div>
       </div>
       <div class="group-label">n-bütil</div>
     </div>
@@ -4780,7 +4808,7 @@
       <div class="iupac-chain" style="gap:2mm; margin-bottom:10mm">
         <div class="atom">CH<sub>3</sub></div>
         <div class="bond">–</div>
-        <div class="atom">CH<div class="num">sekonder C atomu</div></div>
+        <div class="atom">CH<div class="class-tag below"><span class="ptr"></span><span>sekonder C atomu</span></div></div>
         <div class="bond">–</div>
         <div class="atom">CH<sub>2</sub></div>
         <div class="bond">–</div>
@@ -4796,7 +4824,7 @@
           <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
         </div>
         <div class="bond">–</div>
-        <div class="atom">CH<sub>2</sub><div class="num">primer C atomu</div></div>
+        <div class="atom">CH<sub>2</sub><div class="class-tag below"><span class="ptr"></span><span>primer C atomu</span></div></div>
       </div>
       <div class="group-label">izo-bütil</div>
     </div>
@@ -4806,7 +4834,7 @@
         <div class="bond">–</div>
         <div class="atom">C
           <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
-          <div class="num top">tersiyer C atomu</div>
+          <div class="class-tag above"><span>tersiyer C atomu</span><span class="ptr"></span></div>
         </div>
         <div class="bond">–</div>
         <div class="atom">CH<sub>3</sub></div>
