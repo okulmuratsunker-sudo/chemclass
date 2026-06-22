@@ -70,7 +70,7 @@
     font-size:8.5pt;
     color:#9a9a9a;
   }
-  .page-foot::after{ content:"Sayfa " counter(pagenum) " / 49"; }
+  .page-foot::after{ content:"Sayfa " counter(pagenum) " / 50"; }
 
   /* ---------- bullet notes ---------- */
   ul.notes{
@@ -5035,116 +5035,129 @@
   <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
   <h1 class="page-title">Alıştırmalar</h1>
 
-  <div class="two-col" style="flex:1; margin-bottom:0">
-    <div class="col" style="display:flex; flex-direction:column; gap:3mm">
-      <div class="qbox">
-        <p><strong>1.</strong> Aşağıdakilerden hangisi ter-pentil klorür bileşiğidir?</p>
-        <div class="options" style="grid-template-columns:1fr; gap:0.5mm; margin-top:1mm">
-          <span style="display:flex; align-items:center; gap:2mm"><strong>A)</strong>
-            <div class="iupac-chain small" style="margin:2mm 0 7mm 0">
-              <div class="atom">CH<sub>3</sub></div><div class="bond">–</div>
-              <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
-              <div class="atom">CH<div class="branch down"><div class="bline"></div><div class="lbl-row"><span>Cl</span></div></div></div><div class="bond">–</div>
-              <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
-              <div class="atom">CH<sub>3</sub></div>
-            </div>
-          </span>
-          <span style="display:flex; align-items:center; gap:2mm"><strong>B)</strong>
-            <div class="iupac-chain small" style="margin:7mm 0">
-              <div class="atom">CH<sub>3</sub></div><div class="bond">–</div>
-              <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
-              <div class="atom">C
-                <div class="branch up"><div class="lbl-row"><span>Cl</span></div><div class="bline"></div></div>
-                <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
-              </div><div class="bond">–</div>
-              <div class="atom">CH<sub>3</sub></div>
-            </div>
-          </span>
-          <span style="display:flex; align-items:center; gap:2mm"><strong>C)</strong>
-            <div class="iupac-chain small" style="margin:7mm 0">
-              <div class="atom">CH<sub>3</sub></div><div class="bond">–</div>
-              <div class="atom">C
-                <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
-                <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
-              </div><div class="bond">–</div>
-              <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
-              <div class="atom">Cl</div>
-            </div>
-          </span>
-          <span style="display:flex; align-items:center; gap:2mm"><strong>D)</strong>
-            <div class="iupac-chain small" style="margin:2mm 0 7mm 0">
-              <div class="atom">CH<sub>3</sub></div><div class="bond">–</div>
-              <div class="atom">CH<div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div></div><div class="bond">–</div>
-              <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
-              <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
-              <div class="atom">Cl</div>
-            </div>
-          </span>
-          <span style="display:flex; align-items:center; gap:2mm"><strong>E)</strong>
-            <div class="iupac-chain small" style="margin:2mm 0">
-
-              <div class="atom">CH<sub>3</sub></div><div class="bond">–</div>
-              <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
-              <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
-              <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
-              <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
-              <div class="atom">Cl</div>
-            </div>
-          </span>
-        </div>
-      </div>
-
-      <div class="qbox" style="flex:1">
-        <p><strong>2.</strong> Aşağıda verilenlerden hangilerinin isimleri doğru verilmiştir?</p>
-        <div class="statements" style="margin:1mm 0">
-          <div class="stmt" style="align-items:center; margin:2mm 0 14mm 0">
-            <span class="num">I.</span>
-            <div class="iupac-chain small" style="margin:0">
-              <div class="atom">CH<sub>3</sub></div><div class="bond">–</div>
-              <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
-              <div class="atom">CH<div class="branch down"><div class="bline"></div><div class="lbl-row"><span>Br</span></div></div></div><div class="bond">–</div>
-              <div class="atom">CH<sub>3</sub></div>
-            </div>
-            <span>sec bütil bromür</span>
+  <div style="display:flex; flex-direction:column; gap:5mm; flex:1">
+    <div class="qbox">
+      <p><strong>1.</strong> Aşağıdakilerden hangisi ter-pentil klorür bileşiğidir?</p>
+      <div class="options" style="gap:2mm 8mm; margin-top:3mm">
+        <span style="display:flex; align-items:center; gap:2mm"><strong>A)</strong>
+          <div class="iupac-chain" style="margin:3mm 0 8mm 0">
+            <div class="atom">CH<sub>3</sub></div><div class="bond">–</div>
+            <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
+            <div class="atom">CH<div class="branch down"><div class="bline"></div><div class="lbl-row"><span>Cl</span></div></div></div><div class="bond">–</div>
+            <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
+            <div class="atom">CH<sub>3</sub></div>
           </div>
-          <div class="stmt" style="align-items:center; margin:0 0 14mm 0">
-            <span class="num">II.</span>
-            <div class="iupac-chain small" style="margin:0">
-              <div class="atom">CH<sub>3</sub></div><div class="bond">–</div>
-              <div class="atom">C
-                <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
-                <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
-              </div><div class="bond">–</div>
-              <div class="atom">Cl</div>
-            </div>
-            <span>neo bütil klorür</span>
+        </span>
+        <span style="display:flex; align-items:center; gap:2mm"><strong>B)</strong>
+          <div class="iupac-chain" style="margin:3mm 0 8mm 0">
+            <div class="atom">CH<sub>3</sub></div><div class="bond">–</div>
+            <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
+            <div class="atom">C
+              <div class="branch up"><div class="lbl-row"><span>Cl</span></div><div class="bline"></div></div>
+              <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+            </div><div class="bond">–</div>
+            <div class="atom">CH<sub>3</sub></div>
           </div>
-          <div class="stmt" style="align-items:center; margin:0 0 7mm 0">
-            <span class="num">III.</span>
-            <div class="iupac-chain small" style="margin:0">
-              <div class="atom">CH<sub>3</sub></div><div class="bond">–</div>
-              <div class="atom">C
-                <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
-                <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
-              </div><div class="bond">–</div>
-              <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
-              <div class="atom">Br</div>
-            </div>
-            <span>ter bütil bromür</span>
+        </span>
+        <span style="display:flex; align-items:center; gap:2mm"><strong>C)</strong>
+          <div class="iupac-chain" style="margin:8mm 0">
+            <div class="atom">CH<sub>3</sub></div><div class="bond">–</div>
+            <div class="atom">C
+              <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+              <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+            </div><div class="bond">–</div>
+            <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
+            <div class="atom">Cl</div>
           </div>
-        </div>
-        <p style="margin-bottom:0">Yargılarından hangileri doğrudur?</p>
+        </span>
+        <span style="display:flex; align-items:center; gap:2mm"><strong>D)</strong>
+          <div class="iupac-chain" style="margin:2mm 0 8mm 0">
+            <div class="atom">CH<sub>3</sub></div><div class="bond">–</div>
+            <div class="atom">CH<div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div></div><div class="bond">–</div>
+            <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
+            <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
+            <div class="atom">Cl</div>
+          </div>
+        </span>
+        <span style="display:flex; align-items:center; gap:2mm"><strong>E)</strong>
+          <div class="iupac-chain" style="margin:2mm 0 3mm 0">
+            <div class="atom">CH<sub>3</sub></div><div class="bond">–</div>
+            <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
+            <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
+            <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
+            <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
+            <div class="atom">Cl</div>
+          </div>
+        </span>
       </div>
     </div>
 
-    <div class="col" style="display:flex; flex-direction:column; gap:3mm">
+    <div class="qbox" style="flex:1">
+      <p><strong>2.</strong> Aşağıda verilenlerden hangilerinin isimleri doğru verilmiştir?</p>
+      <div class="statements" style="margin:2mm 0">
+        <div class="stmt" style="align-items:center; margin:3mm 0 16mm 0">
+          <span class="num">I.</span>
+          <div class="iupac-chain" style="margin:0">
+            <div class="atom">CH<sub>3</sub></div><div class="bond">–</div>
+            <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
+            <div class="atom">CH<div class="branch down"><div class="bline"></div><div class="lbl-row"><span>Br</span></div></div></div><div class="bond">–</div>
+            <div class="atom">CH<sub>3</sub></div>
+          </div>
+          <span>sec bütil bromür</span>
+        </div>
+        <div class="stmt" style="align-items:center; margin:0 0 16mm 0">
+          <span class="num">II.</span>
+          <div class="iupac-chain" style="margin:0">
+            <div class="atom">CH<sub>3</sub></div><div class="bond">–</div>
+            <div class="atom">C
+              <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+              <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+            </div><div class="bond">–</div>
+            <div class="atom">Cl</div>
+          </div>
+          <span>neo bütil klorür</span>
+        </div>
+        <div class="stmt" style="align-items:center; margin:0 0 8mm 0">
+          <span class="num">III.</span>
+          <div class="iupac-chain" style="margin:0">
+            <div class="atom">CH<sub>3</sub></div><div class="bond">–</div>
+            <div class="atom">C
+              <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+              <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+            </div><div class="bond">–</div>
+            <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
+            <div class="atom">Br</div>
+          </div>
+          <span>ter bütil bromür</span>
+        </div>
+      </div>
+      <p style="margin-bottom:0">Yargılarından hangileri doğrudur?</p>
+    </div>
+  </div>
+
+  <h2 class="section-title" style="margin-top:3mm">Cevaplar</h2>
+  <div class="answers-note">
+    <span><strong>1.</strong> b</span>
+    <span><strong>2.</strong> Yalnız I</span>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 50 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Alıştırmalar</h1>
+
+  <div class="two-col" style="flex:1; margin-bottom:0">
+    <div class="col" style="display:flex; flex-direction:column; gap:4mm">
       <div class="qbox">
         <p style="margin-bottom:0"><strong>3.</strong> Bir karbon atomuna iki tane etil, bir tane metil ve bir tane ter-bütil bağlanması ile oluşan bileşiğin IUPAC sistemine göre adı ne olur?</p>
       </div>
 
-      <div class="qbox">
-        <p style="margin-bottom:1mm"><strong>4.</strong></p>
-        <div class="iupac-chain small" style="margin:3mm auto 8mm auto; width:fit-content">
+      <div class="qbox" style="flex:1">
+        <p style="margin-bottom:2mm"><strong>4.</strong></p>
+        <div class="iupac-chain big" style="margin:5mm auto 12mm auto; width:fit-content">
           <div class="atom">CH<sub>3</sub></div><div class="bond">–</div>
           <div class="atom">C
             <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
@@ -5159,10 +5172,12 @@
           <div class="stmt"><span class="num">III.</span><span>tetra metil metan</span></div>
         </div>
       </div>
+    </div>
 
+    <div class="col" style="display:flex; flex-direction:column">
       <div class="qbox" style="flex:1">
-        <p style="margin-bottom:1mm"><strong>5.</strong></p>
-        <div class="iupac-chain small" style="margin:3mm auto 8mm auto; width:fit-content">
+        <p style="margin-bottom:2mm"><strong>5.</strong></p>
+        <div class="iupac-chain big" style="margin:6mm auto 13mm auto; width:fit-content">
           <div class="atom">CH<sub>3</sub></div><div class="bond">–</div>
           <div class="atom">CH<sub>2</sub></div><div class="bond">–</div>
           <div class="atom">CH<div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>2</sub>–CH<sub>3</sub></span></div></div></div><div class="bond">–</div>
@@ -5179,10 +5194,8 @@
     </div>
   </div>
 
-  <h2 class="section-title" style="margin-top:2mm">Cevaplar</h2>
+  <h2 class="section-title" style="margin-top:3mm">Cevaplar</h2>
   <div class="answers-note">
-    <span><strong>1.</strong> b</span>
-    <span><strong>2.</strong> Yalnız I</span>
     <span><strong>3.</strong> 2,2,3-trimetil-3-etil pentan</span>
     <span><strong>4.</strong> I, II ve III</span>
     <span><strong>5.</strong> I ve III</span>
