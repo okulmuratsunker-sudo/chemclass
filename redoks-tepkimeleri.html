@@ -70,7 +70,7 @@
     font-size:8.5pt;
     color:#9a9a9a;
   }
-  .page-foot::after{ content:"Sayfa " counter(pagenum) " / 45"; }
+  .page-foot::after{ content:"Sayfa " counter(pagenum) " / 46"; }
 
   /* ---------- bullet notes ---------- */
   ul.notes{
@@ -689,14 +689,14 @@
   .struct-grid .sbond-v{ display:flex; justify-content:center; height:100%; }
   .struct-grid .sbond-v::before{ content:""; width:0; border-left:1.3px solid var(--ink); }
 
-  /* ---------- sayfa 47: özel adlandırma ve karbon türleri ---------- */
-  .page-47 .iupac-chain.small{ font-size:12pt; }
-  .page-47 .iupac-chain.small .branch .bline{ height:4mm; }
-  .page-47 .group-grid{ margin-top:6mm; gap:6mm; }
-  .page-47 .group-label{ font-size:11.5pt; margin-top:2.5mm; }
-  .page-47 .iupac-chain.has-up:not(.small){ font-size:14pt; }
-  .page-47 .iupac-chain.has-up:not(.small) .num{ font-size:10.5pt; }
-  .page-47 .iupac-chain.has-up:not(.small) .branch .bline{ height:3.5mm; }
+  /* ---------- özel adlandırma ve karbon türleri ---------- */
+  .ozel-adlandirma .iupac-chain.small{ font-size:12pt; }
+  .ozel-adlandirma .iupac-chain.small .branch .bline{ height:4mm; }
+  .ozel-adlandirma .group-grid{ margin-top:6mm; gap:6mm; }
+  .ozel-adlandirma .group-label{ font-size:11.5pt; margin-top:2.5mm; }
+  .ozel-adlandirma .iupac-chain:not(.small){ font-size:14pt; }
+  .ozel-adlandirma .iupac-chain:not(.small) .branch .bline{ height:3.5mm; }
+  .ozel-adlandirma .iupac-chain .num{ white-space:nowrap; }
 
   /* ---------- alkil grup kartları ---------- */
   .iupac-chain.small{ font-size:10pt; }
@@ -4622,6 +4622,94 @@
         <div class="sbond-v" style="grid-row:10; grid-column:7"></div>
         <div class="satom" style="grid-row:11; grid-column:7">CH<sub>3</sub></div>
       </div>
+    </div>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 46 ======================= -->
+<section class="page ozel-adlandirma">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Alkanların Özel Adlandırılması</h1>
+
+  <ul class="notes">
+    <li>Ana zincirde herhangi bir dallanma yoksa ana zincirin adının başına <strong>n-</strong> getirilir. Bu alkanlara normal alkan denir.</li>
+    <li>Ana zincirin 2. karbonuna 1 tane metil (–CH<sub>3</sub>) grubu bağlı olan alkanlar <strong>izo-</strong> eki getirilerek adlandırılır.</li>
+    <li>Ana zincirin 2. karbonuna 2 tane metil (–CH<sub>3</sub>) grubu bağlı olan alkanlar <strong>neo-</strong> eki getirilerek adlandırılır.</li>
+  </ul>
+
+  <div class="group-grid">
+    <div class="group-item">
+      <div class="iupac-chain small">
+        <div class="atom">CH<sub>3</sub></div><div class="bond">–</div><div class="atom">CH<sub>2</sub></div><div class="bond">–</div><div class="atom">CH<sub>2</sub></div><div class="bond">–</div><div class="atom">CH<sub>2</sub></div><div class="bond">–</div><div class="atom">CH<sub>3</sub></div>
+      </div>
+      <div class="group-label">n-pentan</div>
+    </div>
+    <div class="group-item">
+      <div class="iupac-chain small has-down" style="margin-top:4mm">
+        <div class="atom">CH<sub>3</sub><div class="num top">1</div></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<div class="num top">2</div>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub><div class="num top">3</div></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub><div class="num top">4</div></div>
+      </div>
+      <div class="group-label">izo-pentan</div>
+    </div>
+    <div class="group-item">
+      <div class="iupac-chain small has-up has-down" style="margin-top:7mm">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">C
+          <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+      <div class="group-label">neo-pentan</div>
+    </div>
+  </div>
+
+  <h2 class="section-title" style="color:var(--red); margin-top:6mm">Primer, Sekonder, Tersiyer Karbon Atomu</h2>
+  <ul class="notes">
+    <li>Karbon atomuna sadece başka bir tane karbon atomu bağlıysa bu karbon atomuna <strong>primer (birincil)</strong> karbon atomu denir.</li>
+    <li>Karbon atomuna iki tane başka karbon atomu bağlı ise bu karbon atomuna <strong>sekonder (ikincil)</strong> karbon atomu denir.</li>
+    <li>Karbon atomuna üç tane başka karbon atomu bağlı ise bu karbon atomuna <strong>tersiyer (üçüncül)</strong> karbon atomu denir.</li>
+    <li>Bir alkanın hidrojen atomları, bağlı oldukları karbon atomları esas alınarak sınıflandırılır.</li>
+  </ul>
+
+  <div style="display:flex; justify-content:center; margin-top:9mm">
+    <div class="iupac-chain has-up" style="gap:7mm">
+      <div class="atom">CH<sub>3</sub><div class="num">primer C atomu</div></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+        <div class="num">tersiyer C atomu</div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub><div class="num">sekonder C atomu</div></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub><div class="num">primer C atomu</div></div>
+    </div>
+  </div>
+
+  <div style="display:flex; justify-content:center; margin-top:13mm; margin-bottom:7mm">
+    <div class="iupac-chain has-down" style="gap:7mm; margin-top:7mm">
+      <div class="atom">CH<sub>3</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span><span class="arrow">→ primer H atomu</span></div></div>
+        <div class="num top">tersiyer H atomu</div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub><div class="num top">sekonder H atomu</div></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub><div class="num top">primer H atomu</div></div>
     </div>
   </div>
 
