@@ -70,7 +70,7 @@
     font-size:8.5pt;
     color:#9a9a9a;
   }
-  .page-foot::after{ content:"Sayfa " counter(pagenum) " / 52"; }
+  .page-foot::after{ content:"Sayfa " counter(pagenum) " / 53"; }
 
   /* ---------- bullet notes ---------- */
   ul.notes{
@@ -93,6 +93,29 @@
     font-size:.95em;
   }
   ul.notes.compact li{ margin-bottom:2mm; }
+
+  /* ---------- cycloalkane ring diagrams ---------- */
+  .ring-row{
+    display:flex;
+    justify-content:center;
+    align-items:flex-end;
+    gap:8mm;
+    flex-wrap:wrap;
+    margin-top:2mm;
+  }
+  .ring-fig{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:1.5mm;
+  }
+  .ring-fig svg{ width:30mm; height:30mm; overflow:visible; }
+  .ring-fig .ring-name{
+    font-size:10.5pt;
+    font-weight:700;
+    color:var(--red);
+    text-align:center;
+  }
 
   /* ---------- equation blocks ---------- */
   .eqn-block{
@@ -5362,6 +5385,112 @@
     <span><strong>8b.</strong> 3-kloro-5-metil-4-izopropil heptan</span>
     <span><strong>8c.</strong> 3-bromo-2-kloro-3-nitro oktan</span>
     <span><strong>9.</strong> 3-etil-2-metil-4-nitro heptan</span>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 53 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Sikloalkanlar</h1>
+
+  <div style="display:flex; flex-direction:column; flex:1; justify-content:space-around; gap:3mm">
+
+    <div>
+      <ul class="notes">
+        <li>Genel formülleri C<sub>n</sub>H<sub>2n</sub> dir.</li>
+        <li>En küçük üyesi üç karbonludur.</li>
+        <li>Adlandırma yapılırken aynı karbon sayılı alkan adının başına <strong>siklo</strong> getirilerek adlandırılır.</li>
+      </ul>
+      <div class="ring-row">
+        <div class="ring-fig">
+          <svg viewBox="0 0 100 100">
+            <polygon points="50,22 75.98,67 24.02,67" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+            <text x="50" y="14" text-anchor="middle" font-size="12">CH<tspan baseline-shift="sub" font-size="8">2</tspan></text>
+            <text x="50" y="84" text-anchor="middle" font-size="12">CH<tspan baseline-shift="sub" font-size="8">2</tspan>–CH<tspan baseline-shift="sub" font-size="8">2</tspan></text>
+          </svg>
+          <div class="ring-name">siklopropan</div>
+        </div>
+        <div class="ring-fig">
+          <svg viewBox="0 0 100 100">
+            <polygon points="71.2,30.8 71.2,73.2 28.8,73.2 28.8,30.8" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+          </svg>
+          <div class="ring-name">siklobütan</div>
+        </div>
+        <div class="ring-fig">
+          <svg viewBox="0 0 100 100">
+            <polygon points="50,22 78.53,42.73 67.63,76.27 32.37,76.27 21.47,42.73" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+          </svg>
+          <div class="ring-name">siklopentan</div>
+        </div>
+        <div class="ring-fig">
+          <svg viewBox="0 0 100 100">
+            <polygon points="50,22 75.98,37 75.98,67 50,82 24.02,67 24.02,37" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+          </svg>
+          <div class="ring-name">siklohekzan</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <ul class="notes">
+        <li>Eğer karbon halkasına tek fonksiyonel grup bağlı ise grubun bağlı olduğu karbona numara vermeye gerek yoktur.</li>
+      </ul>
+      <div class="ring-row">
+        <div class="ring-fig">
+          <svg viewBox="0 0 100 100">
+            <polygon points="50,22 75.98,67 24.02,67" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+            <line x1="75.98" y1="67" x2="88.97" y2="74.5" stroke="#1c1c1c" stroke-width="2.5"/>
+            <text x="91" y="79" font-size="12">CH<tspan baseline-shift="sub" font-size="8">3</tspan></text>
+          </svg>
+          <div class="ring-name">metil siklopropan</div>
+        </div>
+        <div class="ring-fig">
+          <svg viewBox="0 0 100 100">
+            <polygon points="71.2,30.8 71.2,73.2 28.8,73.2 28.8,30.8" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+            <line x1="71.2" y1="30.8" x2="81.8" y2="20.2" stroke="#1c1c1c" stroke-width="2.5"/>
+            <text x="84" y="18" font-size="13">OH</text>
+          </svg>
+          <div class="ring-name">hidroksi siklobütan</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <ul class="notes">
+        <li>Birden fazla fonksiyonel grup bağlı ise bunlar en küçük numaraya gelecek şekilde numaralandırılır.</li>
+      </ul>
+      <div class="ring-row">
+        <div class="ring-fig">
+          <svg viewBox="0 0 100 100">
+            <polygon points="71.2,30.8 71.2,73.2 28.8,73.2 28.8,30.8" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+            <text x="66.25" y="35.75" text-anchor="middle" font-size="11" font-weight="700" fill="#b3261e">1</text>
+            <text x="66.25" y="68.25" text-anchor="middle" font-size="11" font-weight="700" fill="#b3261e">2</text>
+            <line x1="71.2" y1="30.8" x2="81.8" y2="20.2" stroke="#1c1c1c" stroke-width="2.5"/>
+            <text x="84" y="18" font-size="12">Br</text>
+            <line x1="71.2" y1="73.2" x2="81.8" y2="83.8" stroke="#1c1c1c" stroke-width="2.5"/>
+            <text x="84" y="89" font-size="12">C<tspan baseline-shift="sub" font-size="8">2</tspan>H<tspan baseline-shift="sub" font-size="8">5</tspan></text>
+          </svg>
+          <div class="ring-name">1-bromo-2-etil siklobütan</div>
+        </div>
+        <div class="ring-fig">
+          <svg viewBox="0 0 100 100">
+            <polygon points="50,22 75.98,37 75.98,67 50,82 24.02,67 24.02,37" fill="none" stroke="#1c1c1c" stroke-width="3"/>
+            <text x="69.92" y="40.5" text-anchor="middle" font-size="11" font-weight="700" fill="#b3261e">1</text>
+            <text x="69.92" y="63.5" text-anchor="middle" font-size="11" font-weight="700" fill="#b3261e">2</text>
+            <line x1="75.98" y1="37" x2="83.48" y2="24.01" stroke="#1c1c1c" stroke-width="2.5"/>
+            <text x="86" y="21" font-size="12">CH<tspan baseline-shift="sub" font-size="8">3</tspan></text>
+            <line x1="75.98" y1="37" x2="90.98" y2="37" stroke="#1c1c1c" stroke-width="2.5"/>
+            <text x="93" y="40" font-size="12">Cl</text>
+            <line x1="75.98" y1="67" x2="88.97" y2="74.5" stroke="#1c1c1c" stroke-width="2.5"/>
+            <text x="91" y="79" font-size="12">CH<tspan baseline-shift="sub" font-size="8">3</tspan></text>
+          </svg>
+          <div class="ring-name">1-kloro-1,2-dimetil siklohekzan</div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <div class="page-foot"><span>Organik Kimya</span></div>
