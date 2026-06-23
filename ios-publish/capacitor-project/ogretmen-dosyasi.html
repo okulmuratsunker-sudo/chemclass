@@ -845,13 +845,22 @@ async function deleteClassWithStudents(cls){
   }
   if(!confirm(`"${cls}" sınıfındaki ${list.length} öğrenciyi ve TÜM notlarını/puanlarını kalıcı olarak silmek istiyor musunuz? Bu işlem geri alınamaz.`))return;
   toast(`Siliniyor… (${list.length} öğrenci)`);
-  try{
-    for(const st of list)await deleteStudentRecords(st.id);
+  let ok=0;const failed=[];
+  for(const st of list){
+    try{await deleteStudentRecords(st.id);ok++;}
+    catch(err){failed.push(st.name+': '+err.message);}
+  }
+  if(failed.length===0){
     ocSaveExtra(ocLoadExtra().filter(c=>c!==cls));
     if(ocSelectedClass===cls)ocSelectedClass=null;
-    ofSaveCache();toast(`✓ "${cls}" sınıfı ve ${list.length} öğrenci silindi`);
-    render();
-  }catch(err){toast('Hata: '+err.message,true);}
+  }
+  ofSaveCache();render();
+  if(failed.length){
+    console.warn('Silinemeyen öğrenciler:',failed);
+    toast(`⚠️ ${ok}/${list.length} öğrenci silindi, ${failed.length} tanesi silinemedi (Konsola bakın). Tekrar deneyin.`,true);
+  }else{
+    toast(`✓ "${cls}" sınıfı ve ${ok} öğrenci silindi`);
+  }
 }
 
 /* ── Not sıfırlama (tekli/toplu) ── */
