@@ -846,10 +846,12 @@ async function deleteClassWithStudents(cls){
   if(!confirm(`"${cls}" sınıfındaki ${list.length} öğrenciyi ve TÜM notlarını/puanlarını kalıcı olarak silmek istiyor musunuz? Bu işlem geri alınamaz.`))return;
   toast(`Siliniyor… (${list.length} öğrenci)`);
   let ok=0;const failed=[];
-  for(const st of list){
+  // Hepsi paralel silinir (sıralı olsaydı her öğrenci için ~4 ağ isteği art
+  // arda beklenirdi, büyük sınıflarda gözle görülür yavaşlığa sebep oluyordu).
+  await Promise.all(list.map(async st=>{
     try{await deleteStudentRecords(st.id);ok++;}
     catch(err){failed.push(st.name+': '+err.message);}
-  }
+  }));
   if(failed.length===0){
     ocSaveExtra(ocLoadExtra().filter(c=>c!==cls));
     if(ocSelectedClass===cls)ocSelectedClass=null;
@@ -1667,27 +1669,31 @@ async function nmImportRows(parsedStudents,defaultClassName,detectedSemester){
   let createdCount=0,gradeWriteCount=0;
   const gradeFields={w1:'y1',w2:'y2',perf:'perf1',perf2:'perf2',project:'proje1',proj2:'proje2'};
   async function writeGrades(studentId,p,sem){
-    for(const[col,key]of Object.entries(gradeFields)){
+    // Not alanları da paralel yazılır — sıralı olsaydı öğrenci başına 6 ayrı
+    // ağ isteği art arda beklenirdi.
+    await Promise.all(Object.entries(gradeFields).map(async([col,key])=>{
       const v=p[key];
-      if(v===null||v===undefined)continue;
+      if(v===null||v===undefined)return;
       await saveGrade(studentId,sem,col,v);gradeWriteCount++;
-    }
+    }));
   }
-  for(const p of toInsert){
+  // Öğrenciler de paralel eklenir (sıralı yerine) — büyük listelerde içe
+  // aktarma süresini öğrenci sayısı kadar çarpmak yerine tek seferde bitirir.
+  await Promise.all(toInsert.map(async p=>{
     try{
       const{data,error}=await sb.from('teacher_students').insert({
         name:p.name,student_number:p.no,class_name:p.class_name
       }).select().single();
-      if(error){dupNumbers.push(p.no+' (hata: '+error.message+')');continue;}
+      if(error){dupNumbers.push(p.no+' (hata: '+error.message+')');return;}
       students.push(data);createdCount++;
       const sem=detectedSemester||nmSem;
       await writeGrades(data.id,p,sem);
     }catch(err){dupNumbers.push(p.no+' (hata: '+err.message+')');}
-  }
-  for(const{existing,p}of matchedExisting){
+  }));
+  await Promise.all(matchedExisting.map(({existing,p})=>{
     const sem=detectedSemester||nmSem;
-    await writeGrades(existing.id,p,sem);
-  }
+    return writeGrades(existing.id,p,sem);
+  }));
   if(detectedSemester)nmSem=detectedSemester;
   if(defaultClassName)nmClass=defaultClassName;
   let msg=`✓ ${createdCount} yeni öğrenci eklendi`;
