@@ -446,6 +446,12 @@ async function signOut(){
 // ── State
 let students=[],grades=[],scores=[],scoreHistory=[],schedule=[],plans=[],photos=[];
 let examQuestions=[],questionScores=[];
+let perfWeights=[],perfScores=[];
+let nmPerfGroup='katilim',nmPerfView='agirlik';
+const PERF_CRITERIA={
+  katilim:['Derse Hazırlık','Devam','Aktif Katılım','Örnek Davranışlar','Okuryazarlık Becerileri ve Kitap Okumaları'],
+  calisma:['İçerik','Düzenleme','Dilbilgisi','Kişisel Yansıma, Orjinallik','Zamanında Tamamlama']
+};
 let page='dashboard',sem=1,editSched=false,scoreStudentId=null,searchQ='';
 let anaSem=1,anaExam='w1',anaView='entry';
 
@@ -528,7 +534,7 @@ async function ofFlush(){
 async function loadAll(){
   if(!navigator.onLine){ofLoadCache();ofShowOffline(true);render();return;}
   ofShowOffline(false);
-  const[s,g,sc,sh,sch,pl,ph,eq,qs]=await Promise.all([
+  const[s,g,sc,sh,sch,pl,ph,eq,qs,pw,ps]=await Promise.all([
     sb.from('teacher_students').select('*').order('name'),
     sb.from('teacher_grades').select('*'),
     sb.from('student_scores').select('*'),
@@ -538,10 +544,13 @@ async function loadAll(){
     sb.from('teacher_photos').select('id,student_id,photo_data'),
     sb.from('exam_questions').select('*').order('semester').order('exam_type').order('q_number'),
     sb.from('question_scores').select('*'),
+    sb.from('perf_criteria_weights').select('*'),
+    sb.from('perf_criteria_scores').select('*'),
   ]);
   students=s.data||[];grades=g.data||[];scores=sc.data||[];scoreHistory=sh.data||[];
   schedule=sch.data||[];plans=pl.data||[];photos=ph.data||[];
   examQuestions=eq.data||[];questionScores=qs.data||[];
+  perfWeights=pw.data||[];perfScores=ps.data||[];
   ofSaveCache();render();
 }
 
@@ -1934,11 +1943,12 @@ function nmSemSelector(){
 }
 
 function nmRender(){
-  const tabs=[['yazili','✍️ Yazılı Not Girişi'],['sozlu','🗣️ Sözlü Hesaplama'],['liste','📋 Not Listesi'],['eokul','🏫 E-Okul Kopyalama'],['disa','📤 Dışa Aktarma'],['yedek','💾 Yedekle / Geri Yükle']];
+  const tabs=[['yazili','✍️ Yazılı Not Girişi'],['sozlu','🗣️ Sözlü Hesaplama'],['perf','📊 Performans Ölçeği'],['liste','📋 Not Listesi'],['eokul','🏫 E-Okul Kopyalama'],['disa','📤 Dışa Aktarma'],['yedek','💾 Yedekle / Geri Yükle']];
   let h=`<div class="page-title">🗂️ Not Merkezi</div>
 <div class="nm-tabs">${tabs.map(([k,l])=>`<button class="nm-tab ${nmPage===k?'active':''}" onclick="nmPage='${k}';render()">${l}</button>`).join('')}</div>`;
   if(nmPage==='yazili')h+=nmRenderYazili();
   else if(nmPage==='sozlu')h+=nmRenderSozlu();
+  else if(nmPage==='perf')h+=nmRenderPerf();
   else if(nmPage==='liste')h+=nmRenderListe();
   else if(nmPage==='eokul')h+=nmRenderEokul();
   else if(nmPage==='disa')h+=nmRenderDisa();
@@ -1988,6 +1998,134 @@ ${hist.length?hist.map(h=>`<div class="nm-hist-item">
   <span class="nm-hist-time">${fmtDate(h.time)} ${new Date(h.time).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}</span>
 </div>`).join(''):'<div class="empty" style="padding:20px">Henüz kayıt yok.</div>'}
 </div>`;
+}
+
+/* ════════ PERFORMANS DEĞERLENDİRME ÖLÇEĞİ ════════
+   Ölçüt isimleri sabit (PERF_CRITERIA), her sınıf için ölçütlerin maks
+   puanı (ağırlığı) ayrı ayrı tanımlanabilir (varsayılan 20, toplam 100
+   olmak zorunda değil ama öyle olması önerilir — uyarı verilir).
+   Öğrenci bazında her ölçüte not girilir, grup toplamı otomatik
+   hesaplanıp "Not Defteri'ne Aktar" ile perf/perf2 alanına yazılır. */
+function nmWeight(cls,group,idx){
+  const w=perfWeights.find(x=>x.class_name===cls&&x.criterion_group===group&&x.criterion_index===idx);
+  return w?parseFloat(w.max_points):20;
+}
+async function nmSetWeight(cls,group,idx,val){
+  const n=parseFloat(val);
+  if(isNaN(n)||n<0){toast('Geçerli bir puan girin',true);return;}
+  const existing=perfWeights.find(x=>x.class_name===cls&&x.criterion_group===group&&x.criterion_index===idx);
+  try{
+    if(existing){
+      await sb.from('perf_criteria_weights').update({max_points:n}).eq('id',existing.id);
+      existing.max_points=n;
+    }else{
+      const{data,error}=await sb.from('perf_criteria_weights').insert({class_name:cls,criterion_group:group,criterion_index:idx,max_points:n}).select().single();
+      if(error){toast('Hata: '+error.message,true);return;}
+      perfWeights.push(data);
+    }
+    render();
+  }catch(err){toast('Hata: '+err.message,true);}
+}
+function nmPerfScore(sid,sem,group,idx){
+  const s=perfScores.find(x=>x.student_id===sid&&x.semester===sem&&x.criterion_group===group&&x.criterion_index===idx);
+  return s?s.score:null;
+}
+async function nmSetPerfScore(sid,sem,group,idx,maxPts,val){
+  let n=val===''?null:parseFloat(val);
+  if(n!==null&&(isNaN(n)||n<0)){toast('Puan negatif olamaz',true);return;}
+  if(n!==null&&n>maxPts){n=maxPts;toast(`Puan en fazla ${maxPts} olabilir`,true);}
+  const existing=perfScores.find(x=>x.student_id===sid&&x.semester===sem&&x.criterion_group===group&&x.criterion_index===idx);
+  try{
+    if(n===null){
+      if(existing){await sb.from('perf_criteria_scores').delete().eq('id',existing.id);perfScores=perfScores.filter(x=>x.id!==existing.id);}
+    }else if(existing){
+      await sb.from('perf_criteria_scores').update({score:n}).eq('id',existing.id);
+      existing.score=n;
+    }else{
+      const{data,error}=await sb.from('perf_criteria_scores').insert({student_id:sid,semester:sem,criterion_group:group,criterion_index:idx,score:n}).select().single();
+      if(error){toast('Hata: '+error.message,true);return;}
+      perfScores.push(data);
+    }
+    render();
+  }catch(err){toast('Hata: '+err.message,true);}
+}
+function nmPerfTotal(sid,sem,group){
+  let total=0,any=false;
+  for(let i=1;i<=5;i++){
+    const v=nmPerfScore(sid,sem,group,i);
+    if(v!==null&&v!==undefined){total+=parseFloat(v);any=true;}
+  }
+  return any?total:null;
+}
+async function nmApplyPerfToGradebook(cls,sem){
+  const list=nmStudentsInClass(cls);
+  let applied=0;
+  for(const st of list){
+    const katilim=nmPerfTotal(st.id,sem,'katilim');
+    const calisma=nmPerfTotal(st.id,sem,'calisma');
+    if(katilim!==null){const err=await saveGrade(st.id,sem,'perf',katilim);if(!err)applied++;}
+    if(calisma!==null){const err=await saveGrade(st.id,sem,'perf2',calisma);if(!err)applied++;}
+  }
+  toast(`✓ ${applied} not Not Defteri'ne (Perf.1/Perf.2) işlendi`);
+  render();
+}
+function nmRenderPerf(){
+  if(!students.length)return `<div class="empty"><div class="empty-ico">👥</div>Önce sınıf/öğrenci listesi gerekli.</div>`;
+  const groupTabs=[['katilim','Ders ve Etkinliklere Katılım → Perf.1'],['calisma','Performans Çalışması → Perf.2']];
+  let h=`<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:14px">${nmClassSelector()}${nmSemSelector()}</div>
+<div class="sub-tabs">${groupTabs.map(([k,l])=>`<button class="sub-tab ${nmPerfGroup===k?'active':''}" onclick="nmPerfGroup='${k}';render()">${esc(l)}</button>`).join('')}</div>
+<div class="sub-tabs" style="margin-top:8px">
+  <button class="sub-tab ${nmPerfView==='agirlik'?'active':''}" onclick="nmPerfView='agirlik';render()">① Ağırlıkları Ayarla</button>
+  <button class="sub-tab ${nmPerfView==='giris'?'active':''}" onclick="nmPerfView='giris';render()">② Not Gir</button>
+</div>`;
+  if(!nmClass)return h;
+  if(nmPerfView==='agirlik')h+=nmRenderPerfWeights(nmClass,nmPerfGroup);
+  else h+=nmRenderPerfEntry(nmClass,nmSem,nmPerfGroup);
+  return h;
+}
+function nmRenderPerfWeights(cls,group){
+  const criteria=PERF_CRITERIA[group];
+  const total=criteria.reduce((s,_,i)=>s+nmWeight(cls,group,i+1),0);
+  return `<div class="card">
+  <div class="card-title">"${esc(cls)}" için Ölçüt Ağırlıkları
+    <span style="font-size:.8rem;font-weight:700;color:${total===100?'var(--success)':'var(--danger)'}">Toplam: ${total}/100</span>
+  </div>
+  ${total!==100?`<p class="nm-missing" style="margin-bottom:10px">⚠️ Ağırlıklar toplamı 100 değil — not hesaplaması yine çalışır ama dönem notuyla orantısı bozulabilir.</p>`:''}
+  <div class="tbl-wrap"><table><thead><tr><th>Ölçüt</th><th>Maks. Puan</th></tr></thead><tbody>
+  ${criteria.map((name,i)=>`<tr>
+    <td>${esc(name)}</td>
+    <td><input class="grade-inp" type="number" min="0" max="100" style="width:70px" value="${nmWeight(cls,group,i+1)}"
+      onchange="nmSetWeight('${esc(cls).replace(/'/g,"\\'")}','${group}',${i+1},this.value)"></td>
+  </tr>`).join('')}
+  </tbody></table></div>
+</div>`;
+}
+function nmRenderPerfEntry(cls,sem,group){
+  const criteria=PERF_CRITERIA[group];
+  const list=nmStudentsInClass(cls);
+  const maxTotal=criteria.reduce((s,_,i)=>s+nmWeight(cls,group,i+1),0);
+  return `<div class="card" style="margin-bottom:16px">
+  <div class="card-title">Not Gir
+    <button class="btn btn-primary btn-sm" onclick="nmApplyPerfToGradebook('${esc(cls).replace(/'/g,"\\'")}',${sem})">📥 Not Defteri'ne Aktar (Perf.1/Perf.2)</button>
+  </div>
+  <p style="font-size:.8rem;color:var(--text2)">Her ölçüte not girip Enter'a basın. Toplam otomatik hesaplanır, "Not Defteri'ne Aktar" ile dönem notuna işlenir.</p>
+</div>
+<div class="card"><div class="tbl-wrap"><table>
+<thead><tr><th>No</th><th>Ad Soyad</th>${criteria.map((n,i)=>`<th>${esc(n)}<br><span style="font-weight:400;font-size:.7rem">/${nmWeight(cls,group,i+1)}</span></th>`).join('')}<th>Toplam</th></tr></thead>
+<tbody>${list.map(st=>{
+  const total=nmPerfTotal(st.id,sem,group);
+  return`<tr>
+  <td>${esc(st.student_number)}</td><td>${esc(st.name)}</td>
+  ${criteria.map((_,i)=>{
+    const idx=i+1,maxPts=nmWeight(cls,group,idx),v=nmPerfScore(st.id,sem,group,idx);
+    return`<td><input class="q-inp" type="number" min="0" max="${maxPts}" value="${v??''}" placeholder="—"
+      onchange="nmSetPerfScore('${st.id}',${sem},'${group}',${idx},${maxPts},this.value)"
+      onkeydown="if(event.key==='Enter')this.blur()"></td>`;
+  }).join('')}
+  <td class="row-total">${total??'—'}<span style="font-size:.7rem;opacity:.7">/${maxTotal}</span></td>
+</tr>`;
+}).join('')}
+</tbody></table></div></div>`;
 }
 
 function nmRenderSozlu(){
