@@ -1671,12 +1671,18 @@ async function nmImportRows(parsedStudents,defaultClassName,detectedSemester){
   let createdCount=0,gradeWriteCount=0;
   const gradeFields={w1:'y1',w2:'y2',perf:'perf1',perf2:'perf2',project:'proje1',proj2:'proje2'};
   async function writeGrades(studentId,p,sem){
-    // Not alanları da paralel yazılır — sıralı olsaydı öğrenci başına 6 ayrı
-    // ağ isteği art arda beklenirdi.
-    await Promise.all(Object.entries(gradeFields).map(async([col,key])=>{
-      const v=p[key];
-      if(v===null||v===undefined)return;
-      await saveGrade(studentId,sem,col,v);gradeWriteCount++;
+    // ÖNEMLİ: ilk alan beklenerek yazılır (öğrencinin teacher_grades satırı
+    // henüz yoksa oluşturulur). Eğer hepsi aynı anda (Promise.all) yazılırsa,
+    // satır henüz yokken her alan ayrı ayrı "satır yok, oluşturayım" sanıp
+    // PARALEL INSERT denedi — sadece biri kazanıyor, diğer notlar sessizce
+    // kayboluyordu (race condition). Satır oluştuktan sonra kalan alanlar
+    // güvenle paralel UPDATE edilebilir (her biri farklı sütunu günceller).
+    const entries=Object.entries(gradeFields).filter(([,key])=>p[key]!==null&&p[key]!==undefined);
+    if(!entries.length)return;
+    const[firstCol,firstKey]=entries[0];
+    await saveGrade(studentId,sem,firstCol,p[firstKey]);gradeWriteCount++;
+    await Promise.all(entries.slice(1).map(async([col,key])=>{
+      await saveGrade(studentId,sem,col,p[key]);gradeWriteCount++;
     }));
   }
   // Öğrenciler de paralel eklenir (sıralı yerine) — büyük listelerde içe
