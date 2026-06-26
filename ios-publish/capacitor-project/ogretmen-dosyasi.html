@@ -1216,7 +1216,7 @@ ${gradesClassFilter?`<button class="btn btn-danger btn-sm" style="margin-left:au
     value="${g?.[c.k]!==null&&g?.[c.k]!==undefined?g[c.k]:''}" placeholder="—"
     onchange="saveGrade('${st.id}',${sem},'${c.k}',this.value)"
     onkeydown="if(event.key==='Enter')this.blur()"></td>`).join('')}
-  <td><span class="donem-chip ${dnLv.cls||''} ${dn===null?'empty':''}">${dn??'—'}</span></td>
+  <td><span id="dn-${st.id}-${sem}" class="donem-chip ${dnLv.cls||''} ${dn===null?'empty':''}">${dn??'—'}</span></td>
   <td>${g?`<button class="btn-xs btn-danger" onclick="resetStudentGrade('${st.id}',${sem})" title="Bu öğrencinin ${sem}.dönem notlarını sıfırla">🗑</button>`:''}</td>
 </tr>`;
   });
@@ -1224,13 +1224,24 @@ ${gradesClassFilter?`<button class="btn btn-danger btn-sm" style="margin-left:au
 <div style="margin-top:10px;font-size:.78rem;color:var(--text2)">💡 Notu yazıp Tab/Enter'a basın — otomatik kaydedilir.</div>`;
 }
 
+// Akıcı not girişi için: kaydetmeden sonra TÜM tabloyu render() ile yeniden
+// çizmek, Tab ile yan hücreye geçerken imleç odağını kaçırıyordu. Bunun yerine
+// sadece ilgili "Dönem Notu" hücresini güncelliyoruz — input'lar yeniden
+// oluşmadığı için Tab akıcı çalışıyor, kayıt yine her hücrede anında yapılıyor.
+function updateDonemCell(sid,sem){
+  const el=document.getElementById('dn-'+sid+'-'+sem);
+  if(!el)return;
+  const dn=calcDönem(getGrade(sid,sem)),lv=mebLevel(dn);
+  el.className='donem-chip '+(lv.cls||'')+(dn===null?' empty':'');
+  el.textContent=dn??'—';
+}
 async function saveGrade(sid,s,col,val){
   if(!navigator.onLine){
     let g=grades.find(x=>x.student_id===sid&&x.semester===s);
     const nv=val===''||val===null?null:parseFloat(val);
     if(g){g[col]=nv;ofQueue({t:'update',table:'teacher_grades',id:g.id,data:{[col]:nv,updated_at:new Date().toISOString()}});}
     else{const tmpId='tmp_'+Date.now();const row={id:tmpId,student_id:sid,semester:s,[col]:nv,updated_at:new Date().toISOString()};grades.push(row);ofQueue({t:'insert',table:'teacher_grades',tmpId,data:{student_id:sid,semester:s,[col]:nv,updated_at:row.updated_at}});}
-    ofSaveCache();render();return;
+    ofSaveCache();updateDonemCell(sid,s);return;
   }
   const nv=val===''?null:parseFloat(val);
   if(nv!==null&&(isNaN(nv)||nv<0||nv>100)){toast('Not 0-100 arasında olmalı',true);return}
@@ -1246,7 +1257,7 @@ async function saveGrade(sid,s,col,val){
     if(error){toast('Hata: '+error.message,true);return}
     grades.push(data);
   }
-  render();toast('✓ Kaydedildi');
+  updateDonemCell(sid,s);
 }
 
 // ════════════════════════════════════════
@@ -2300,7 +2311,7 @@ async function nmSetPerfScore(sid,sem,group,idx,maxPts,val){
       if(existing){existing.score=n;existing.id=data.id;}
       else{perfScores.push(data);}
     }
-    render();
+    updatePerfTotalCell(sid,sem,group);
   }catch(err){toast('Hata: '+err.message,true);}
 }
 function nmPerfTotal(sid,sem,group){
@@ -2593,10 +2604,18 @@ function nmRenderPerfEntry(cls,sem,group){
       onchange="nmSetPerfScore('${st.id}',${sem},'${group}',${idx},${maxPts},this.value)"
       onkeydown="if(event.key==='Enter')this.blur()"></td>`;
   }).join('')}
-  <td class="row-total">${total??'—'}<span style="font-size:.7rem;opacity:.7">/${maxTotal}</span></td>
+  <td class="row-total"><span id="pt-${st.id}-${sem}-${group}">${total??'—'}</span><span style="font-size:.7rem;opacity:.7">/${maxTotal}</span></td>
 </tr>`;
 }).join('')}
 </tbody></table></div></div>`;
+}
+// Performans ölçütü kaydedince TÜM tabloyu render() etmek yerine sadece o
+// öğrencinin "Toplam" hücresini güncelle — Tab ile akıcı not girişi için.
+function updatePerfTotalCell(sid,sem,group){
+  const el=document.getElementById('pt-'+sid+'-'+sem+'-'+group);
+  if(!el)return;
+  const t=nmPerfTotal(sid,sem,group);
+  el.textContent=t??'—';
 }
 
 function nmRenderSozlu(){
