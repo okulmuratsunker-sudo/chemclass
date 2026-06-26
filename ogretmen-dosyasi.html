@@ -12,6 +12,8 @@
 <link rel="apple-touch-icon" href="icon-ogretmen-180.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <style>
 :root{
   --bg:#f4f6fb;--surface:#fff;--surface2:#eef1f8;--border:#e0e5f0;
@@ -232,6 +234,25 @@ select.inp{cursor:pointer}
 .user-chip span.email{max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .user-chip button{background:none;border:none;cursor:pointer;color:var(--danger);font-size:.75rem;font-weight:700;padding:2px 6px;border-radius:5px;transition:all .2s}
 .user-chip button:hover{background:rgba(224,82,82,.1)}
+.auth-card.wide{max-width:520px}
+.auth-link-row{text-align:center;margin-top:14px;font-size:.84rem;color:var(--text2)}
+.auth-link-row a{color:var(--accent);font-weight:700;cursor:pointer;text-decoration:none}
+.auth-back{display:inline-flex;align-items:center;gap:4px;color:var(--text2);font-size:.84rem;font-weight:600;cursor:pointer;margin-bottom:14px;background:none;border:none;font-family:inherit;padding:0}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:480px){.field-row{grid-template-columns:1fr}}
+.pass-wrap{position:relative}
+.pass-wrap input{padding-right:40px}
+.pass-toggle{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;padding:4px;color:var(--text2)}
+.check-row{display:flex;align-items:flex-start;gap:8px;margin:14px 0;font-size:.8rem;color:var(--text2)}
+.check-row input{margin-top:3px}
+.status-screen{text-align:center;padding:10px}
+.status-ico{font-size:2.8rem;margin-bottom:14px}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.admin-pending-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rsm);padding:16px;margin-bottom:12px}
+.admin-pending-card .row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:.84rem;margin-bottom:4px}
+.admin-pending-card .row b{color:var(--text2);font-weight:600;margin-right:6px}
+.admin-pending-actions{display:flex;gap:8px;margin-top:10px}
 
 /* Soru ekleme satırı */
 .add-q-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--surface2);border-radius:var(--rsm);padding:12px 14px}
@@ -273,24 +294,7 @@ select.inp{cursor:pointer}
 
 <!-- AUTH SCREEN -->
 <div id="authScreen">
-  <div class="auth-card">
-    <div class="auth-title">📋 Öğretmen Dosyası</div>
-    <p class="auth-sub">Hesabınıza giriş yapın</p>
-    <div class="auth-tabs">
-      <button class="auth-tab active" onclick="authTab('login')">Giriş Yap</button>
-      <button class="auth-tab" onclick="authTab('signup')">Kayıt Ol</button>
-    </div>
-    <div id="authMsg" class="auth-msg"></div>
-    <div class="field">
-      <label class="field-label">E-posta</label>
-      <input class="inp" id="authEmail" type="email" placeholder="ornek@mail.com" autocomplete="email" onkeydown="if(event.key==='Enter')doAuth()"/>
-    </div>
-    <div class="field">
-      <label class="field-label">Şifre</label>
-      <input class="inp" id="authPass" type="password" placeholder="En az 6 karakter" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAuth()"/>
-    </div>
-    <button class="btn" style="width:100%;margin-top:8px" id="authBtn" onclick="doAuth()">Giriş Yap</button>
-  </div>
+  <div class="auth-card" id="authCard"></div>
 </div>
 
 <header>
@@ -316,6 +320,7 @@ select.inp{cursor:pointer}
   <button class="menu-item-btn" data-page="scores" onclick="goto('scores')"><span class="mi-ico">⭐</span>Puan Sistemi</button>
   <button class="menu-item-btn" data-page="plans" onclick="goto('plans')"><span class="mi-ico">📚</span>Ders Planları</button>
   <button class="menu-item-btn" data-page="notmerkezi" onclick="goto('notmerkezi')"><span class="mi-ico">🗂️</span>Not Merkezi</button>
+  <button class="menu-item-btn" data-page="adminApprovals" id="adminMenuItem" style="display:none" onclick="goto('adminApprovals')"><span class="mi-ico">🛡️</span>Onay Bekleyen Kullanıcılar</button>
 </div>
 
 <main id="main"><div class="loading">Yükleniyor…</div></main>
@@ -401,46 +406,236 @@ select.inp{cursor:pointer}
 <div id="toast"></div>
 
 <script>
-const SB_URL='https://yqyrhuednyhirgcghexe.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxeXJodWVkbnloaXJnY2doZXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzQ5MTgsImV4cCI6MjA5NTM1MDkxOH0.bPaF2xWNL4k4eZhhQpzYpaCojqSVIYe4sqM-atpoDJM';
+const SB_URL='https://krqyzhmioqtfihwrblmb.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtycXl6aG1pb3F0Zmlod3JibG1iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNTQzOTQsImV4cCI6MjA5NTczMDM5NH0.qE5bmGq7DksTJ4WHklpS_cGPeghkQrk5ZwjR36dn0GI';
 const sb=supabase.createClient(SB_URL,SB_KEY);
 
 // ── Auth
-let authMode='login';
-function authTab(mode){
-  authMode=mode;
-  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(mode==='login'?i===0:i===1)));
-  document.getElementById('authBtn').textContent=mode==='login'?'Giriş Yap':'Kayıt Ol';
-  setAuthMsg('','');
-}
+/* ════════ AUTH / KAYIT / ONAY ════════ */
+let authView='login'; // login | register | forgot | pending | rejected
+let currentUserId=null;
+let currentProfile=null;
+
 function setAuthMsg(msg,type){
   const e=document.getElementById('authMsg');
+  if(!e)return;
   e.textContent=msg;e.className='auth-msg'+(msg?' show':'')+(type?' '+type:'');
 }
-async function doAuth(){
+function goAuthView(v){authView=v;renderAuth();}
+function togglePw(id,btn){
+  const el=document.getElementById(id);if(!el)return;
+  const showing=el.type==='password';el.type=showing?'text':'password';
+  if(btn)btn.textContent=showing?'🙈':'👁️';
+}
+function isValidEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);}
+function isValidPhone(p){return /^[0-9 +()\-]{10,15}$/.test(p);}
+function authErrorMessage(error){
+  const m=error?.message||'';
+  if(/Invalid login credentials/i.test(m))return 'E-posta veya şifre hatalı';
+  if(/User already registered/i.test(m))return 'Bu e-posta adresi zaten kayıtlı';
+  if(/Email not confirmed/i.test(m))return 'E-posta adresinizi doğrulamanız gerekiyor. Gelen kutunuzu kontrol edin.';
+  if(/Password should be at least/i.test(m))return 'Şifre en az 8 karakter olmalı';
+  if(/rate limit/i.test(m))return 'Çok fazla deneme yapıldı, lütfen biraz sonra tekrar deneyin';
+  return m||'Bir hata oluştu, lütfen tekrar deneyin';
+}
+
+function renderAuth(){
+  const el=document.getElementById('authCard');
+  if(!el)return;
+  el.className='auth-card'+(authView==='register'?' wide':'');
+  if(authView==='register')el.innerHTML=authRegisterHtml();
+  else if(authView==='forgot')el.innerHTML=authForgotHtml();
+  else if(authView==='pending')el.innerHTML=authStatusHtml('pending');
+  else if(authView==='rejected')el.innerHTML=authStatusHtml('rejected');
+  else el.innerHTML=authLoginHtml();
+}
+function authLoginHtml(){
+  return `
+  <div class="auth-title">📋 Öğretmenim</div>
+  <p class="auth-sub">Öğretmenler için dijital sınıf ve not takip sistemi</p>
+  <div id="authMsg" class="auth-msg"></div>
+  <div class="field"><label class="field-label">E-posta</label>
+    <input class="inp" id="authEmail" type="email" placeholder="ornek@mail.com" autocomplete="email" onkeydown="if(event.key==='Enter')doLogin()"></div>
+  <div class="field"><label class="field-label">Şifre</label>
+    <div class="pass-wrap"><input class="inp" id="authPass" type="password" placeholder="Şifreniz" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button type="button" class="pass-toggle" onclick="togglePw('authPass',this)">👁️</button></div></div>
+  <button class="btn" style="width:100%;margin-top:8px" id="authBtn" onclick="doLogin()">Giriş Yap</button>
+  <div class="auth-link-row"><a onclick="goAuthView('forgot')">Şifremi Unuttum</a> &nbsp;·&nbsp; Hesabınız yok mu? <a onclick="goAuthView('register')">Kayıt Ol</a></div>`;
+}
+function authRegisterHtml(){
+  return `
+  <button class="auth-back" onclick="goAuthView('login')">← Giriş ekranına dön</button>
+  <div class="auth-title" style="font-size:1.25rem">Kayıt Ol</div>
+  <p class="auth-sub">Bilgilerinizi girin; e-posta doğrulaması ve admin onayından sonra giriş yapabilirsiniz.</p>
+  <div id="authMsg" class="auth-msg"></div>
+  <div class="field"><label class="field-label">Ad Soyad *</label><input class="inp" id="regName" placeholder="Ad Soyad"></div>
+  <div class="field"><label class="field-label">E-posta *</label><input class="inp" id="regEmail" type="email" placeholder="ornek@mail.com" autocomplete="email"></div>
+  <div class="field-row">
+    <div class="field"><label class="field-label">Şifre *</label>
+      <div class="pass-wrap"><input class="inp" id="regPass" type="password" placeholder="En az 8 karakter">
+      <button type="button" class="pass-toggle" onclick="togglePw('regPass',this)">👁️</button></div></div>
+    <div class="field"><label class="field-label">Şifre Tekrar *</label>
+      <div class="pass-wrap"><input class="inp" id="regPass2" type="password" placeholder="Şifre tekrar">
+      <button type="button" class="pass-toggle" onclick="togglePw('regPass2',this)">👁️</button></div></div>
+  </div>
+  <div class="field"><label class="field-label">Okul Adı *</label><input class="inp" id="regSchool" placeholder="Okulunuzun adı"></div>
+  <div class="field-row">
+    <div class="field"><label class="field-label">Branş *</label><input class="inp" id="regBranch" placeholder="örn. Matematik"></div>
+    <div class="field"><label class="field-label">Telefon *</label><input class="inp" id="regPhone" type="tel" placeholder="05xx xxx xx xx"></div>
+  </div>
+  <div class="field"><label class="field-label">Kullanıcı Tipi *</label>
+    <select class="inp" id="regUserType">
+      <option value="teacher">Öğretmen</option>
+      <option value="admin">Yönetici</option>
+      <option value="other">Diğer</option>
+    </select>
+  </div>
+  <div class="field-row">
+    <div class="field"><label class="field-label">İl (opsiyonel)</label><input class="inp" id="regCity" placeholder="İl"></div>
+    <div class="field"><label class="field-label">İlçe (opsiyonel)</label><input class="inp" id="regDistrict" placeholder="İlçe"></div>
+  </div>
+  <div class="field"><label class="field-label">Açıklama / Başvuru Notu (opsiyonel)</label><input class="inp" id="regNote" placeholder="Eklemek istediğiniz bir not"></div>
+  <div class="check-row"><input type="checkbox" id="regKvkk"><label for="regKvkk">KVKK Aydınlatma Metni'ni okudum, kişisel verilerimin işlenmesine onay veriyorum.</label></div>
+  <button class="btn" style="width:100%" id="regBtn" onclick="doRegister()">Kayıt Ol</button>
+  <div class="auth-link-row">Zaten hesabınız var mı? <a onclick="goAuthView('login')">Giriş Yap</a></div>`;
+}
+function authForgotHtml(){
+  return `
+  <button class="auth-back" onclick="goAuthView('login')">← Giriş ekranına dön</button>
+  <div class="auth-title" style="font-size:1.25rem">Şifremi Unuttum</div>
+  <p class="auth-sub">E-posta adresinize sıfırlama bağlantısı gönderelim.</p>
+  <div id="authMsg" class="auth-msg"></div>
+  <div class="field"><label class="field-label">E-posta</label><input class="inp" id="forgotEmail" type="email" placeholder="ornek@mail.com" onkeydown="if(event.key==='Enter')doForgotPassword()"></div>
+  <button class="btn" style="width:100%" id="forgotBtn" onclick="doForgotPassword()">Sıfırlama Bağlantısı Gönder</button>`;
+}
+function authStatusHtml(kind){
+  const pending=kind==='pending';
+  return `<div class="status-screen">
+    <div class="status-ico">${pending?'⏳':'🚫'}</div>
+    <div class="auth-title" style="font-size:1.15rem">${pending?'Onay Bekleniyor':'Kayıt Onaylanmadı'}</div>
+    <p class="auth-sub" style="margin-bottom:24px">${pending
+      ?'Kaydınız henüz admin tarafından onaylanmadı. Onaylandıktan sonra uygulamayı kullanabilirsiniz.'
+      :'Kaydınız onaylanmadı. Lütfen uygulama yöneticisiyle iletişime geçiniz.'}</p>
+    <button class="btn btn-secondary" style="width:100%" onclick="signOut()">Çıkış Yap</button>
+  </div>`;
+}
+
+async function loadProfile(uid){
+  const{data,error}=await sb.from('teacher_profiles').select('*').eq('id',uid).maybeSingle();
+  if(error||!data){currentProfile=null;return null;}
+  currentProfile=data;return data;
+}
+async function afterLogin(user){
+  const profile=await loadProfile(user.id);
+  if(!profile){setAuthMsg('Profil bilgisi bulunamadı, lütfen yöneticinizle iletişime geçin.','err');await sb.auth.signOut();return;}
+  if(profile.approval_status==='pending'){authView='pending';renderAuth();return;}
+  if(profile.approval_status==='rejected'){authView='rejected';renderAuth();return;}
+  showApp(user,profile);
+  await loadAll();
+}
+async function doLogin(){
   const email=document.getElementById('authEmail')?.value.trim();
   const pass=document.getElementById('authPass')?.value;
   if(!email||!pass){setAuthMsg('E-posta ve şifre gerekli','err');return;}
   const btn=document.getElementById('authBtn');
-  btn.textContent='...';btn.disabled=true;
-  const res=authMode==='login'
-    ?await sb.auth.signInWithPassword({email,password:pass})
-    :await sb.auth.signUp({email,password:pass});
-  btn.disabled=false;btn.textContent=authMode==='login'?'Giriş Yap':'Kayıt Ol';
-  if(res.error){setAuthMsg(res.error.message,'err');return;}
-  if(authMode==='signup'&&res.data?.user&&!res.data?.session){
-    setAuthMsg('✓ Kayıt başarılı! E-postanızı onaylayın, ardından giriş yapın.','ok');return;
-  }
-  showApp(res.data.user);
-  await loadAll();
+  const orig=btn.textContent;btn.innerHTML='<span class="spinner"></span>Giriş yapılıyor…';btn.disabled=true;
+  const res=await sb.auth.signInWithPassword({email,password:pass});
+  btn.disabled=false;btn.textContent=orig;
+  if(res.error){setAuthMsg(authErrorMessage(res.error),'err');return;}
+  await afterLogin(res.data.user);
 }
-function showApp(user){
+async function doRegister(){
+  const v=id=>document.getElementById(id)?.value.trim()||'';
+  const name=v('regName'),email=v('regEmail'),pass=document.getElementById('regPass')?.value||'',pass2=document.getElementById('regPass2')?.value||'',
+        school=v('regSchool'),branch=v('regBranch'),phone=v('regPhone'),userType=v('regUserType'),
+        city=v('regCity'),district=v('regDistrict'),note=v('regNote'),kvkk=document.getElementById('regKvkk')?.checked;
+  if(!name||!email||!pass||!pass2||!school||!branch||!phone){setAuthMsg('Lütfen zorunlu alanları (*) doldurun','err');return;}
+  if(!isValidEmail(email)){setAuthMsg('Geçerli bir e-posta adresi girin','err');return;}
+  if(pass.length<8){setAuthMsg('Şifre en az 8 karakter olmalı','err');return;}
+  if(pass!==pass2){setAuthMsg('Şifreler eşleşmiyor','err');return;}
+  if(!isValidPhone(phone)){setAuthMsg('Geçerli bir telefon numarası girin','err');return;}
+  if(!kvkk){setAuthMsg('KVKK Aydınlatma Metni onayı gerekli','err');return;}
+  const btn=document.getElementById('regBtn');
+  const orig=btn.textContent;btn.innerHTML='<span class="spinner"></span>Kayıt yapılıyor…';btn.disabled=true;
+  const res=await sb.auth.signUp({email,password:pass,options:{
+    emailRedirectTo:location.origin+location.pathname,
+    data:{full_name:name,school_name:school,branch,phone,user_type:userType,city:city||null,district:district||null,note:note||null}
+  }});
+  btn.disabled=false;btn.textContent=orig;
+  if(res.error){setAuthMsg(authErrorMessage(res.error),'err');return;}
+  authView='login';renderAuth();
+  setAuthMsg('✓ Kaydınız alındı! E-postanızı doğrulayın. Doğruladıktan sonra giriş yapabilirsiniz — ancak admin onayından sonra uygulamayı kullanabileceksiniz.','ok');
+}
+async function doForgotPassword(){
+  const email=document.getElementById('forgotEmail')?.value.trim();
+  if(!email||!isValidEmail(email)){setAuthMsg('Geçerli bir e-posta adresi girin','err');return;}
+  const btn=document.getElementById('forgotBtn');
+  const orig=btn.textContent;btn.innerHTML='<span class="spinner"></span>Gönderiliyor…';btn.disabled=true;
+  const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+  btn.disabled=false;btn.textContent=orig;
+  if(error){setAuthMsg(authErrorMessage(error),'err');return;}
+  setAuthMsg('✓ Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.','ok');
+}
+
+function showApp(user,profile){
+  currentUserId=user.id;currentProfile=profile||currentProfile;
   document.getElementById('authScreen').style.display='none';
   document.getElementById('userEmail').textContent=user.email;
   document.getElementById('userChip').style.display='flex';
+  const adminItem=document.getElementById('adminMenuItem');
+  if(adminItem)adminItem.style.display=(currentProfile?.role==='admin')?'flex':'none';
 }
 async function signOut(){
-  await sb.auth.signOut();location.reload();
+  try{await sb.auth.signOut();}catch(e){}
+  try{
+    localStorage.removeItem(OF_CACHE);localStorage.removeItem(OF_QUEUE);
+    localStorage.removeItem(NM_KEY);localStorage.removeItem('nmPerfSettings');
+    localStorage.removeItem(OC_KEY);
+  }catch(e){}
+  students=[];grades=[];scores=[];scoreHistory=[];schedule=[];plans=[];photos=[];
+  examQuestions=[];questionScores=[];perfWeights=[];perfScores=[];
+  currentUserId=null;currentProfile=null;
+  authView='login';
+  location.reload();
+}
+
+/* ── Admin: Onay Bekleyen Kullanıcılar ── */
+async function renderAdminApprovals(){
+  const m=document.getElementById('main');
+  m.innerHTML='<div class="loading">Yükleniyor…</div>';
+  const{data,error}=await sb.from('teacher_profiles').select('*').order('created_at',{ascending:false});
+  if(error){m.innerHTML=`<div class="empty">Hata: ${esc(error.message)}</div>`;return;}
+  const pending=(data||[]).filter(p=>p.approval_status==='pending');
+  const others=(data||[]).filter(p=>p.approval_status!=='pending');
+  const card=p=>`<div class="admin-pending-card">
+    <div class="row"><b>Ad Soyad:</b> ${esc(p.full_name||'—')}</div>
+    <div class="row"><b>E-posta:</b> ${esc(p.email||'—')}</div>
+    <div class="row"><b>Okul:</b> ${esc(p.school_name||'—')} &nbsp; <b>Branş:</b> ${esc(p.branch||'—')}</div>
+    <div class="row"><b>Telefon:</b> ${esc(p.phone||'—')} &nbsp; <b>Tip:</b> ${esc(p.user_type||'—')}</div>
+    <div class="row"><b>İl/İlçe:</b> ${esc(p.city||'—')} / ${esc(p.district||'—')}</div>
+    ${p.note?`<div class="row"><b>Not:</b> ${esc(p.note)}</div>`:''}
+    <div class="row"><b>Kayıt Tarihi:</b> ${p.created_at?new Date(p.created_at).toLocaleString('tr-TR'):'—'}</div>
+    <div class="row"><b>E-posta Doğrulandı:</b> ${p.email_verified?'✅':'❌'}</div>
+    <div class="row"><b>Durum:</b> ${p.approval_status==='approved'?'✅ Onaylı':p.approval_status==='rejected'?'🚫 Reddedildi':'⏳ Bekliyor'}</div>
+    ${p.approval_status==='pending'?`<div class="admin-pending-actions">
+      <button class="btn btn-primary btn-sm" onclick="approveUser('${p.id}')">✓ Onayla</button>
+      <button class="btn btn-danger btn-sm" onclick="rejectUser('${p.id}')">✕ Reddet</button>
+    </div>`:''}
+  </div>`;
+  m.innerHTML=`<div class="card-title" style="margin-bottom:10px">🛡️ Onay Bekleyen Kullanıcılar (${pending.length})</div>
+  ${pending.length?pending.map(card).join(''):'<div class="empty">Onay bekleyen kullanıcı yok.</div>'}
+  <div class="card-title" style="margin:24px 0 10px">Diğer Kullanıcılar</div>
+  ${others.length?others.map(card).join(''):'<div class="empty">Kayıt yok.</div>'}`;
+}
+async function approveUser(id){
+  const{error}=await sb.from('teacher_profiles').update({approval_status:'approved',approved_at:new Date().toISOString(),approved_by:currentUserId}).eq('id',id);
+  if(error){toast('Hata: '+error.message,true);return;}
+  toast('✓ Kullanıcı onaylandı');renderAdminApprovals();
+}
+async function rejectUser(id){
+  const{error}=await sb.from('teacher_profiles').update({approval_status:'rejected',approved_at:new Date().toISOString(),approved_by:currentUserId}).eq('id',id);
+  if(error){toast('Hata: '+error.message,true);return;}
+  toast('Kullanıcı reddedildi');renderAdminApprovals();
 }
 
 // ── State
@@ -512,18 +707,18 @@ async function ofFlush(){
   for(let op of q){
     try{
       if(op.t==='insert'){
-        let{data}=await sb.from(op.table).insert(op.data).select().single();
+        let{data}=await sb.from(op.table).insert({...op.data,user_id:currentUserId}).select().single();
         if(data&&op.tmpId)idMap[op.tmpId]=data.id;
       }else if(op.t==='update'){
         let id=idMap[op.id]||op.id;
         if(id&&!String(id).startsWith('tmp_'))await sb.from(op.table).update(op.data).eq('id',id);
       }else if(op.t==='upsert'){
-        await sb.from(op.table).upsert(op.data,{onConflict:op.conflict});
+        await sb.from(op.table).upsert({...op.data,user_id:currentUserId},{onConflict:op.conflict});
       }else if(op.t==='delete'){
         let id=idMap[op.id]||op.id;
         if(id&&!String(id).startsWith('tmp_'))await sb.from(op.table).delete().eq('id',id);
       }else if(op.t==='score_history'){
-        await sb.from('score_history').insert(op.data);
+        await sb.from('score_history').insert({...op.data,user_id:currentUserId});
       }
     }catch(e){console.error('ofFlush error',op,e);}
   }
@@ -532,20 +727,25 @@ async function ofFlush(){
 
 // ── Load
 async function loadAll(){
+  if(!currentUserId||currentProfile?.approval_status!=='approved')return;
   if(!navigator.onLine){ofLoadCache();ofShowOffline(true);render();return;}
   ofShowOffline(false);
+  // ÖNEMLİ: Supabase/PostgREST sorgu başına en fazla 1000 satır döndürür.
+  // perf_criteria_scores tek öğretmende bile bu sınırı aşabiliyor — limit
+  // konmazsa bazı öğrencilerin ölçüt verisi hiç yüklenmiyor (eksik/yarım görünüm).
+  const MAX_ROWS=100000;
   const[s,g,sc,sh,sch,pl,ph,eq,qs,pw,ps]=await Promise.all([
-    sb.from('teacher_students').select('*').order('name'),
-    sb.from('teacher_grades').select('*'),
-    sb.from('student_scores').select('*'),
-    sb.from('score_history').select('*').order('created_at',{ascending:false}),
-    sb.from('teacher_schedule').select('*').order('day_index').order('period_index'),
-    sb.from('teacher_plans').select('*').order('created_at',{ascending:false}),
-    sb.from('teacher_photos').select('id,student_id,photo_data'),
-    sb.from('exam_questions').select('*').order('semester').order('exam_type').order('q_number'),
-    sb.from('question_scores').select('*'),
-    sb.from('perf_criteria_weights').select('*'),
-    sb.from('perf_criteria_scores').select('*'),
+    sb.from('teacher_students').select('*').order('name').limit(MAX_ROWS),
+    sb.from('teacher_grades').select('*').limit(MAX_ROWS),
+    sb.from('student_scores').select('*').limit(MAX_ROWS),
+    sb.from('score_history').select('*').order('created_at',{ascending:false}).limit(MAX_ROWS),
+    sb.from('teacher_schedule').select('*').order('day_index').order('period_index').limit(MAX_ROWS),
+    sb.from('teacher_plans').select('*').order('created_at',{ascending:false}).limit(MAX_ROWS),
+    sb.from('teacher_photos').select('id,student_id,photo_data').limit(MAX_ROWS),
+    sb.from('exam_questions').select('*').order('semester').order('exam_type').order('q_number').limit(MAX_ROWS),
+    sb.from('question_scores').select('*').limit(MAX_ROWS),
+    sb.from('perf_criteria_weights').select('*').limit(MAX_ROWS),
+    sb.from('perf_criteria_scores').select('*').limit(MAX_ROWS),
   ]);
   students=s.data||[];grades=g.data||[];scores=sc.data||[];scoreHistory=sh.data||[];
   schedule=sch.data||[];plans=pl.data||[];photos=ph.data||[];
@@ -608,6 +808,7 @@ function render(){
   else if(page==='scores')m.innerHTML=renderScores();
   else if(page==='plans')m.innerHTML=renderPlans();
   else if(page==='notmerkezi'){m.innerHTML=nmRender();nmAfterRender();}
+  else if(page==='adminApprovals')renderAdminApprovals();
 }
 
 // ════════════════════════════════════════
@@ -745,7 +946,7 @@ async function ocAddStudentToSelected(){
   if(dup){msgEl.textContent=`Bu sınıfta ${no} numaralı öğrenci zaten var: ${dup.name}`;return;}
   msgEl.textContent='';
   try{
-    const{data,error}=await sb.from('teacher_students').insert({name,student_number:no,class_name:ocSelectedClass}).select().single();
+    const{data,error}=await sb.from('teacher_students').insert({name,student_number:no,class_name:ocSelectedClass,user_id:currentUserId}).select().single();
     if(error){msgEl.textContent='Hata: '+error.message;return;}
     students.push(data);ofSaveCache();
     toast(`✓ ${name} eklendi`);
@@ -823,6 +1024,11 @@ async function deleteStudentRecords(sid){
   scoreHistory=scoreHistory.filter(h=>h.student_id!==sid);
   photos=photos.filter(p=>p.student_id!==sid);
   questionScores=questionScores.filter(q=>q.student_id!==sid);
+  perfScores=perfScores.filter(p=>p.student_id!==sid);
+  let nmChanged=false;
+  for(const k of Object.keys(nmData.classroom)){if(k.startsWith(sid+'_')){delete nmData.classroom[k];nmChanged=true;}}
+  for(const k of Object.keys(nmData.manual)){if(k.startsWith(sid+'_')){delete nmData.manual[k];nmChanged=true;}}
+  if(nmChanged)nmSave();
 }
 async function deleteStudentWithConfirm(sid){
   const st=students.find(s=>s.id===sid);if(!st)return;
@@ -866,6 +1072,25 @@ async function deleteClassWithStudents(cls){
 }
 
 /* ── Not sıfırlama (tekli/toplu) ── */
+// Not Defteri/Not Merkezi'nin tüm dönem-bazlı satellite verisini (Performans
+// Ölçeği ölçütleri + Classroom/manuel sözlü — bu ikincisi sadece localStorage'da
+// tutuluyor, tablo değil) birlikte siler — tek başına teacher_grades silinirse
+// diğer ekranlarda eski veri kalır (senkron bozulur).
+async function clearSemesterSatelliteData(studentIds,sem){
+  if(!studentIds.length)return;
+  const perfIds=perfScores.filter(p=>p.semester===sem&&studentIds.includes(p.student_id)).map(p=>p.id);
+  if(perfIds.length){
+    await sb.from('perf_criteria_scores').delete().in('id',perfIds);
+    perfScores=perfScores.filter(p=>!perfIds.includes(p.id));
+  }
+  let changed=false;
+  for(const sid of studentIds){
+    const k=nmKey(sid,sem);
+    if(k in nmData.classroom){delete nmData.classroom[k];changed=true;}
+    if(k in nmData.manual){delete nmData.manual[k];changed=true;}
+  }
+  if(changed)nmSave();
+}
 async function resetStudentGrade(sid,sem){
   const g=getGrade(sid,sem);
   if(!g){toast('Bu dönem için zaten not yok',true);return;}
@@ -874,6 +1099,7 @@ async function resetStudentGrade(sid,sem){
   try{
     await sb.from('teacher_grades').delete().eq('id',g.id);
     grades=grades.filter(x=>x.id!==g.id);
+    await clearSemesterSatelliteData([sid],sem);
     toast('✓ Not sıfırlandı');render();
   }catch(err){toast('Hata: '+err.message,true);}
 }
@@ -885,6 +1111,7 @@ async function resetClassGrades(cls,sem){
   try{
     await sb.from('teacher_grades').delete().eq('semester',sem).in('student_id',ids);
     grades=grades.filter(g=>!(g.semester===sem&&ids.includes(g.student_id)));
+    await clearSemesterSatelliteData(ids,sem);
     toast(`✓ ${ids.length} öğrencinin ${sem}. dönem notları sıfırlandı`);render();
   }catch(err){toast('Hata: '+err.message,true);}
 }
@@ -1013,7 +1240,7 @@ async function saveGrade(sid,s,col,val){
     if(error){toast('Hata: '+error.message,true);return}
     g[col]=nv;
   }else{
-    const row={student_id:sid,semester:s,w1:null,w2:null,oral:null,perf:null,perf2:null,project:null,proj2:null};
+    const row={student_id:sid,semester:s,w1:null,w2:null,oral:null,perf:null,perf2:null,project:null,proj2:null,user_id:currentUserId};
     row[col]=nv;
     const{data,error}=await sb.from('teacher_grades').insert(row).select().single();
     if(error){toast('Hata: '+error.message,true);return}
@@ -1265,7 +1492,7 @@ async function addQuestion(){
   if(!mx||mx<=0){toast('Geçerli maksimum puan girin',true);return}
   const exists=examQuestions.find(q=>q.semester===anaSem&&q.exam_type===anaExam&&q.q_number===qn);
   if(exists){toast('Bu soru numarası zaten var',true);return}
-  const{data,error}=await sb.from('exam_questions').insert({semester:anaSem,exam_type:anaExam,q_number:qn,max_points:mx,topic:topic||null}).select().single();
+  const{data,error}=await sb.from('exam_questions').insert({semester:anaSem,exam_type:anaExam,q_number:qn,max_points:mx,topic:topic||null,user_id:currentUserId}).select().single();
   if(error){toast('Hata: '+error.message,true);return}
   examQuestions.push(data);examQuestions.sort((a,b)=>a.q_number-b.q_number);
   render();toast(`✓ S${qn} eklendi`);
@@ -1302,7 +1529,7 @@ async function saveQScore(qid,sid,maxPts,inputEl){
       if(error){toast('Hata: '+error.message,true);return}
       existing.score=nv;
     }else{
-      const{data,error}=await sb.from('question_scores').insert({question_id:qid,student_id:sid,score:nv}).select().single();
+      const{data,error}=await sb.from('question_scores').insert({question_id:qid,student_id:sid,score:nv,user_id:currentUserId}).select().single();
       if(error){toast('Hata: '+error.message,true);return}
       questionScores.push(data);
     }
@@ -1391,11 +1618,11 @@ async function saveScore(){
     if(error){toast('Hata: '+error.message,true);return}
     sc.score=nv;
   }else{
-    const{data,error}=await sb.from('student_scores').insert({student_id:sid,score:delta}).select().single();
+    const{data,error}=await sb.from('student_scores').insert({student_id:sid,score:delta,user_id:currentUserId}).select().single();
     if(error){toast('Hata: '+error.message,true);return}
     scores.push(data);
   }
-  const{error:he}=await sb.from('score_history').insert({student_id:sid,delta,note:note||''});
+  const{error:he}=await sb.from('score_history').insert({student_id:sid,delta,note:note||'',user_id:currentUserId});
   if(!he)scoreHistory.unshift({student_id:sid,delta,note:note||'',created_at:new Date().toISOString()});
   closeModal('mo-score');render();toast(`✓ ${delta>=0?'+':''}${delta} puan eklendi`);
 }
@@ -1407,7 +1634,7 @@ async function toggleSchedEdit(){
   inputs.forEach(inp=>{
     const di=parseInt(inp.dataset.day),pi=parseInt(inp.dataset.period),id=inp.dataset.id,val=inp.value.trim();
     if(id){ups.push({id,day_index:di,period_index:pi,content:val||null})}
-    else if(val){ins.push({day_index:di,period_index:pi,content:val})}
+    else if(val){ins.push({day_index:di,period_index:pi,content:val,user_id:currentUserId})}
   });
   for(const u of ups){
     if(u.content)await sb.from('teacher_schedule').update({content:u.content}).eq('id',u.id);
@@ -1455,7 +1682,7 @@ async function savePlan(){
     plans.unshift(row);ofQueue({t:'insert',table:'teacher_plans',tmpId,data:{plan_type:type,title,date:date||null,content:content||null}});
     ofSaveCache();closeModal('mo-plan');render();toast('✓ Plan eklendi (çevrimdışı)');return;
   }
-  const{data,error}=await sb.from('teacher_plans').insert({plan_type:type,title,date:date||null,content:content||null}).select().single();
+  const{data,error}=await sb.from('teacher_plans').insert({plan_type:type,title,date:date||null,content:content||null,user_id:currentUserId}).select().single();
   if(error){toast('Hata: '+error.message,true);return}
   plans.unshift(data);closeModal('mo-plan');render();toast('✓ Plan eklendi');
 }
@@ -1690,7 +1917,7 @@ async function nmImportRows(parsedStudents,defaultClassName,detectedSemester){
   await Promise.all(toInsert.map(async p=>{
     try{
       const{data,error}=await sb.from('teacher_students').insert({
-        name:p.name,student_number:p.no,class_name:p.class_name
+        name:p.name,student_number:p.no,class_name:p.class_name,user_id:currentUserId
       }).select().single();
       if(error){dupNumbers.push(p.no+' (hata: '+error.message+')');return;}
       students.push(data);createdCount++;
@@ -2042,7 +2269,7 @@ async function nmSetWeight(cls,group,idx,val){
       await sb.from('perf_criteria_weights').update({max_points:n}).eq('id',existing.id);
       existing.max_points=n;
     }else{
-      const{data,error}=await sb.from('perf_criteria_weights').insert({class_name:cls,criterion_group:group,criterion_index:idx,max_points:n}).select().single();
+      const{data,error}=await sb.from('perf_criteria_weights').insert({class_name:cls,criterion_group:group,criterion_index:idx,max_points:n,user_id:currentUserId}).select().single();
       if(error){toast('Hata: '+error.message,true);return;}
       perfWeights.push(data);
     }
@@ -2065,7 +2292,7 @@ async function nmSetPerfScore(sid,sem,group,idx,maxPts,val){
       await sb.from('perf_criteria_scores').update({score:n}).eq('id',existing.id);
       existing.score=n;
     }else{
-      const{data,error}=await sb.from('perf_criteria_scores').insert({student_id:sid,semester:sem,criterion_group:group,criterion_index:idx,score:n}).select().single();
+      const{data,error}=await sb.from('perf_criteria_scores').insert({student_id:sid,semester:sem,criterion_group:group,criterion_index:idx,score:n,user_id:currentUserId}).select().single();
       if(error){toast('Hata: '+error.message,true);return;}
       perfScores.push(data);
     }
@@ -2092,10 +2319,224 @@ async function nmApplyPerfToGradebook(cls,sem){
   toast(`✓ ${applied} not Not Defteri'ne (Perf.1/Perf.2) işlendi`);
   render();
 }
+function nmPerfSettingsGet(){
+  try{return JSON.parse(localStorage.getItem('nmPerfSettings')||'{}');}catch{return{};}
+}
+function nmPerfSettingsSet(patch){
+  localStorage.setItem('nmPerfSettings',JSON.stringify({...nmPerfSettingsGet(),...patch}));
+}
+function nmRenderPerfSettings(){
+  const s=nmPerfSettingsGet();
+  const fields=[
+    ['okulAdi','Okul Adı (İl/İlçe + Okul Adı)'],
+    ['dersYili','Eğitim-Öğretim Yılı (örn. 2025-2026)'],
+    ['ders','Ders'],
+    ['ogretmenAdi','Öğretmen Adı Soyadı'],
+    ['brans','Branş/Unvan (örn. Matematik Öğretmeni)'],
+    ['mudurAdi','Okul Müdürü Adı Soyadı'],
+  ];
+  return `<div class="card" style="margin-bottom:16px">
+  <div class="card-title">📋 Çıktı Bilgileri (Resmi Format için)</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
+  ${fields.map(([k,label])=>`<label style="font-size:.78rem;color:var(--text2);display:block">${esc(label)}
+    <input class="grade-inp" style="width:100%;margin-top:4px" value="${esc(s[k]||'')}" onchange="nmPerfSettingsSet({'${k}':this.value});render()">
+  </label>`).join('')}
+  </div>
+</div>`;
+}
+function nmExportPerfOlcegi(cls,sem){
+  if(typeof XLSX==='undefined'){toast('Excel kütüphanesi yüklenemedi',true);return;}
+  const s=nmPerfSettingsGet();
+  const list=nmStudentsInClass(cls);
+  if(!list.length){toast('Bu sınıfta öğrenci yok',true);return;}
+  const katC=PERF_CRITERIA.katilim,calC=PERF_CRITERIA.calisma;
+  const katMax=katC.map((_,i)=>nmWeight(cls,'katilim',i+1));
+  const calMax=calC.map((_,i)=>nmWeight(cls,'calisma',i+1));
+  const title=`${(s.okulAdi||'OKUL ADI').toUpperCase()} PERFORMANS DEĞERLENDİRME ÖLÇEĞİ`;
+  const rows=[];
+  rows[0]=[title];
+  rows[1]=['DERS YILI','',s.dersYili||'','DERS','',s.ders||''];
+  rows[2]=['DÖNEMİ','',sem,'SINIFI','',cls,'','','','','Sınıf Mevcudu','','',list.length];
+  rows[3]=[];
+  rows[4]=['ÖĞRENCİLERİN DURUMUNU BELİRLEMEYE YÖNELİK FAALİYETLER VE DEĞERLENDİRME ÖLÇÜTLERİ','','','DERS VE ETKİNLİKLERE KATILIM','','','','','','PERFORMANS ÇALIŞMASI'];
+  rows[5]=['','','',...katC,'TOPLAM',...calC,'TOPLAM'];
+  rows[6]=['SIRA','NO','ADI SOYADI',...katC.map((_,i)=>`Ölçüt ${i+1}`),100,...calC.map((_,i)=>`Ölçüt ${i+1}`),100];
+  rows[7]=['','','',...katMax,'',...calMax,''];
+  list.forEach((st,i)=>{
+    const katVals=katC.map((_,ci)=>nmPerfScore(st.id,sem,'katilim',ci+1)??'');
+    const calVals=calC.map((_,ci)=>nmPerfScore(st.id,sem,'calisma',ci+1)??'');
+    rows.push([i+1,st.student_number||'',st.name,...katVals,nmPerfTotal(st.id,sem,'katilim')??'',...calVals,nmPerfTotal(st.id,sem,'calisma')??'']);
+  });
+  rows.push([]);rows.push([]);
+  const yil=(s.dersYili||'').split('-')[1]||'';
+  rows.push(['','','','','','','','','','','','UYGUNDUR']);
+  rows.push(['','',s.ogretmenAdi||'','','','','','','','','',`……./……./${yil}`]);
+  rows.push(['','',s.brans||'','','','','','','','','',s.mudurAdi||'']);
+  rows.push(['','','','','','','','','','','','Okul Müdürü']);
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  const lastCol=4+katC.length+calC.length;
+  ws['!merges']=[
+    {s:{r:0,c:0},e:{r:0,c:lastCol}},
+    {s:{r:4,c:0},e:{r:4,c:2}},
+    {s:{r:4,c:3},e:{r:4,c:3+katC.length}},
+    {s:{r:4,c:4+katC.length},e:{r:4,c:lastCol}},
+  ];
+  // Excel'in varsayılan dar sütun genişliği isimleri/başlıkları kesiyor —
+  // sütun genişliklerini elle veriyoruz (wch = karakter birimi).
+  ws['!cols']=[
+    {wch:4},{wch:5},{wch:20},
+    ...katC.map(()=>({wch:6})),{wch:6},
+    ...calC.map(()=>({wch:6})),{wch:6},
+  ];
+  ws['!pageSetup']={orientation:'landscape',fitToWidth:1,fitToHeight:0,scale:90};
+  ws['!margins']={left:0.3,right:0.3,top:0.4,bottom:0.4,header:0,footer:0};
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Performans');
+  XLSX.writeFile(wb,`Performans_${cls}_D${sem}.xlsx`);
+}
+function nmPerfOlcegiBuild(cls,sem){
+  const s=nmPerfSettingsGet();
+  const list=nmStudentsInClass(cls);
+  if(!list.length)return null;
+  const katC=PERF_CRITERIA.katilim,calC=PERF_CRITERIA.calisma;
+  const katMax=katC.map((_,i)=>nmWeight(cls,'katilim',i+1));
+  const calMax=calC.map((_,i)=>nmWeight(cls,'calisma',i+1));
+  const title=`${(s.okulAdi||'OKUL ADI').toUpperCase()} PERFORMANS DEĞERLENDİRME ÖLÇEĞİ`;
+  const yil=(s.dersYili||'').split('-')[1]||'';
+  const th=(t,cs)=>`<th${cs?` colspan="${cs}"`:''}>${esc(t)}</th>`;
+  const theadHtml=`<thead>
+<tr>
+  <th rowspan="3">SIRA</th><th rowspan="3">NO</th><th rowspan="3">ADI SOYADI</th>
+  ${th('DERS VE ETKİNLİKLERE KATILIM (1. PERFORMANS)',katC.length+1)}
+  ${th('PERFORMANS ÇALIŞMASI (2. PERFORMANS)',calC.length+1)}
+</tr>
+<tr>${katC.map(c=>th(c)).join('')}${th('TOPLAM')}${calC.map(c=>th(c)).join('')}${th('TOPLAM')}</tr>
+<tr>${katMax.map(m=>th(m)).join('')}${th(100)}${calMax.map(m=>th(m)).join('')}${th(100)}</tr>
+</thead>`;
+  const buildRows=(sublist,startIdx)=>sublist.map((st,i)=>{
+    const katVals=katC.map((_,ci)=>nmPerfScore(st.id,sem,'katilim',ci+1)??'');
+    const calVals=calC.map((_,ci)=>nmPerfScore(st.id,sem,'calisma',ci+1)??'');
+    return `<tr>
+      <td>${startIdx+i+1}</td><td>${esc(st.student_number||'')}</td><td class="ad">${esc(st.name)}</td>
+      ${katVals.map(v=>`<td>${v}</td>`).join('')}<td class="tot">${nmPerfTotal(st.id,sem,'katilim')??''}</td>
+      ${calVals.map(v=>`<td>${v}</td>`).join('')}<td class="tot">${nmPerfTotal(st.id,sem,'calisma')??''}</td>
+    </tr>`;
+  }).join('');
+  const buildTable=(sublist,startIdx)=>`<table>${theadHtml}<tbody>${buildRows(sublist,startIdx)}</tbody></table>`;
+  // Sınıf mevcudu büyükse (tipik olarak ~18'den fazla) tek tablo A4'e dikey sığmaz —
+  // listeyi ikiye bölüp yan yana iki sütun halinde basıyoruz, tek sayfada kalsın diye.
+  let tablesHtml;
+  if(list.length>18){
+    const half=Math.ceil(list.length/2);
+    const left=list.slice(0,half),right=list.slice(half);
+    tablesHtml=`<div class="cols"><div class="col">${buildTable(left,0)}</div><div class="col">${buildTable(right,half)}</div></div>`;
+  }else{
+    tablesHtml=buildTable(list,0);
+  }
+  const styleCss=`*{box-sizing:border-box}
+body{font-family:Arial,sans-serif;font-size:7.5px;margin:0;padding:0}
+h1{font-size:10px;text-align:center;margin:0 0 4px}
+.info{display:flex;justify-content:space-between;font-size:7.5px;margin-bottom:4px;flex-wrap:wrap;gap:3px}
+.info span{margin-right:10px}
+.cols{display:flex;gap:5mm}
+.cols .col{flex:1;min-width:0}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #333;padding:1px 2px;text-align:center}
+th{background:#eee;font-size:6.5px}
+td.ad{text-align:left;white-space:nowrap;font-size:7px}
+td.tot{font-weight:700;background:#f5f5f5}
+.foot{display:flex;justify-content:space-between;margin-top:10px;font-size:8px}
+.foot div{text-align:center;width:30%}`;
+  const bodyHtml=`<h1>${esc(title)}</h1>
+<div class="info">
+  <span><b>Ders Yılı:</b> ${esc(s.dersYili||'')}</span>
+  <span><b>Dönem:</b> ${sem}</span>
+  <span><b>Ders:</b> ${esc(s.ders||'')}</span>
+  <span><b>Sınıf:</b> ${esc(cls)}</span>
+  <span><b>Sınıf Mevcudu:</b> ${list.length}</span>
+</div>
+${tablesHtml}
+<div class="foot">
+  <div>UYGUNDUR</div>
+  <div>${esc(s.ogretmenAdi||'')}<br>${esc(s.brans||'')}</div>
+  <div>……./……./${esc(yil)}<br>${esc(s.mudurAdi||'')}<br>Okul Müdürü</div>
+</div>`;
+  return{styleCss,bodyHtml};
+}
+async function nmDownloadPerfPDF(cls,sem){
+  if(typeof html2canvas==='undefined'||typeof jspdf==='undefined'){toast('PDF kütüphaneleri yüklenemedi',true);return;}
+  const built=nmPerfOlcegiBuild(cls,sem);
+  if(!built){toast('Bu sınıfta öğrenci yok',true);return;}
+  toast('PDF hazırlanıyor…');
+  const PAGE_W=1587,PAGE_H=1123; // A4 yatay, ~96dpi*~2 yedek alan
+  const div=document.createElement('div');
+  div.style.position='fixed';div.style.left='-99999px';div.style.top='0';
+  div.style.width=PAGE_W+'px';div.style.height=PAGE_H+'px';
+  div.style.padding='30px';div.style.background='#fff';div.style.overflow='hidden';
+  div.innerHTML=`<style>${built.styleCss}</style>${built.bodyHtml}`;
+  document.body.appendChild(div);
+  try{
+    const canvas=await html2canvas(div,{scale:1.5,backgroundColor:'#ffffff'});
+    const imgData=canvas.toDataURL('image/jpeg',0.85);
+    const{jsPDF}=jspdf;
+    const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4',compress:true});
+    doc.addImage(imgData,'JPEG',0,0,297,210);
+    doc.save(`Performans_${cls}_D${sem}.pdf`);
+    toast('✓ PDF indirildi');
+  }catch(err){
+    toast('PDF oluşturulamadı: '+err.message,true);
+  }finally{
+    document.body.removeChild(div);
+  }
+}
+function nmDistributePerfTotal(total,maxList){
+  const n=maxList.length;
+  const maxSum=maxList.reduce((a,b)=>a+b,0)||100;
+  const shares=maxList.map(m=>Math.round((total/maxSum)*m));
+  // küçük rastgele varyasyon: son ölçüt hariç hepsine ±(maks. puanın ~%15'i) kadar oynat,
+  // sonra son ölçütü "toplam tam tutsun" diye geri hesapla — e-Okul'daki toplamla
+  // tek tek not aynı görünmesin ama TOPLAM birebir korunsun.
+  for(let i=0;i<n-1;i++){
+    const jitter=Math.round((Math.random()*2-1)*Math.min(2,maxList[i]*0.15));
+    shares[i]=Math.max(0,Math.min(maxList[i],shares[i]+jitter));
+  }
+  const sumOthers=shares.slice(0,n-1).reduce((a,b)=>a+b,0);
+  let last=Math.max(0,Math.min(maxList[n-1],total-sumOthers));
+  let diff=total-(sumOthers+last);
+  let idx=0;
+  while(diff!==0&&idx<n-1){
+    const room=diff>0?maxList[idx]-shares[idx]:shares[idx];
+    const take=diff>0?Math.min(room,diff):Math.max(-room,diff);
+    shares[idx]+=take;diff-=take;idx++;
+  }
+  shares[n-1]=last;
+  return shares;
+}
+async function nmAutoFillPerfFromGradebook(cls,sem,group){
+  const list=nmStudentsInClass(cls);
+  const criteria=PERF_CRITERIA[group];
+  const gradeKey=group==='katilim'?'perf':'perf2';
+  const maxList=criteria.map((_,i)=>nmWeight(cls,group,i+1));
+  let filled=0,skipped=0,noGrade=0;
+  for(const st of list){
+    if(nmPerfTotal(st.id,sem,group)!==null){skipped++;continue;}
+    const g=grades.find(x=>x.student_id===st.id&&x.semester===sem);
+    const total=g?g[gradeKey]:null;
+    if(total===null||total===undefined){noGrade++;continue;}
+    const shares=nmDistributePerfTotal(total,maxList);
+    for(let i=0;i<criteria.length;i++){
+      await nmSetPerfScore(st.id,sem,group,i+1,maxList[i],String(shares[i]));
+    }
+    filled++;
+  }
+  toast(`✓ ${filled} öğrenci dolduruldu${skipped?`, ${skipped} zaten girilmişti`:''}${noGrade?`, ${noGrade} öğrencide Not Defteri'nde ${gradeKey} notu yok`:''}`);
+  render();
+}
 function nmRenderPerf(){
   if(!students.length)return `<div class="empty"><div class="empty-ico">👥</div>Önce sınıf/öğrenci listesi gerekli.</div>`;
-  const groupTabs=[['katilim','Ders ve Etkinliklere Katılım → Perf.1'],['calisma','Performans Çalışması → Perf.2']];
-  let h=`<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:14px">${nmClassSelector()}${nmSemSelector()}</div>
+  const groupTabs=[['katilim','1. Performans (Ders ve Etkinliklere Katılım)'],['calisma','2. Performans (Performans Çalışması)']];
+  let h=nmRenderPerfSettings();
+  h+=`<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:14px">${nmClassSelector()}${nmSemSelector()}</div>
 <div class="sub-tabs">${groupTabs.map(([k,l])=>`<button class="sub-tab ${nmPerfGroup===k?'active':''}" onclick="nmPerfGroup='${k}';render()">${esc(l)}</button>`).join('')}</div>
 <div class="sub-tabs" style="margin-top:8px">
   <button class="sub-tab ${nmPerfView==='agirlik'?'active':''}" onclick="nmPerfView='agirlik';render()">① Ağırlıkları Ayarla</button>
@@ -2128,10 +2569,13 @@ function nmRenderPerfEntry(cls,sem,group){
   const list=nmStudentsInClass(cls);
   const maxTotal=criteria.reduce((s,_,i)=>s+nmWeight(cls,group,i+1),0);
   return `<div class="card" style="margin-bottom:16px">
-  <div class="card-title">Not Gir
-    <button class="btn btn-primary btn-sm" onclick="nmApplyPerfToGradebook('${esc(cls).replace(/'/g,"\\'")}',${sem})">📥 Not Defteri'ne Aktar (Perf.1/Perf.2)</button>
+  <div class="card-title" style="flex-wrap:wrap;gap:8px">Not Gir
+    <button class="btn btn-secondary btn-sm" onclick="nmAutoFillPerfFromGradebook('${esc(cls).replace(/'/g,"\\'")}',${sem},'${group}')">🔄 Not Defteri'nden Otomatik Doldur</button>
+    <button class="btn btn-primary btn-sm" onclick="nmApplyPerfToGradebook('${esc(cls).replace(/'/g,"\\'")}',${sem})">📥 Tüm Sınıfı Not Defteri'ne Aktar (Perf.1/Perf.2)</button>
+    <button class="btn btn-secondary btn-sm" onclick="nmExportPerfOlcegi('${esc(cls).replace(/'/g,"\\'")}',${sem})">📄 Resmi Format İndir (XLSX)</button>
+    <button class="btn btn-secondary btn-sm" onclick="nmDownloadPerfPDF('${esc(cls).replace(/'/g,"\\'")}',${sem})">⬇️ PDF İndir (A4 Yatay)</button>
   </div>
-  <p style="font-size:.8rem;color:var(--text2)">Her ölçüte not girip Enter'a basın. Toplam otomatik hesaplanır, "Not Defteri'ne Aktar" ile dönem notuna işlenir.</p>
+  <p style="font-size:.8rem;color:var(--text2)">"Otomatik Doldur": Not Defteri'nde zaten bir Perf.1/Perf.2 notun varsa (örn. e-Okul'dan aktarılmış), bu toplamı 5 ölçüt arasında ağırlıklarına göre otomatik paylaştırır. Sonra istersen tek tek düzeltebilirsin. "Tüm Sınıfı Aktar" ile bu ekrandaki toplamlar Not Defteri'ne geri yazılır. "PDF İndir": her iki performansı (1. ve 2.) aynı A4 yatay sayfada doğrudan PDF dosyası olarak indirir, yazdırma penceresi açılmaz.</p>
 </div>
 <div class="card"><div class="tbl-wrap"><table>
 <thead><tr><th>No</th><th>Ad Soyad</th>${criteria.map((n,i)=>`<th>${esc(n)}<br><span style="font-weight:400;font-size:.7rem">/${nmWeight(cls,group,i+1)}</span></th>`).join('')}<th>Toplam</th></tr></thead>
@@ -2259,14 +2703,16 @@ function nmRenderYedek(){
 nmLoad();
 
 // ── Init with auth check
+renderAuth();
 (async()=>{
   const{data:{session}}=await sb.auth.getSession();
-  if(session){showApp(session.user);await loadAll();}
+  if(session){await afterLogin(session.user);}
   sb.auth.onAuthStateChange(async(event,session)=>{
     if(event==='SIGNED_OUT')location.reload();
   });
 })();
 window.addEventListener('online',async()=>{
+  if(!currentUserId||currentProfile?.approval_status!=='approved')return;
   ofShowOffline(false);await ofFlush();await loadAll();
 });
 window.addEventListener('offline',()=>ofShowOffline(true));
