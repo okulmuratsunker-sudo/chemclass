@@ -1529,7 +1529,7 @@ async function saveQScore(qid,sid,maxPts,inputEl){
       if(error){toast('Hata: '+error.message,true);return}
       existing.score=nv;
     }else{
-      const{data,error}=await sb.from('question_scores').insert({question_id:qid,student_id:sid,score:nv,user_id:currentUserId}).select().single();
+      const{data,error}=await sb.from('question_scores').upsert({question_id:qid,student_id:sid,score:nv,user_id:currentUserId},{onConflict:'question_id,student_id'}).select().single();
       if(error){toast('Hata: '+error.message,true);return}
       questionScores.push(data);
     }
@@ -2269,7 +2269,7 @@ async function nmSetWeight(cls,group,idx,val){
       await sb.from('perf_criteria_weights').update({max_points:n}).eq('id',existing.id);
       existing.max_points=n;
     }else{
-      const{data,error}=await sb.from('perf_criteria_weights').insert({class_name:cls,criterion_group:group,criterion_index:idx,max_points:n,user_id:currentUserId}).select().single();
+      const{data,error}=await sb.from('perf_criteria_weights').upsert({class_name:cls,criterion_group:group,criterion_index:idx,max_points:n,user_id:currentUserId},{onConflict:'class_name,criterion_group,criterion_index'}).select().single();
       if(error){toast('Hata: '+error.message,true);return;}
       perfWeights.push(data);
     }
@@ -2288,13 +2288,17 @@ async function nmSetPerfScore(sid,sem,group,idx,maxPts,val){
   try{
     if(n===null){
       if(existing){await sb.from('perf_criteria_scores').delete().eq('id',existing.id);perfScores=perfScores.filter(x=>x.id!==existing.id);}
-    }else if(existing){
-      await sb.from('perf_criteria_scores').update({score:n}).eq('id',existing.id);
-      existing.score=n;
     }else{
-      const{data,error}=await sb.from('perf_criteria_scores').insert({student_id:sid,semester:sem,criterion_group:group,criterion_index:idx,score:n,user_id:currentUserId}).select().single();
+      // UPSERT: satır varsa günceller, yoksa ekler. Bellekteki state bayat/eksik
+      // olsa bile (DB'de var ama bellekte yok) "duplicate key" hatası vermez —
+      // benzersizlik kuralı (student_id,semester,criterion_group,criterion_index).
+      const{data,error}=await sb.from('perf_criteria_scores')
+        .upsert({student_id:sid,semester:sem,criterion_group:group,criterion_index:idx,score:n,user_id:currentUserId},
+                {onConflict:'student_id,semester,criterion_group,criterion_index'})
+        .select().single();
       if(error){toast('Hata: '+error.message,true);return;}
-      perfScores.push(data);
+      if(existing){existing.score=n;existing.id=data.id;}
+      else{perfScores.push(data);}
     }
     render();
   }catch(err){toast('Hata: '+err.message,true);}
