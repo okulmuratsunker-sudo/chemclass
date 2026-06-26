@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ChemClass v18</title>
+<link rel="manifest" href="manifest-chemclass.json">
+<meta name="theme-color" content="#00d4aa">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ChemClass">
+<link rel="apple-touch-icon" href="icon-chemclass-180.png">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#0a0e1a;--s1:#111827;--s2:#1a2235;--bd:#1e2d45;--gr:#00d4aa;--or:#ff6b35;--re:#ff4444;--go:#ffd700;--t1:#e8f4f8;--t2:#8ba3b8}
+[data-theme="light"]{--bg:#f0f4f8;--s1:#ffffff;--s2:#e8edf2;--bd:#c9d4de;--t1:#0a1628;--t2:#4a6080}
+[data-theme="light"] .top{background:rgba(240,244,248,.97)!important}
+[data-theme="light"] .hero{background:linear-gradient(135deg,rgba(0,212,170,.10),rgba(255,107,53,.07))!important}
+[data-theme="light"] .stat{background:rgba(255,255,255,.9)!important}
+[data-theme="light"] .homebtn{background:linear-gradient(135deg,var(--s2),#f8fafc)!important}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--t1);font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;transition:background .3s,color .3s}
+.wrap{max-width:960px;margin:auto;padding:16px}
+.top{display:flex;gap:10px;align-items:center;position:sticky;top:0;background:rgba(10,14,26,.97);padding:max(env(safe-area-inset-top),12px) 0 12px;z-index:10;flex-wrap:wrap;transition:background .3s}
+.logo{font-weight:900;color:var(--gr);letter-spacing:2px}.logo span{color:var(--or)}
+.pill{background:var(--s2);border:1px solid var(--bd);padding:6px 10px;border-radius:999px;color:var(--t2);font-size:12px}
+button,input,select{font:inherit}
+button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:pointer;transition:opacity .15s,transform .1s}
+button:active{transform:scale(.96)}
+.b{background:var(--gr);color:#071018}.s{background:var(--s2);color:var(--t1);border:1px solid var(--bd)}.r{background:rgba(255,68,68,.15);color:var(--re);border:1px solid rgba(255,68,68,.35)}
+.nav-fixed{display:flex;gap:6px;padding:10px 0;border-bottom:1px solid var(--bd);margin-bottom:4px}
+.nav-fixed button{flex:1;font-size:13px;padding:10px 6px;white-space:nowrap;transition:background .2s,color .2s}
+.nav-fixed .on{background:var(--gr);color:#071018}
+.hamburger{font-size:20px;padding:6px 11px;line-height:1;border-radius:10px}
+.menu-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column;overflow-y:auto;transition:background .3s}
+.menu-overlay.open{display:flex;animation:fadeIn .18s ease}
+.menu-header{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.menu-item{display:flex;align-items:center;gap:14px;padding:18px 16px;border:0;border-bottom:1px solid var(--bd);background:transparent;color:var(--t1);font-size:17px;font-weight:700;cursor:pointer;width:100%;text-align:left;transition:background .15s;border-radius:0}
+.menu-item:active{background:var(--s2)}
+.menu-item.on{color:var(--gr);background:var(--s2)}
+.mi-icon{font-size:22px;width:32px;text-align:center;flex-shrink:0}
+.menu-footer{margin-top:auto;padding:16px;border-top:1px solid var(--bd);display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:14px;margin:12px 0;transition:background .3s,border-color .3s}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.inp{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px;color:var(--t1);margin:5px 0;transition:background .3s,color .3s}
+.inp:focus{outline:none;border-color:var(--gr)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.student,.group{background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:10px;margin:8px 0;display:flex;gap:10px;align-items:center;animation:fadeIn .22s ease;transition:background .3s,border-color .3s}
+.type-badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;margin-bottom:6px}
+.type-odev{background:rgba(0,212,170,.14);color:var(--gr);border:1px solid rgba(0,212,170,.3)}
+.type-duyuru{background:rgba(255,107,53,.14);color:var(--or);border:1px solid rgba(255,107,53,.3)}
+.type-gorev{background:rgba(167,139,250,.14);color:#a78bfa;border:1px solid rgba(167,139,250,.3)}
+.assign-card{background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:12px;margin:8px 0}
+.assign-card .ttl{font-weight:700;font-size:15px;margin:2px 0 4px}
+.assign-card .desc{color:var(--t2);font-size:13px;margin-bottom:6px;white-space:pre-wrap}
+.msg-row{display:flex;gap:10px;align-items:flex-start;background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:10px;margin:6px 0}
+.msg-row .dir{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.msg-row .dir.out{background:rgba(0,212,170,.14)}
+.msg-row .dir.in{background:rgba(255,107,53,.14)}
+.msg-row.clickable{cursor:pointer}
+.msg-row.clickable:hover{border-color:var(--gr)}
+.bubble{max-width:80%;padding:8px 12px;border-radius:14px;font-size:14px;line-height:1.4}
+.bubble.out{align-self:flex-end;background:rgba(0,212,170,.16);border:1px solid rgba(0,212,170,.3);border-bottom-right-radius:4px}
+.bubble.in{align-self:flex-start;background:var(--s2);border:1px solid var(--bd);border-bottom-left-radius:4px}
+.bubble .t{font-size:11px;color:var(--t2);margin-top:4px}
+.av{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;font-weight:800;font-size:15px;flex-shrink:0}
+.grow{flex:1;min-width:0}
+.muted{color:var(--t2);font-size:12px}
+.score{font-weight:900;font-size:20px;min-width:44px;text-align:center}
+.pos{color:var(--gr)}.neg{color:var(--re)}
+.bigpick{min-height:180px;display:grid;place-items:center;text-align:center;background:var(--s2);border:2px solid var(--bd);border-radius:18px;transition:border-color .3s}
+.bigpick h1{font-size:34px;margin:0;color:var(--gr)}
+.spinning{border-color:var(--or)!important}
+.hide{display:none}
+.bar{height:7px;background:var(--bd);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--gr);transition:width .4s}
+.small{font-size:12px;padding:7px 9px}
+.act{font-size:12px;padding:8px 9px;border-radius:999px}
+.good{background:rgba(0,212,170,.16);color:var(--gr);border:1px solid rgba(0,212,170,.35)}
+.warn{background:rgba(255,68,68,.15);color:var(--re);border:1px solid rgba(255,68,68,.35)}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:10px 18px;display:none;z-index:999;font-weight:600;max-width:90vw;text-align:center}
+.toast.on{display:block;animation:slideUp .2s ease}
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(0,212,170,.18),rgba(255,107,53,.10));border:1px solid var(--bd);border-radius:22px;padding:20px;margin:12px 0;box-shadow:0 18px 50px rgba(0,0,0,.25)}
+.hero:before{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:rgba(0,212,170,.18);filter:blur(2px)}
+.brand{font-size:34px;font-weight:950;letter-spacing:3px;color:var(--gr);line-height:1}.brand span{color:var(--or)}
+.maker{margin-top:8px;font-size:17px;color:var(--t1);font-weight:800}.maker small{display:block;color:var(--t2);font-size:12px;font-weight:500}
+.stat{background:rgba(26,34,53,.75);border:1px solid var(--bd);border-radius:16px;padding:14px;transition:transform .15s}
+.stat:hover{transform:translateY(-2px)}
+.stat b{display:block;font-size:26px;color:var(--gr)}
+.homebtn{min-height:86px;text-align:left;border:1px solid var(--bd);background:linear-gradient(135deg,var(--s2),#111827);color:var(--t1);border-radius:18px;padding:14px;transition:transform .15s,border-color .2s}
+.homebtn:hover{transform:translateY(-2px);border-color:var(--gr)}
+.homebtn strong{display:block;font-size:18px}
+.timerBox{text-align:center;padding:22px}
+.timerDisplay{font-size:54px;font-weight:950;color:var(--gr);letter-spacing:2px}
+.preset{padding:8px 10px;border-radius:999px}
+.dangerGlow{animation:pulse 1s infinite alternate;color:var(--re)!important}
+@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.04)}}
+.hist-item{border-left:3px solid var(--bd);padding:5px 10px;margin:5px 0;border-radius:0 8px 8px 0}
+.hist-pos{border-left-color:var(--gr)}.hist-neg{border-left-color:var(--re)}
+.att-btn{width:38px;height:38px;border-radius:50%;font-size:16px;padding:0;flex-shrink:0}
+.att-p{background:rgba(0,212,170,.2);color:var(--gr);border:1px solid var(--gr)}
+.att-a{background:rgba(255,68,68,.2);color:var(--re);border:1px solid var(--re)}
+.att-e{background:rgba(255,215,0,.15);color:var(--go);border:1px solid var(--go)}
+.att-n{background:var(--s2);color:var(--t2);border:1px solid var(--bd)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-bg.open{display:flex;animation:fadeIn .15s ease}
+.modal{background:var(--s1);border:1px solid var(--bd);border-radius:18px;padding:20px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;animation:scaleIn .18s ease;transition:background .3s}
+.modal h3{margin:0 0 12px}
+.custom-score-btn{padding:8px 14px;border-radius:999px;border:1px solid var(--bd);background:var(--s2);color:var(--t1);font-size:13px;font-weight:700}
+.compare-bar-wrap{display:flex;gap:8px;align-items:center;margin:4px 0}
+.compare-label{width:80px;font-size:12px;color:var(--t2);text-align:right;flex-shrink:0}
+.compare-bar{flex:1;height:10px;background:var(--bd);border-radius:999px;overflow:hidden}
+.compare-bar i{display:block;height:100%;border-radius:999px}
+/* Animations */
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
+@keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes scorePop{0%{transform:scale(1)}40%{transform:scale(1.4)}100%{transform:scale(1)}}
+.score-pop{animation:scorePop .28s ease}
+/* Theme toggle */
+.theme-btn{background:var(--s2);border:1px solid var(--bd);border-radius:999px;padding:7px 13px;color:var(--t1);font-size:12px;font-weight:700;cursor:pointer;transition:border-color .2s}
+.theme-btn:hover{border-color:var(--gr)}
+/* Search */
+.search-inp{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:8px 12px;color:var(--t1);font-size:13px;transition:border-color .2s;min-width:160px;flex:1;max-width:260px}
+.search-inp:focus{outline:none;border-color:var(--gr)}
+/* Sound options */
+.snd-btn{padding:7px 13px;border-radius:999px;border:1px solid var(--bd);background:var(--s2);color:var(--t1);font-size:12px;font-weight:700;cursor:pointer;transition:background .15s}
+.snd-btn.on{background:var(--gr);color:#071018;border-color:var(--gr)}
+/* Board refresh rate */
+.rate-btn{padding:6px 11px;border-radius:999px;border:1px solid var(--bd);background:var(--s2);color:var(--t1);font-size:12px;font-weight:700;cursor:pointer}
+.rate-btn.on{background:var(--gr);color:#071018;border-color:var(--gr)}
+/* Avatar color picker */
+.cp-row{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}
+.cp-dot{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform .12s,border-color .12s}
+.cp-dot.on{border-color:var(--t1);transform:scale(1.18)}
+@media(max-width:600px){
+  .wrap{padding:8px}
+  .bigpick h1{font-size:24px}
+  .brand{font-size:26px}
+  .timerDisplay{font-size:38px}
+  .homebtn{min-height:62px;padding:10px}
+  .homebtn strong{font-size:14px}
+  .score{font-size:16px}
+  .top{gap:6px;padding:8px 0}
+  .top .logo{font-size:13px}
+  .nav-fixed button{font-size:11px;padding:8px 4px}
+  .student{flex-wrap:wrap;gap:5px}
+  .student .row{width:100%;justify-content:flex-start}
+  .card{padding:10px;border-radius:12px}
+  .modal{padding:14px;border-radius:14px}
+  .att-btn{width:34px;height:34px;font-size:13px}
+  .grid{grid-template-columns:1fr 1fr}
+  .stat b{font-size:20px}
+  .timerBox{padding:12px}
+  .hero{padding:14px}
+}
+@media(max-width:380px){
+  .grid{grid-template-columns:1fr}
+  .nav-fixed button{font-size:10px;padding:7px 3px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- TOP BAR -->
+<div class="top">
+  <div style="flex:1">
+    <div class="logo">CHEM<span>CLASS</span> <span style="font-size:11px;color:var(--t2)">v18</span></div>
+  </div>
+  <span id="active" class="pill">Ana Ekran</span>
+  <span id="cloudStatus" class="pill">Yerel kayıt</span>
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀️</button>
+  <button class="hamburger s" onclick="openMenu()">☰</button>
+</div>
+
+<!-- NAV FIXED -->
+<div class="nav-fixed">
+  <button data-tab="home" class="s on" onclick="tab('home')">🏠 Ana Ekran</button>
+  <button data-tab="cloud" class="s" onclick="tab('cloud')">☁️ Bulut</button>
+  <button data-tab="boardShare" class="s" onclick="tab('boardShare')">🖥️ Tahta Modu</button>
+</div>
+
+<!-- MENU OVERLAY -->
+<div class="menu-overlay" id="menuOverlay">
+  <div class="menu-header">
+    <div class="logo">CHEM<span>CLASS</span></div>
+    <button class="r small" onclick="closeMenu()">✕ Kapat</button>
+  </div>
+  <button class="menu-item" data-tab="pick" onclick="tab('pick')"><span class="mi-icon">🎲</span>Rastgele Seçici</button>
+  <button class="menu-item" data-tab="timer" onclick="tab('timer')"><span class="mi-icon">⏳</span>Geri Sayım Sayacı</button>
+  <button class="menu-item" data-tab="students" onclick="tab('students')"><span class="mi-icon">🏫</span>Sınıflar</button>
+  <button class="menu-item" data-tab="attend" onclick="tab('attend')"><span class="mi-icon">📋</span>Yoklama</button>
+  <button class="menu-item" data-tab="beh" onclick="tab('beh')"><span class="mi-icon">⭐</span>Davranış</button>
+  <button class="menu-item" data-tab="groups" onclick="tab('groups')"><span class="mi-icon">👥</span>Gruplar</button>
+  <button class="menu-item" data-tab="board" onclick="tab('board')"><span class="mi-icon">📊</span>Liderlik Tablosu</button>
+  <button class="menu-item" data-tab="assignments" onclick="tab('assignments')"><span class="mi-icon">📚</span>Ödevler</button>
+  <button class="menu-item" data-tab="messages" onclick="tab('messages')"><span class="mi-icon">💬</span>Mesajlar</button>
+  <div class="menu-footer">
+    <button class="s small" onclick="exportData();closeMenu()">💾 Yedek Al</button>
+    <label class="s small" style="cursor:pointer;display:block;text-align:center">📂 Yedek Yükle<input id="importJson" type="file" accept=".json" hidden onchange="importData(event)"></label>
+  </div>
+</div>
+
+<!-- HOME -->
+<section id="home">
+  <div class="hero">
+    <div class="brand">CHEM<span>CLASS</span></div>
+    <div class="maker">Created by Murat Sünker<small>Katılım, davranış puanı ve sınıf içi etkinlik aracı</small></div>
+  </div>
+  <div class="grid">
+    <div class="stat"><span class="muted">Sınıf</span><b id="homeClassCount">0</b></div>
+    <div class="stat"><span class="muted">Öğrenci</span><b id="homeStudentCount">0</b></div>
+    <div class="stat"><span class="muted">Toplam Puan</span><b id="homeScoreCount">0</b></div>
+  </div>
+  <div class="grid">
+    <button class="homebtn" onclick="tabById('pick')"><strong>🎲 Rastgele Seçici</strong><span class="muted">Sınıfta hızlı öğrenci seç.</span></button>
+    <button class="homebtn" onclick="tabById('timer')"><strong>⏳ Geri Sayım Sayacı</strong><span class="muted">Etkinlik, sınav veya grup çalışması için süre başlat.</span></button>
+    <button class="homebtn" onclick="tabById('students')"><strong>🏫 Sınıf ve Öğrenciler</strong><span class="muted">Excel/CSV aktar, düzenle ve yedekle.</span></button>
+    <button class="homebtn" onclick="tabById('attend')"><strong>📋 Yoklama</strong><span class="muted">Geldi / Gelmedi / Geç hızlı işaretle.</span></button>
+    <button class="homebtn" onclick="tabById('board')"><strong>📊 Liderlik Tablosu</strong><span class="muted">Puanları sınıf sınıf takip et.</span></button>
+    <button class="homebtn" onclick="tabById('boardShare')"><strong>🖥️ Tahta Modu</strong><span class="muted">Akıllı tahtaya güvenli görüntüleme kodu oluştur.</span></button>
+  </div>
+</section>
+
+<!-- TIMER -->
+<section id="timer" class="hide">
+  <div class="card timerBox">
+    <h2>⏳ Geri Sayım Sayacı</h2>
+    <div id="timerDisplay" class="timerDisplay">05:00</div>
+    <div class="row" style="justify-content:center;margin:12px 0">
+      <input id="timerMin" class="inp" style="max-width:105px" type="number" min="0" value="5" placeholder="Dakika">
+      <input id="timerSec" class="inp" style="max-width:105px" type="number" min="0" max="59" value="0" placeholder="Saniye">
+    </div>
+    <div class="row" style="justify-content:center">
+      <button class="s preset" onclick="setTimer(1,0)">1 dk</button>
+      <button class="s preset" onclick="setTimer(3,0)">3 dk</button>
+      <button class="s preset" onclick="setTimer(5,0)">5 dk</button>
+      <button class="s preset" onclick="setTimer(10,0)">10 dk</button>
+      <button class="s preset" onclick="setTimer(15,0)">15 dk</button>
+    </div>
+    <div class="row" style="justify-content:center;margin-top:14px">
+      <button class="b" onclick="startTimer()">▶ Başlat</button>
+      <button class="s" onclick="pauseTimer()">⏸ Duraklat</button>
+      <button class="r" onclick="resetTimer()">↺ Sıfırla</button>
+    </div>
+    <div style="margin-top:16px;border-top:1px solid var(--bd);padding-top:12px">
+      <div class="muted" style="margin-bottom:8px;font-weight:700">🔊 Bitiş Sesi</div>
+      <div class="row" style="justify-content:center">
+        <button id="snd-beep" class="snd-btn on" onclick="setSnd('beep',this)">Bip</button>
+        <button id="snd-chime" class="snd-btn" onclick="setSnd('chime',this)">Çan</button>
+        <button id="snd-alarm" class="snd-btn" onclick="setSnd('alarm',this)">Alarm</button>
+        <button id="snd-silent" class="snd-btn" onclick="setSnd('silent',this)">Sessiz</button>
+        <button class="s small" onclick="beep()">▶ Test</button>
+      </div>
+    </div>
+    <div class="muted" style="margin-top:10px">Süre bitince ekranda uyarı verir.</div>
+  </div>
+</section>
+
+<!-- PICK -->
+<section id="pick" class="hide">
+  <div class="card">
+    <div class="row">
+      <select id="pickClass" class="inp" style="max-width:220px" onchange="resetPick();renderAll()"></select>
+      <div id="pickChips" class="row" style="width:100%;margin:4px 0"></div>
+      <button class="b" onclick="pickStudent()">🎲 Rastgele Seç</button>
+      <button class="s" onclick="resetPick()">↺ Sıfırla</button>
+    </div>
+    <div class="bigpick" id="bigpickBox">
+      <div><h1 id="pickName">?</h1><div id="pickInfo" class="muted">Önce sınıf seçin</div></div>
+    </div>
+    <div id="quick" class="row hide" style="margin-top:10px">
+      <button class="warn act" onclick="changeScore(lastPick,-1,'Uyarı')">−1 Uyarı</button>
+      <button class="good act" onclick="changeScore(lastPick,1,'Katılım')">+1 Katılım</button>
+      <button class="good act" onclick="changeScore(lastPick,2,'Doğru cevap')">+2 Doğru cevap</button>
+      <button class="good act" onclick="changeScore(lastPick,3,'Grup liderliği')">+3 Grup liderliği</button>
+      <div id="customBtnsQuick" class="row"></div>
+      <strong id="quickScore" class="score">0</strong>
+    </div>
+    <div class="muted" style="margin-top:10px">Son seçilenler: <span id="recent">Yok</span></div>
+    <div class="muted">Not: Son 5 seçilen öğrenci geçici olarak tekrar seçilmez.</div>
+  </div>
+</section>
+
+<!-- STUDENTS -->
+<section id="students" class="hide">
+  <div class="grid">
+    <div class="card">
+      <h3>Sınıf Ekle</h3>
+      <input id="newClass" class="inp" placeholder="Örn: 9-A">
+      <button class="b" onclick="addClass()">Sınıf Ekle</button>
+    </div>
+    <div class="card">
+      <h3>Excel / CSV Aktar</h3>
+      <select id="impClass" class="inp" onchange="renderAll()"></select>
+      <div id="impChips" class="row" style="margin:4px 0"></div>
+      <input id="file" class="inp" type="file" accept=".xlsx,.xls,.csv" onchange="readFile(event)">
+      <div class="muted">CSV/XLSX: Okul Numarası ve Adı Soyadı sütunları aranır. Önce sınıf seç.</div>
+      <div id="importStatus" class="muted" style="margin-top:6px">Henüz dosya seçilmedi.</div>
+    </div>
+    <div class="card">
+      <h3>📤 Excel'e Aktar</h3>
+      <select id="exportClass" class="inp"></select>
+      <button class="b" style="margin-top:6px" onclick="exportToExcel()">Excel İndir (.xlsx)</button>
+      <div class="muted" style="margin-top:4px">Seçili sınıfın puan tablosunu indirir.</div>
+    </div>
+    <div class="card">
+      <h3>⚙️ Dönem Sonu İşlemleri</h3>
+      <select id="resetClass" class="inp"></select>
+      <div id="resetChips" class="row" style="margin:4px 0"></div>
+      <button class="r" style="margin-top:6px;width:100%" onclick="resetScores()">Puanları Sıfırla</button>
+      <div class="muted" style="margin-top:4px">Tüm puanları ve geçmişleri sıfırlar.</div>
+    </div>
+  </div>
+  <div class="row" style="margin:6px 0">
+    <input id="stuSearch" class="search-inp" placeholder="🔍 Öğrenci ara..." oninput="renderClasses()">
+  </div>
+  <div id="classList"></div>
+</section>
+
+<!-- ATTENDANCE -->
+<section id="attend" class="hide">
+  <div class="card">
+    <div class="row">
+      <select id="attClass" class="inp" style="max-width:220px" onchange="renderAll()"></select>
+      <div id="attChips" class="row" style="width:100%;margin:4px 0"></div>
+      <input id="attDate" class="inp" type="date" style="max-width:170px">
+    </div>
+    <div class="row" style="margin:8px 0">
+      <button class="b small" onclick="attMarkAll('P')">✓ Hepsini Geldi</button>
+      <button class="r small" onclick="attMarkAll('A')">✗ Hepsini Gelmedi</button>
+      <button class="s small" onclick="saveAttendance()">💾 Yoklamayı Kaydet</button>
+      <button class="s small" onclick="showAttStats()">📊 İstatistik</button>
+    </div>
+    <div id="attendList"></div>
+  </div>
+  <div id="attStatsBox" class="hide"></div>
+</section>
+
+<!-- BEHAVIOUR -->
+<section id="beh" class="hide">
+  <div class="card">
+    <div class="row">
+      <select id="behClass" class="inp" style="max-width:220px" onchange="renderAll()"></select>
+      <div id="behChips" class="row" style="width:100%;margin:4px 0"></div>
+      <input id="behSearch" class="search-inp" placeholder="🔍 Öğrenci ara..." oninput="renderBeh()">
+      <input id="note" class="inp" style="max-width:260px" placeholder="İsteğe bağlı not...">
+    </div>
+    <div class="card" style="margin:8px 0;padding:10px">
+      <div class="row" style="margin-bottom:6px">
+        <b style="font-size:13px">⚙️ Özel Puan Butonları</b>
+        <button class="s small" onclick="showCustomBtnModal()">Düzenle</button>
+      </div>
+      <div id="customBtnsList" class="row"></div>
+    </div>
+    <div id="behList"></div>
+  </div>
+</section>
+
+<!-- GROUPS -->
+<section id="groups" class="hide">
+  <div class="card">
+    <div class="row">
+      <select id="grpClass" class="inp" style="max-width:220px" onchange="renderAll()"></select>
+      <div id="grpChips" class="row" style="width:100%;margin:4px 0"></div>
+      <select id="grpMode" class="inp" style="max-width:220px">
+        <option value="count">Grup sayısı</option>
+        <option value="size">Gruptaki kişi sayısı</option>
+      </select>
+      <input id="grpVal" class="inp" style="max-width:100px" type="number" value="4">
+      <button class="b" onclick="makeGroups()">👥 Grupları Oluştur</button>
+    </div>
+    <div class="muted" style="margin-top:4px">Grup puanları yeniden oluşturulana kadar korunur.</div>
+    <div id="groupList"></div>
+  </div>
+</section>
+
+<!-- BOARD -->
+<section id="board" class="hide">
+  <div class="card">
+    <div class="row">
+      <select id="boardClass" class="inp" style="max-width:220px" onchange="renderAll()"></select>
+      <div id="boardChips" class="row" style="width:100%;margin:4px 0"></div>
+      <input id="boardSearch" class="search-inp" placeholder="🔍 Öğrenci ara..." oninput="renderBoard()">
+      <button class="s small" onclick="toggleCompare()">📊 Sınıf Karşılaştır</button>
+    </div>
+    <div id="boardList"></div>
+    <div id="compareBox" class="hide" style="margin-top:14px">
+      <h3>📊 Sınıf Karşılaştırması</h3>
+      <div id="compareList"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ASSIGNMENTS -->
+<section id="assignments" class="hide">
+  <div class="card">
+    <div class="row">
+      <h2 class="grow">📚 Ödevler, Duyurular ve Görevler</h2>
+      <button class="b" onclick="openAssignModal()">+ Yeni Gönder</button>
+    </div>
+    <p class="muted">Öğrencilerinize ödev, duyuru veya görev paylaşın — dilerseniz dosya da ekleyin (kota dolmasın diye yalnızca son 3 dosyanız saklanır, eskiler otomatik silinir).</p>
+    <div class="row">
+      <select id="asgFilterClass" class="inp" style="max-width:220px" onchange="renderTeacherAssignments()"></select>
+    </div>
+    <div id="assignTeacherList"></div>
+  </div>
+</section>
+
+<!-- MESSAGES -->
+<section id="messages" class="hide">
+  <div class="card">
+    <h2>✉️ Mesaj Gönder</h2>
+    <div class="row">
+      <select id="msgScope" class="inp" style="max-width:170px" onchange="renderMsgScope()">
+        <option value="student">Tek Öğrenciye</option>
+        <option value="class">Sınıfa (toplu)</option>
+        <option value="all">Herkese (toplu)</option>
+      </select>
+      <select id="msgClass" class="inp" style="max-width:180px" onchange="renderMsgStudents()"></select>
+      <select id="msgStudent" class="inp" style="max-width:240px"></select>
+    </div>
+    <textarea id="msgBody" class="inp" rows="3" placeholder="Mesajınızı yazın…" style="resize:vertical;margin-top:6px"></textarea>
+    <button class="b" style="margin-top:8px" onclick="sendTeacherMessage()">Gönder</button>
+  </div>
+  <div class="card">
+    <div class="row">
+      <h2 class="grow">📨 Mesaj Geçmişi</h2>
+      <input id="msgSearch" class="search-inp" placeholder="🔍 Ara…" oninput="renderMsgHistory()">
+    </div>
+    <div id="msgHistoryList"></div>
+  </div>
+</section>
+
+<!-- MODAL: Conversation -->
+<div id="convModal" class="modal-bg" onclick="if(event.target===this)closeModal('convModal')">
+  <div class="modal" style="display:flex;flex-direction:column;max-height:80vh">
+    <div class="row" style="margin-bottom:10px">
+      <h3 class="grow" id="convTitle">Konuşma</h3>
+      <button class="r small" onclick="closeModal('convModal')">✕</button>
+    </div>
+    <div id="convMessages" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:4px"></div>
+    <div class="row" style="margin-top:10px;align-items:flex-end">
+      <textarea id="convBody" class="inp" rows="2" placeholder="Yanıt yazın…" style="resize:vertical"></textarea>
+      <button class="b" onclick="sendConversationReply()">Gönder</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOARD SHARE -->
+<section id="boardShare" class="hide">
+  <div class="card">
+    <h2>🖥️ PIN'li Tahta Modu</h2>
+    <p class="muted">Akıllı tahtada kullanıcı adı/şifre görünmeden sadece görüntüleme ekranı açılır. Puan girişi ve düzenleme kapalıdır.</p>
+    <div class="grid">
+      <div>
+        <label class="muted">Tahtada gösterilecek sınıf</label>
+        <select id="shareClass" class="inp"></select>
+      </div>
+      <div>
+        <label class="muted">Kod geçerlilik süresi</label>
+        <select id="shareHours" class="inp">
+          <option value="2">2 saat</option><option value="4">4 saat</option>
+          <option value="8" selected>8 saat</option><option value="12">12 saat</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <button class="b" onclick="createBoardCode()">Tahta Kodu Oluştur</button>
+      <button class="s" onclick="manualRefreshBoard()">Tahtayı Güncelle</button>
+      <button class="r" onclick="closeBoardSession()">Bağlantıyı Kapat</button>
+    </div>
+    <div class="card" style="background:rgba(0,212,170,.06)">
+      <b>Tahta Kodu:</b> <span id="boardCodeText" style="font-size:28px;color:var(--gr);font-weight:950">Henüz yok</span>
+      <div class="muted" id="boardCodeInfo">Kod oluşturmak için önce bulut hesabına giriş yapmalısın.</div>
+      <div id="boardUrlBox" class="row" style="margin-top:8px;display:none">
+        <input id="boardUrl" class="inp" readonly>
+        <button class="s small" onclick="copyBoardUrl()">Linki Kopyala</button>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <div class="muted" style="margin-bottom:6px">Tahta görünümü:</div>
+      <div class="row">
+        <button class="s small" onclick="setBoardView('list')">📊 Liste</button>
+        <button class="s small" onclick="setBoardView('pick')">🎲 Seçici</button>
+        <button class="s small" onclick="setBoardView('groups')">👥 Gruplar</button>
+        <button class="s small" onclick="setBoardView('timer')">⏱️ Sayaç</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Akıllı tahtada açılacak ekran</h3>
+    <div class="row">
+      <input id="boardEnterCode" class="inp" style="max-width:180px" placeholder="6 haneli kod">
+      <button class="b" onclick="enterBoardCode()">Tahta.html'i Aç</button>
+      <a href="/tahta.html" target="_blank" class="s small" style="text-decoration:none">Tahta ekranı ↗</a>
+    </div>
+  </div>
+</section>
+
+<!-- BOARD VIEW -->
+<section id="boardView" class="hide">
+  <div class="hero">
+    <div class="brand">CHEM<span>CLASS</span></div>
+    <div class="maker">Tahta Modu<small>Görüntüleme ekranı • Puan girişi kapalı</small></div>
+  </div>
+  <div class="card">
+    <div class="row">
+      <h2 id="bvClass" class="grow">Sınıf</h2>
+      <span id="bvUpdated" class="pill">Bekleniyor</span>
+    </div>
+    <div class="grid">
+      <div class="stat"><span class="muted">Öğrenci</span><b id="bvCount">0</b></div>
+      <div class="stat"><span class="muted">Toplam Puan</span><b id="bvTotal">0</b></div>
+      <div class="stat"><span class="muted">Kod</span><b id="bvCode">----</b></div>
+    </div>
+    <div style="margin-top:10px">
+      <span class="muted">Otomatik yenileme: </span>
+      <button class="rate-btn on" onclick="setBoardRate(3000,this)">3sn</button>
+      <button class="rate-btn" onclick="setBoardRate(5000,this)">5sn</button>
+      <button class="rate-btn" onclick="setBoardRate(10000,this)">10sn</button>
+      <button class="rate-btn" onclick="setBoardRate(30000,this)">30sn</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>📊 Liderlik Tablosu</h2>
+    <div id="bvList" class="muted">Kod bekleniyor.</div>
+  </div>
+  <div class="card">
+    <h2>🎲 Son Seçilenler</h2>
+    <div id="bvRecent" class="muted">Henüz yok.</div>
+  </div>
+</section>
+
+<!-- CLOUD -->
+<section id="cloud" class="hide">
+  <div class="card">
+    <h2>☁️ Bulut Senkronizasyonu</h2>
+    <p class="muted">Bu bölüm isteğe bağlıdır. E-posta/şifre ile giriş yaparsan veriler cihazlar arasında senkronize olur.</p>
+    <div class="grid">
+      <div>
+        <label class="muted">Supabase Project URL</label>
+        <input id="sbUrl" class="inp" value="https://krqyzhmioqtfihwrblmb.supabase.co" placeholder="https://xxxx.supabase.co">
+      </div>
+      <div>
+        <label class="muted">Supabase anon public key</label>
+        <input id="sbKey" class="inp" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtycXl6aG1pb3F0Zmlod3JibG1iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNTQzOTQsImV4cCI6MjA5NTczMDM5NH0.qE5bmGq7DksTJ4WHklpS_cGPeghkQrk5ZwjR36dn0GI" placeholder="anon public key">
+      </div>
+    </div>
+    <div class="row">
+      <button class="s" onclick="saveCloudSettings()">Ayarları Kaydet</button>
+      <button class="s" onclick="loadCloudSettings()">Ayarları Yükle</button>
+    </div>
+    <hr style="border-color:var(--bd);opacity:.4">
+    <div class="grid">
+      <div><label class="muted">E-posta</label><input id="loginEmail" class="inp" type="email" placeholder="ornek@mail.com"></div>
+      <div><label class="muted">Şifre</label><input id="loginPass" class="inp" type="password" placeholder="Şifre"></div>
+    </div>
+    <div class="row">
+      <button class="b" onclick="signUp()">Hesap Oluştur</button>
+      <button class="b" onclick="signIn()">Giriş Yap</button>
+      <button class="s" onclick="signOut()">Çıkış</button>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="s" onclick="loadFromCloud()">Buluttan Yükle</button>
+      <button class="s" onclick="saveToCloudNow()">Buluta Kaydet</button>
+    </div>
+    <div class="card" style="background:rgba(0,212,170,.06)">
+      <b>Durum:</b> <span id="cloudInfo">Yerel kayıt aktif.</span>
+    </div>
+  </div>
+</section>
+
+</div>
+<div id="toast" class="toast"></div>
+
+<!-- MODAL: History -->
+<div id="histModal" class="modal-bg" onclick="if(event.target===this)closeModal('histModal')">
+  <div class="modal">
+    <div class="row" style="margin-bottom:10px">
+      <h3 class="grow" id="histModalTitle">Puan Geçmişi</h3>
+      <button class="r small" onclick="closeModal('histModal')">✕</button>
+    </div>
+    <div id="histModalContent"></div>
+  </div>
+</div>
+
+<!-- MODAL: Edit Student -->
+<div id="editModal" class="modal-bg" onclick="if(event.target===this)closeModal('editModal')">
+  <div class="modal">
+    <div class="row" style="margin-bottom:10px">
+      <h3 class="grow">Öğrenci Düzenle</h3>
+      <button class="r small" onclick="closeModal('editModal')">✕</button>
+    </div>
+    <label class="muted">Ad Soyad</label>
+    <input id="editName" class="inp" placeholder="Ad Soyad">
+    <label class="muted">Okul Numarası</label>
+    <input id="editNo" class="inp" placeholder="No">
+    <label class="muted">Avatar Rengi</label>
+    <div class="cp-row" id="colorPicker"></div>
+    <input type="hidden" id="editId">
+    <div class="row" style="margin-top:10px">
+      <button class="b" onclick="saveEditStudent()">Kaydet</button>
+      <button class="s" onclick="closeModal('editModal')">İptal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Transfer Student -->
+<div id="transferModal" class="modal-bg" onclick="if(event.target===this)closeModal('transferModal')">
+  <div class="modal">
+    <div class="row" style="margin-bottom:10px">
+      <h3 class="grow">↔️ Öğrenci Taşı</h3>
+      <button class="r small" onclick="closeModal('transferModal')">✕</button>
+    </div>
+    <p id="transferInfo" class="muted"></p>
+    <label class="muted">Hedef Sınıf</label>
+    <select id="transferTarget" class="inp" style="margin:8px 0"></select>
+    <input type="hidden" id="transferId">
+    <div class="row" style="margin-top:12px">
+      <button class="b" onclick="doTransfer()">Taşı</button>
+      <button class="s" onclick="closeModal('transferModal')">İptal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Custom Buttons -->
+<div id="customBtnModal" class="modal-bg" onclick="if(event.target===this)closeModal('customBtnModal')">
+  <div class="modal">
+    <div class="row" style="margin-bottom:10px">
+      <h3 class="grow">⚙️ Özel Puan Butonları</h3>
+      <button class="r small" onclick="closeModal('customBtnModal')">✕</button>
+    </div>
+    <p class="muted">Kendi puan butonlarını ekle (örn: +5 Proje, −2 Devamsızlık).</p>
+    <div id="customBtnEditor"></div>
+    <button class="s" style="margin-top:8px;width:100%" onclick="addCustomBtn()">+ Yeni Buton Ekle</button>
+    <div class="row" style="margin-top:12px">
+      <button class="b" onclick="saveCustomBtns()">Kaydet</button>
+      <button class="s" onclick="closeModal('customBtnModal')">İptal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: New Assignment -->
+<div id="assignModal" class="modal-bg" onclick="if(event.target===this)closeModal('assignModal')">
+  <div class="modal">
+    <div class="row" style="margin-bottom:10px">
+      <h3 class="grow">📚 Yeni Ödev / Duyuru / Görev</h3>
+      <button class="r small" onclick="closeModal('assignModal')">✕</button>
+    </div>
+    <label class="muted">Sınıf</label>
+    <select id="asgFormClass" class="inp"></select>
+    <label class="muted">Tür</label>
+    <select id="asgFormType" class="inp">
+      <option value="odev">📘 Ödev</option>
+      <option value="duyuru">📢 Duyuru</option>
+      <option value="gorev">✅ Görev</option>
+    </select>
+    <label class="muted">Başlık</label>
+    <input id="asgFormTitle" class="inp" placeholder="Başlık">
+    <label class="muted">Açıklama (opsiyonel)</label>
+    <textarea id="asgFormBody" class="inp" rows="3" placeholder="Açıklama" style="resize:vertical"></textarea>
+    <label class="muted">Son Tarih (opsiyonel)</label>
+    <input id="asgFormDue" class="inp" type="date">
+    <label class="muted">Dosya Ekle (opsiyonel — yalnızca son 3 dosya saklanır)</label>
+    <input id="asgFormFile" class="inp" type="file">
+    <div class="row" style="margin-top:10px">
+      <button class="b" onclick="saveAssignment()">Gönder</button>
+      <button class="s" onclick="closeModal('assignModal')">İptal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Attendance Stats -->
+<div id="attStatsModal" class="modal-bg" onclick="if(event.target===this)closeModal('attStatsModal')">
+  <div class="modal">
+    <div class="row" style="margin-bottom:10px">
+      <h3 class="grow">📊 Yoklama İstatistikleri</h3>
+      <button class="r small" onclick="closeModal('attStatsModal')">✕</button>
+    </div>
+    <div id="attStatsContent"></div>
+  </div>
+</div>
+
+<script>
+const KEY='chemclass_v18_data',CLOUDKEY='chemclass_v15_cloud_settings';
+let data={classes:[],students:[],attendance:{},customBtns:[],classCodes:{}};
+let picked=[],lastPick=null,groups=[];
+let timerTotal=300,timerLeft=300,timerRun=null;
+let sb=null,sbUser=null,syncTimer=null;
+let activeBoardCode='',activeBoardClass='',boardPoll=null,boardViewData=null;
+let boardCurrentView='list';
+let tempCustomBtns=[];
+let sndType='beep';
+let boardRate=3000;
+let editColor=0;
+
+// 8 avatar rengi
+const AV_BG=['rgba(0,212,170,.18)','rgba(255,107,53,.18)','rgba(255,215,0,.18)','rgba(167,139,250,.18)','rgba(244,114,182,.18)','rgba(56,189,248,.18)','rgba(52,211,153,.18)','rgba(251,146,60,.18)'];
+const AV_FG=['#00d4aa','#ff6b35','#ffd700','#a78bfa','#f472b6','#38bdf8','#34d399','#fb923c'];
+
+function avSt(s){let c=s.color||0;return `background:${AV_BG[c]||AV_BG[0]};color:${AV_FG[c]||AV_FG[0]}`}
+
+// ─── THEME ────────────────────────────────────────────────────────────────────
+function toggleTheme(){
+  let html=document.documentElement;
+  let dark=html.getAttribute('data-theme')==='dark';
+  html.setAttribute('data-theme',dark?'light':'dark');
+  themeBtn.textContent=dark?'🌙':'☀️';
+  localStorage.setItem('cc_theme',dark?'light':'dark');
+}
+function loadTheme(){
+  let t=localStorage.getItem('cc_theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  themeBtn.textContent=t==='dark'?'☀️':'🌙';
+}
+
+// ─── UTILS ────────────────────────────────────────────────────────────────────
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function msg(t,dur=1800){toast.textContent=t;toast.classList.add('on');clearTimeout(window._tt);window._tt=setTimeout(()=>toast.classList.remove('on'),dur)}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function openModal(id){document.getElementById(id).classList.add('open')}
+
+function save(){
+  if(!data.customBtns)data.customBtns=[];
+  if(!data.attendance)data.attendance={};
+  data._modified=Date.now();
+  localStorage.setItem(KEY,JSON.stringify(data));
+  renderAll();scheduleCloudSave();scheduleBoardUpdate();
+}
+
+const TAB_LABELS={home:'Ana Ekran',cloud:'Bulut',boardShare:'Tahta Modu',pick:'Seçici',timer:'Sayaç',students:'Sınıflar',attend:'Yoklama',beh:'Davranış',groups:'Gruplar',board:'Tablo',assignments:'Ödevler',messages:'Mesajlar'};
+function tab(id){
+  document.querySelectorAll('section').forEach(s=>s.classList.add('hide'));
+  document.getElementById(id)?.classList.remove('hide');
+  document.querySelectorAll('[data-tab]').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll(`[data-tab="${id}"]`).forEach(b=>b.classList.add('on'));
+  active.textContent=TAB_LABELS[id]||id;
+  renderAll();
+  if(id==='assignments')enterAssignmentsTab();
+  if(id==='messages')enterMessagesTab();
+  closeMenu();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function tabById(id){tab(id);}
+function goHome(){tab('home');}
+function openMenu(){document.getElementById('menuOverlay').classList.add('open');}
+function closeMenu(){document.getElementById('menuOverlay').classList.remove('open');}
+
+// ─── SELECTS & CHIPS ──────────────────────────────────────────────────────────
+function opts(sel,all=false){
+  if(!sel)return;
+  let old=sel.value;
+  sel.innerHTML=(all?'<option value="">Tüm Öğrenciler</option>':'')+data.classes.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  if(old===''||data.classes.includes(old))sel.value=old;
+}
+function setFilter(which,val){
+  const map={pick:pickClass,beh:behClass,board:boardClass,grp:grpClass,imp:impClass,att:attClass,reset:resetClass,exp:exportClass};
+  if(map[which]){map[which].value=val;if(which==='pick')resetPick();renderAll();}
+}
+function chips(cid,which,allowAll=false){
+  let el=document.getElementById(cid);if(!el)return;
+  const map={pick:pickClass,beh:behClass,board:boardClass,grp:grpClass,imp:impClass,att:attClass,reset:resetClass,exp:exportClass};
+  let sel=map[which];if(!sel)return;
+  let arr=(allowAll?[['','Tüm']]:[]).concat(data.classes.map(c=>[c,c]));
+  el.innerHTML=arr.map(([v,t])=>`<button class="${sel.value===v?'b':'s'} small" onclick="setFilter('${which}','${esc(v)}')">${esc(t)}</button>`).join('');
+}
+
+function renderAll(){
+  let vals={pick:pickClass?.value,imp:impClass?.value,beh:behClass?.value,grp:grpClass?.value,board:boardClass?.value,att:attClass?.value,reset:resetClass?.value,exp:exportClass?.value};
+  [pickClass,impClass,behClass,grpClass,boardClass,attClass,resetClass,exportClass].forEach((s,i)=>{if(!s)return;opts(s,i===2||i===4);});
+  if(vals.pick!==undefined&&pickClass)pickClass.value=vals.pick;
+  if(vals.imp!==undefined&&impClass)impClass.value=vals.imp;
+  if(vals.beh!==undefined&&behClass)behClass.value=vals.beh;
+  if(vals.grp!==undefined&&grpClass)grpClass.value=vals.grp;
+  if(vals.board!==undefined&&boardClass)boardClass.value=vals.board;
+  if(vals.att!==undefined&&attClass)attClass.value=vals.att;
+  if(vals.reset!==undefined&&resetClass)resetClass.value=vals.reset;
+  if(vals.exp!==undefined&&exportClass)exportClass.value=vals.exp;
+  if(shareClass){let old=shareClass.value;shareClass.innerHTML=data.classes.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');if(data.classes.includes(old))shareClass.value=old;}
+  chips('pickChips','pick');chips('behChips','beh',true);chips('boardChips','board',true);
+  chips('grpChips','grp');chips('impChips','imp');chips('attChips','att');chips('resetChips','reset');
+  renderClasses();renderBeh();renderBoard();renderHome();renderCloud();renderAttend();renderCustomBtns();renderCompare();
+  active.textContent=document.querySelector('section:not(.hide)')?.id==='home'?'Ana Ekran':(pickClass?.value||'Tüm Öğrenciler');
+}
+
+// ─── AVATAR COLOR PICKER ──────────────────────────────────────────────────────
+function renderColorPicker(cur){
+  let el=document.getElementById('colorPicker');if(!el)return;
+  editColor=cur||0;
+  el.innerHTML=AV_FG.map((c,i)=>`<div class="cp-dot${i===editColor?' on':''}" style="background:${c}" onclick="pickColor(${i})"></div>`).join('');
+}
+function pickColor(i){
+  editColor=i;
+  document.querySelectorAll('#colorPicker .cp-dot').forEach((d,j)=>d.classList.toggle('on',j===i));
+}
+
+// ─── CLASSES & STUDENTS ───────────────────────────────────────────────────────
+function genClassCode(){let c='ABCDEFGHJKMNPQRSTUVWXYZ23456789',s='';for(let i=0;i<6;i++)s+=c[Math.floor(Math.random()*c.length)];return s}
+function getClassCode(cls){
+  data.classCodes=data.classCodes||{};
+  if(!data.classCodes[cls]){data.classCodes[cls]=genClassCode();save();}
+  return data.classCodes[cls];
+}
+function regenClassCode(cls){
+  if(!confirm(esc(cls)+' sınıfı için yeni kod üretilsin mi? Eski kodu kullanan öğrenciler tekrar giriş yapamaz.'))return;
+  data.classCodes=data.classCodes||{};
+  data.classCodes[cls]=genClassCode();save();msg('Yeni kod üretildi: '+data.classCodes[cls]);
+}
+function copyClassCode(cls){
+  let code=getClassCode(cls);
+  if(navigator.clipboard?.writeText)navigator.clipboard.writeText(code).then(()=>msg('Kod kopyalandı: '+code)).catch(()=>msg('Kod: '+code));
+  else msg('Kod: '+code);
+}
+function addClass(){
+  let c=newClass.value.trim();
+  if(!c)return msg('Sınıf adı girin');
+  if(data.classes.includes(c))return msg('Bu sınıf zaten var');
+  data.classes.push(c);data.classes.sort();getClassCode(c);newClass.value='';save();msg('Sınıf eklendi');
+}
+function addStudent(cls){
+  let n=document.getElementById('name_'+cls).value.trim(),no=document.getElementById('no_'+cls).value.trim();
+  if(!n)return msg('Ad Soyad girin');
+  data.students.push({id:uid(),className:cls,name:n,no,score:0,history:[],color:0});
+  document.getElementById('name_'+cls).value='';document.getElementById('no_'+cls).value='';
+  save();msg('Öğrenci eklendi');
+}
+function delClass(c){if(!confirm(c+' sınıfı ve tüm öğrencileri silinsin mi?'))return;data.classes=data.classes.filter(x=>x!==c);data.students=data.students.filter(s=>s.className!==c);if(data.classCodes)delete data.classCodes[c];save()}
+function clearClass(c){if(!confirm(c+' sınıfındaki öğrenciler silinsin mi?'))return;data.students=data.students.filter(s=>s.className!==c);save();msg('Sınıf temizlendi')}
+function delStudent(id){if(!confirm('Öğrenci silinsin mi?'))return;data.students=data.students.filter(s=>s.id!==id);save()}
+
+function openEditStudent(id){
+  let s=data.students.find(x=>x.id===id);if(!s)return;
+  editId.value=id;editName.value=s.name;editNo.value=s.no||'';
+  renderColorPicker(s.color||0);openModal('editModal');
+}
+function saveEditStudent(){
+  let id=editId.value,name=editName.value.trim(),no=editNo.value.trim();
+  if(!name)return msg('Ad Soyad boş olamaz');
+  let s=data.students.find(x=>x.id===id);if(!s)return;
+  s.name=name;s.no=no;s.color=editColor;closeModal('editModal');save();msg('Öğrenci güncellendi');
+}
+
+// ─── TRANSFER ─────────────────────────────────────────────────────────────────
+function openTransfer(id){
+  let s=data.students.find(x=>x.id===id);if(!s)return;
+  let others=data.classes.filter(c=>c!==s.className);
+  if(!others.length)return msg('Taşınacak başka sınıf yok');
+  transferId.value=id;
+  transferInfo.textContent=s.name+' — Şu an: '+s.className;
+  transferTarget.innerHTML=others.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  openModal('transferModal');
+}
+function doTransfer(){
+  let id=transferId.value,target=transferTarget.value;
+  let s=data.students.find(x=>x.id===id);if(!s||!target)return;
+  s.className=target;closeModal('transferModal');save();msg(s.name+' → '+target);
+}
+
+function openHistModal(id){
+  let s=data.students.find(x=>x.id===id);if(!s)return;
+  histModalTitle.textContent=s.name+' — Puan Geçmişi';
+  let h=s.history||[];
+  if(!h.length){histModalContent.innerHTML='<div class="muted">Henüz puan kaydı yok.</div>';openModal('histModal');return;}
+  histModalContent.innerHTML=h.map(item=>{
+    let cls=item.d>0?'hist-pos':'hist-neg',sign=item.d>0?'+':'';
+    return `<div class="hist-item ${cls}"><div class="row"><b>${sign}${item.d}</b><span class="grow" style="margin-left:8px">${esc(item.n)}</span><span class="muted">${esc(item.t)}</span></div></div>`;
+  }).join('');
+  openModal('histModal');
+}
+
+function renderClasses(){
+  let q=(document.getElementById('stuSearch')?.value||'').toLocaleLowerCase('tr-TR');
+  classList.innerHTML=data.classes.map(c=>{
+    let all=data.students.filter(s=>s.className===c);
+    let ss=q?all.filter(s=>s.name.toLocaleLowerCase('tr-TR').includes(q)||String(s.no||'').includes(q)):all;
+    let total=all.reduce((a,s)=>a+(s.score||0),0);
+    return `<div class="card">
+      <div class="row">
+        <h3 class="grow">${esc(c)} <span class="muted">${all.length} öğrenci • Toplam: ${total>0?'+':''}${total}</span></h3>
+        <button class="s small" onclick="clearClass('${esc(c)}')">Temizle</button>
+        <button class="r small" onclick="delClass('${esc(c)}')">Sil</button>
+      </div>
+      <div class="row" style="align-items:center;gap:8px">
+        <span class="muted">Öğrenci giriş kodu:</span>
+        <code style="font-weight:800;letter-spacing:3px;font-size:16px;color:var(--gr)">${esc(getClassCode(c))}</code>
+        <button class="s small" onclick="copyClassCode('${esc(c)}')">📋 Kopyala</button>
+        <button class="s small" onclick="regenClassCode('${esc(c)}')">🔄 Yenile</button>
+      </div>
+      <div class="row">
+        <input id="name_${esc(c)}" class="inp" style="max-width:260px" placeholder="Ad Soyad">
+        <input id="no_${esc(c)}" class="inp" style="max-width:110px" placeholder="No">
+        <button class="b" onclick="addStudent('${esc(c)}')">Ekle</button>
+      </div>
+      ${ss.map(s=>`<div class="student">
+        <div class="av" style="${avSt(s)}">${esc((s.name||'?')[0])}</div>
+        <div class="grow"><b>${esc(s.name)}</b><div class="muted">No: ${esc(s.no||'-')} • Puan: ${s.score>0?'+':''}${s.score||0}</div></div>
+        <button class="s small" onclick="openHistModal('${s.id}')">📋</button>
+        <button class="s small" onclick="openEditStudent('${s.id}')">✏️</button>
+        <button class="s small" onclick="openTransfer('${s.id}')">↔️ Taşı</button>
+        <button class="r small" onclick="delStudent('${s.id}')">Sil</button>
+      </div>`).join('')}
+      ${q&&!ss.length?'<div class="muted" style="padding:8px">Arama sonucu yok.</div>':''}
+    </div>`;
+  }).join('')||'<div class="card muted">Henüz sınıf yok.</div>';
+}
+
+// ─── SCORE ────────────────────────────────────────────────────────────────────
+function getByClass(c){return data.students.filter(s=>!c||s.className===c)}
+function pointText(d,label){return label||(d===1?'Katılım':d===2?'Doğru cevap':d===3?'Grup liderliği':d===-1?'Uyarı':(d>0?'Puan eklendi':'Puan düşürüldü'))}
+async function changeScore(id,d,label){
+  let s=data.students.find(x=>x.id===id);if(!s)return;
+  s.score=(s.score||0)+d;s.history=s.history||[];
+  let n=(document.getElementById('note')?.value||'').trim();
+  s.history.unshift({d,n:n||pointText(d,label),t:new Date().toLocaleString('tr-TR')});
+  if(document.getElementById('note'))note.value='';
+  if(document.getElementById('quickScore')&&id===lastPick){
+    let el=document.getElementById('quickScore');
+    el.textContent=s.score;
+    el.classList.remove('score-pop');void el.offsetWidth;el.classList.add('score-pop');
+  }
+  save();
+  syncScoreToTeacher(s.no, d, n||pointText(d,label));
+}
+
+// ─── PICK ─────────────────────────────────────────────────────────────────────
+function resetPick(){
+  picked=[];lastPick=null;
+  pickName.textContent='?';
+  pickInfo.textContent=pickClass?.value?'Seçim yapılacak':'Önce sınıf seçin';
+  quick.classList.add('hide');recent.textContent='Yok';bigpickBox.classList.remove('spinning');
+}
+function pickStudent(){
+  let c=pickClass.value;if(!c)return msg('Önce sınıf seçin');
+  let all=getByClass(c);if(!all.length)return msg('Bu sınıfta öğrenci yok');
+  let recentIds=picked.slice(-5),rem=all.filter(s=>!recentIds.includes(s.id));
+  if(!rem.length){rem=all;msg('Sınıf küçük — son 5 kuralı gevşetildi');}
+  bigpickBox.classList.add('spinning');
+  let spins=0,total=12,chosen=rem[Math.floor(Math.random()*rem.length)],allNames=rem.map(s=>s.name);
+  let iv=setInterval(()=>{
+    pickName.textContent=allNames[spins%allNames.length];spins++;
+    if(spins>=total){
+      clearInterval(iv);bigpickBox.classList.remove('spinning');
+      lastPick=chosen.id;picked.push(chosen.id);
+      pickName.textContent=chosen.name;pickInfo.textContent='No: '+(chosen.no||'-');
+      quick.classList.remove('hide');quickScore.textContent=chosen.score||0;
+      renderCustomBtnsQuick();
+      recent.textContent=picked.slice(-8).map(id=>data.students.find(s=>s.id===id)?.name).filter(Boolean).reverse().join(', ');
+      window._lastPickTime=new Date().toISOString();
+      setBoardView('pick');
+    }
+  },60);
+}
+
+// ─── BEHAVIOUR ────────────────────────────────────────────────────────────────
+function renderBeh(){
+  let q=(document.getElementById('behSearch')?.value||'').toLocaleLowerCase('tr-TR');
+  let ss=getByClass(behClass?.value).filter(s=>!q||s.name.toLocaleLowerCase('tr-TR').includes(q)||String(s.no||'').includes(q));
+  behList.innerHTML=ss.map(s=>`
+    <div class="student">
+      <div class="av" style="${avSt(s)}">${esc((s.name||'?')[0])}</div>
+      <div class="grow"><b>${esc(s.name)}</b><div class="muted">${esc(s.className)} • No: ${esc(s.no||'-')}</div></div>
+      <div class="row">
+        <button class="warn act" onclick="changeScore('${s.id}',-1,'Uyarı')">−1</button>
+        <button class="good act" onclick="changeScore('${s.id}',1,'Katılım')">+1</button>
+        <button class="good act" onclick="changeScore('${s.id}',2,'Doğru cevap')">+2</button>
+        <button class="good act" onclick="changeScore('${s.id}',3,'Grup liderliği')">+3</button>
+        ${(data.customBtns||[]).map(b=>`<button class="custom-score-btn act" onclick="changeScore('${s.id}',${b.val},'${esc(b.label)}')">${b.val>0?'+':''}${b.val} ${esc(b.label)}</button>`).join('')}
+      </div>
+      <div class="row" style="flex-direction:column;align-items:flex-end;gap:2px">
+        <div class="score ${(s.score||0)<0?'neg':'pos'}">${s.score>0?'+':''}${s.score||0}</div>
+        <button class="s small" onclick="openHistModal('${s.id}')">📋</button>
+      </div>
+    </div>`).join('')||'<div class="muted">Öğrenci yok.</div>';
+}
+
+// ─── BOARD ────────────────────────────────────────────────────────────────────
+function renderBoard(){
+  let q=(document.getElementById('boardSearch')?.value||'').toLocaleLowerCase('tr-TR');
+  let ss=getByClass(boardClass?.value).sort((a,b)=>(b.score||0)-(a.score||0));
+  if(q)ss=ss.filter(s=>s.name.toLocaleLowerCase('tr-TR').includes(q)||String(s.no||'').includes(q));
+  let mx=Math.max(1,...ss.map(s=>Math.abs(s.score||0)));
+  boardList.innerHTML=ss.map((s,i)=>`
+    <div class="student">
+      <b style="width:34px;flex-shrink:0">#${i+1}</b>
+      <div class="av" style="${avSt(s)}">${esc((s.name||'?')[0])}</div>
+      <div class="grow">
+        <b>${esc(s.name)}</b>
+        <div class="bar"><i style="width:${Math.max(4,Math.abs(s.score||0)/mx*100)}%"></i></div>
+        <div class="muted">${esc(s.className)}</div>
+      </div>
+      <button class="s small" onclick="openHistModal('${s.id}')">📋</button>
+      <div class="score ${(s.score||0)<0?'neg':'pos'}">${s.score>0?'+':''}${s.score||0}</div>
+    </div>`).join('')||'<div class="muted">Öğrenci yok.</div>';
+}
+
+let compareVisible=false;
+function toggleCompare(){
+  compareVisible=!compareVisible;
+  document.getElementById('compareBox').classList.toggle('hide',!compareVisible);
+  if(compareVisible)renderCompare();
+}
+function renderCompare(){
+  if(!compareVisible)return;
+  let stats=data.classes.map(c=>{
+    let ss=data.students.filter(s=>s.className===c);
+    let total=ss.reduce((a,s)=>a+(s.score||0),0),avg=ss.length?Math.round(total/ss.length*10)/10:0;
+    return{c,total,avg,n:ss.length};
+  });
+  let maxTotal=Math.max(1,...stats.map(x=>Math.abs(x.total)));
+  let colors=['#00d4aa','#ff6b35','#ffd700','#a78bfa','#f472b6','#38bdf8'];
+  compareList.innerHTML=stats.map((x,i)=>`
+    <div style="margin:10px 0">
+      <div class="row"><b>${esc(x.c)}</b><span class="muted" style="margin-left:4px">${x.n} öğrenci • Ort: ${x.avg>0?'+':''}${x.avg}</span><b style="margin-left:auto">${x.total>0?'+':''}${x.total}</b></div>
+      <div class="compare-bar-wrap">
+        <span class="compare-label">Toplam</span>
+        <div class="compare-bar"><i style="width:${Math.max(4,Math.abs(x.total)/maxTotal*100)}%;background:${colors[i%colors.length]}"></i></div>
+      </div>
+    </div>`).join('')||'<div class="muted">Sınıf yok.</div>';
+}
+
+// ─── GROUPS ───────────────────────────────────────────────────────────────────
+function makeGroups(){
+  let ss=getByClass(grpClass?.value);if(!ss.length)return msg('Öğrenci yok');
+  ss=[...ss].sort(()=>Math.random()-.5);
+  let v=Math.max(1,parseInt(grpVal.value)||4),arr=[];
+  if(grpMode.value==='count'){for(let i=0;i<Math.min(v,ss.length);i++)arr.push([]);ss.forEach((s,i)=>arr[i%arr.length].push(s));}
+  else{for(let i=0;i<ss.length;i+=v)arr.push(ss.slice(i,i+v));}
+  groups=arr.map((m,i)=>({name:'Grup '+(i+1),score:0,m,id:uid()}));
+  renderGroups();
+  setBoardView('groups');
+}
+function renderGroups(){
+  groupList.innerHTML=groups.map((g,i)=>`
+    <div class="group">
+      <div class="grow">
+        <input class="inp" value="${esc(g.name)}" onchange="groups[${i}].name=this.value" style="margin-bottom:6px">
+        <div>${g.m.map(s=>`<span class="pill" style="margin:2px">${esc(s.name)}</span>`).join('')}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <button class="b small" onclick="groups[${i}].score++;renderGroups()">+</button>
+        <div class="score ${g.score<0?'neg':'pos'}">${g.score>0?'+':''}${g.score}</div>
+        <button class="r small" onclick="groups[${i}].score--;renderGroups()">−</button>
+      </div>
+    </div>`).join('')||'<div class="muted">Henüz grup oluşturulmadı.</div>';
+}
+
+// ─── ATTENDANCE ───────────────────────────────────────────────────────────────
+function todayStr(){return new Date().toISOString().slice(0,10)}
+let attState={};
+function renderAttend(){
+  let cls=attClass?.value;
+  if(!cls){attendList.innerHTML='<div class="muted">Önce sınıf seçin.</div>';return;}
+  let ss=data.students.filter(s=>s.className===cls);
+  if(!ss.length){attendList.innerHTML='<div class="muted">Bu sınıfta öğrenci yok.</div>';return;}
+  if(!attDate.value)attDate.value=todayStr();
+  let key=cls+'_'+attDate.value;
+  if(!attState._key||attState._key!==key){
+    attState={_key:key};
+    let saved=(data.attendance||{})[key]||{};
+    ss.forEach(s=>attState[s.id]=saved[s.id]||'');
+  }
+  attendList.innerHTML=ss.map(s=>{
+    let st=attState[s.id]||'';
+    return `<div class="student">
+      <div class="av" style="${avSt(s)}">${esc((s.name||'?')[0])}</div>
+      <div class="grow"><b>${esc(s.name)}</b><div class="muted">No: ${esc(s.no||'-')}</div></div>
+      <button class="att-btn ${st==='P'?'att-p':'att-n'}" onclick="setAtt('${s.id}','P')">✓</button>
+      <button class="att-btn ${st==='A'?'att-a':'att-n'}" onclick="setAtt('${s.id}','A')">✗</button>
+      <button class="att-btn ${st==='E'?'att-e':'att-n'}" onclick="setAtt('${s.id}','E')">⚡</button>
+    </div>`;
+  }).join('');
+  let cnt={P:0,A:0,E:0,x:0};
+  ss.forEach(s=>{let v=attState[s.id]||'x';cnt[v]=(cnt[v]||0)+1});
+  document.getElementById('attStatsBox').innerHTML=`<div class="card"><div class="row">
+    <span class="good act">✓ Geldi: ${cnt.P||0}</span>
+    <span class="warn act">✗ Gelmedi: ${cnt.A||0}</span>
+    <span style="background:rgba(255,215,0,.15);color:var(--go);border:1px solid rgba(255,215,0,.3)" class="act">⚡ İzinli: ${cnt.E||0}</span>
+    <span class="pill">? İşaretlenmedi: ${cnt.x||0}</span>
+  </div></div>`;
+  document.getElementById('attStatsBox').classList.remove('hide');
+}
+function setAtt(id,val){attState[id]===val?attState[id]='':attState[id]=val;renderAttend();}
+function attMarkAll(val){let cls=attClass?.value;if(!cls)return;data.students.filter(s=>s.className===cls).forEach(s=>attState[s.id]=val);renderAttend();}
+function saveAttendance(){
+  let cls=attClass?.value;if(!cls)return msg('Sınıf seçin');
+  let date=attDate.value;if(!date)return msg('Tarih seçin');
+  if(!data.attendance)data.attendance={};
+  let key=cls+'_'+date,snap={};
+  data.students.filter(s=>s.className===cls).forEach(s=>snap[s.id]=attState[s.id]||'');
+  data.attendance[key]=snap;save();msg('Yoklama kaydedildi ✓');
+}
+function showAttStats(){
+  let cls=attClass?.value;if(!cls)return msg('Sınıf seçin');
+  let ss=data.students.filter(s=>s.className===cls);if(!ss.length)return msg('Bu sınıfta öğrenci yok');
+  let keys=Object.keys(data.attendance||{}).filter(k=>k.startsWith(cls+'_')).sort();
+  if(!keys.length){attStatsContent.innerHTML='<div class="muted">Henüz yoklama kaydı yok.</div>';openModal('attStatsModal');return;}
+  let rows=ss.map(s=>{
+    let P=0,A=0,E=0,total=keys.length;
+    keys.forEach(k=>{let v=(data.attendance[k]||{})[s.id];if(v==='P')P++;else if(v==='A')A++;else if(v==='E')E++;});
+    return{name:s.name,no:s.no,P,A,E,total};
+  });
+  attStatsContent.innerHTML=`<p class="muted">${keys.length} günlük kayıt (${keys[0].split('_')[1]} – ${keys[keys.length-1].split('_')[1]})</p>`+
+    `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+    <tr style="color:var(--t2)"><th style="text-align:left;padding:6px">Öğrenci</th><th>No</th><th style="color:var(--gr)">✓ Geldi</th><th style="color:var(--re)">✗ Gelmedi</th><th style="color:var(--go)">⚡ İzinli</th><th>% Devam</th></tr>
+    ${rows.map(r=>`<tr style="border-top:1px solid var(--bd)">
+      <td style="padding:6px"><b>${esc(r.name)}</b></td>
+      <td style="text-align:center;color:var(--t2)">${esc(r.no||'-')}</td>
+      <td style="text-align:center;color:var(--gr)"><b>${r.P}</b></td>
+      <td style="text-align:center;color:var(--re)"><b>${r.A}</b></td>
+      <td style="text-align:center;color:var(--go)"><b>${r.E}</b></td>
+      <td style="text-align:center"><b>${r.total?Math.round((r.P+r.E)/r.total*100):'-'}%</b></td>
+    </tr>`).join('')}
+    </table></div>`;
+  openModal('attStatsModal');
+}
+
+// ─── CUSTOM BUTTONS ───────────────────────────────────────────────────────────
+function renderCustomBtns(){
+  let btns=data.customBtns||[];
+  customBtnsList.innerHTML=btns.length?btns.map(b=>`<span class="custom-score-btn">${b.val>0?'+':''}${b.val} ${esc(b.label)}</span>`).join(' '):'<span class="muted">Henüz özel buton yok. Düzenle\'ye bas.</span>';
+}
+function renderCustomBtnsQuick(){
+  let el=document.getElementById('customBtnsQuick');if(!el||!lastPick)return;
+  el.innerHTML=(data.customBtns||[]).map(b=>`<button class="custom-score-btn act" onclick="changeScore('${lastPick}',${b.val},'${esc(b.label)}')">${b.val>0?'+':''}${b.val} ${esc(b.label)}</button>`).join('');
+}
+function showCustomBtnModal(){tempCustomBtns=JSON.parse(JSON.stringify(data.customBtns||[]));renderCustomBtnEditor();openModal('customBtnModal');}
+function renderCustomBtnEditor(){
+  customBtnEditor.innerHTML=tempCustomBtns.map((b,i)=>`
+    <div class="row" style="margin:6px 0">
+      <input class="inp" style="max-width:100px" type="number" value="${b.val}" onchange="tempCustomBtns[${i}].val=parseInt(this.value)||0" placeholder="Puan">
+      <input class="inp" style="max-width:180px" value="${esc(b.label)}" onchange="tempCustomBtns[${i}].label=this.value" placeholder="Buton adı">
+      <button class="r small" onclick="tempCustomBtns.splice(${i},1);renderCustomBtnEditor()">✕</button>
+    </div>`).join('');
+}
+function addCustomBtn(){tempCustomBtns.push({val:5,label:'Proje'});renderCustomBtnEditor();}
+function saveCustomBtns(){data.customBtns=tempCustomBtns.filter(b=>b.label.trim());closeModal('customBtnModal');save();msg('Butonlar kaydedildi');}
+
+// ─── SOUND ────────────────────────────────────────────────────────────────────
+function setSnd(type,btn){
+  sndType=type;localStorage.setItem('cc_snd',type);
+  document.querySelectorAll('.snd-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+function loadSnd(){
+  sndType=localStorage.getItem('cc_snd')||'beep';
+  let btn=document.getElementById('snd-'+sndType);
+  if(btn){document.querySelectorAll('.snd-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+}
+function beep(){
+  if(sndType==='silent')return;
+  try{
+    let A=window.AudioContext||window.webkitAudioContext,ctx=new A();
+    if(sndType==='beep'){
+      let o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);o.frequency.value=880;g.gain.value=.08;
+      o.start();setTimeout(()=>{o.stop();ctx.close()},350);
+    }else if(sndType==='chime'){
+      [523,659,784,1047].forEach((f,i)=>{
+        let o=ctx.createOscillator(),g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);o.frequency.value=f;g.gain.value=.05;
+        o.start(ctx.currentTime+i*.12);o.stop(ctx.currentTime+i*.12+.18);
+      });
+      setTimeout(()=>ctx.close(),800);
+    }else if(sndType==='alarm'){
+      let o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);o.type='sawtooth';g.gain.value=.06;
+      o.frequency.setValueAtTime(440,ctx.currentTime);o.frequency.setValueAtTime(880,ctx.currentTime+.15);
+      o.frequency.setValueAtTime(440,ctx.currentTime+.3);o.frequency.setValueAtTime(880,ctx.currentTime+.45);
+      o.start();setTimeout(()=>{o.stop();ctx.close()},600);
+    }
+  }catch(e){}
+}
+
+// ─── EXPORT EXCEL ─────────────────────────────────────────────────────────────
+function exportToExcel(){
+  let cls=exportClass?.value;
+  let ss=(cls?data.students.filter(s=>s.className===cls):data.students).sort((a,b)=>(b.score||0)-(a.score||0));
+  if(!ss.length)return msg('Öğrenci yok');
+  let wsData=[['Sıra','No','Ad Soyad','Sınıf','Puan']];
+  ss.forEach((s,i)=>wsData.push([i+1,s.no||'',s.name,s.className,s.score||0]));
+  let wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols']=[{wch:6},{wch:10},{wch:28},{wch:10},{wch:8}];
+  XLSX.utils.book_append_sheet(wb,ws,cls||'Tum Siniflar');
+  XLSX.writeFile(wb,'chemclass-'+(cls||'tum')+'-'+todayStr()+'.xlsx');msg('Excel indirildi');
+}
+
+// ─── RESET SCORES ─────────────────────────────────────────────────────────────
+function resetScores(){
+  let cls=resetClass?.value;if(!cls)return msg('Sınıf seçin');
+  if(!confirm(cls+' sınıfının TÜM puanları ve geçmişleri sıfırlansın mı? Bu işlem geri alınamaz.'))return;
+  data.students.filter(s=>s.className===cls).forEach(s=>{s.score=0;s.history=[];});
+  save();msg(cls+' sınıfı sıfırlandı');
+}
+
+// ─── HOME ─────────────────────────────────────────────────────────────────────
+function renderHome(){
+  homeClassCount.textContent=data.classes.length;
+  homeStudentCount.textContent=data.students.length;
+  homeScoreCount.textContent=data.students.reduce((a,s)=>a+(s.score||0),0);
+}
+
+// ─── TIMER ────────────────────────────────────────────────────────────────────
+function fmtTime(x){x=Math.max(0,x|0);return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0')}
+function drawTimer(){timerDisplay.textContent=fmtTime(timerLeft);timerDisplay.classList.toggle('dangerGlow',timerLeft>0&&timerLeft<=10)}
+function setTimer(m,s){pauseTimer();timerTotal=(m*60+s)|0;timerLeft=timerTotal;timerMin.value=m;timerSec.value=s;drawTimer()}
+function startTimer(){
+  if(timerRun)return;
+  let m=parseInt(timerMin.value)||0,s=parseInt(timerSec.value)||0;
+  if(timerLeft<=0||timerLeft===timerTotal){timerTotal=m*60+s;timerLeft=timerTotal;}
+  if(timerLeft<=0)return msg('Süre girin');
+  drawTimer();
+  timerRun=setInterval(()=>{timerLeft--;drawTimer();if(timerLeft<=0){pauseTimer();beep();msg('⏰ Süre bitti!',3000);}},1000);
+  setBoardView('timer');
+}
+function pauseTimer(){if(timerRun){clearInterval(timerRun);timerRun=null;scheduleBoardUpdate();}}
+function resetTimer(){pauseTimer();timerTotal=(parseInt(timerMin.value)||0)*60+(parseInt(timerSec.value)||0);timerLeft=timerTotal||300;drawTimer();scheduleBoardUpdate();}
+
+// ─── CSV / EXCEL IMPORT ────────────────────────────────────────────────────────
+function splitCsvLine(line){
+  let out=[],cur='',q=false;
+  for(let i=0;i<line.length;i++){
+    let ch=line[i];
+    if(ch==='"'){if(q&&line[i+1]==='"'){cur+='"';i++;}else q=!q;}
+    else if(!q&&(ch===';'||ch===','||ch==='\t')){out.push(cur);cur='';}
+    else cur+=ch;
+  }
+  out.push(cur);return out;
+}
+function cleanCell(x){return String(x??'').replace(/^﻿/,'').replace(/^"|"$/g,'').trim()}
+function isHeader(vals){let j=vals.join(' ').toLocaleLowerCase('tr-TR');return /adı soyadı|adi soyadi|okul numarası|okul numarasi|sıra no|sira no|ağırlıklı|agirlikli|puanı|puani|muaf|proje|başarılı|basarili|öğrenci sayısı|ogrenci sayisi|müdür|mudur|öğretmeni|ogretmeni|devamsızlık|devamsizlik|y\d/.test(j)}
+function looksName(x){x=cleanCell(x);if(!x||x.length<5)return false;if(/^\d+$/.test(x))return false;if(/başarılı|basarili|başarısız|basarisiz|oranı|orani|müdür|mudur|öğretmen|ogretmen|devamsız|devamsiz|millî eğitim|milli egitim/i.test(x))return false;return /[A-Za-zÇĞİÖŞÜçğıöşü]/.test(x)&&x.replace(/\s+/g,' ').split(' ').length>=2}
+function looksNo(x){x=cleanCell(x);return /^\d{1,6}$/.test(x)}
+function extractStudent(vals){
+  vals=vals.map(cleanCell);if(isHeader(vals))return null;
+  let wide=vals.length>4;
+  for(let i=0;i<vals.length-1;i++){
+    if(looksNo(vals[i])&&looksName(vals[i+1]))return{no:vals[i],name:vals[i+1]};
+    if(i<vals.length-2&&looksNo(vals[i])&&looksNo(vals[i+1])&&looksName(vals[i+2]))return{no:vals[i+1],name:vals[i+2]};
+  }
+  if(!wide){if(looksName(vals[0]))return{name:vals[0],no:looksNo(vals[1])?vals[1]:''};if(looksNo(vals[0])&&looksName(vals[1]))return{no:vals[0],name:vals[1]};}
+  let ni=vals.findIndex(looksName);
+  if(ni>=0){let no='';for(let k of[ni-1,ni+1,0,1,2]){if(looksNo(vals[k])){no=vals[k];break;}}if(no||!wide)return{name:vals[ni],no};}
+  return null;
+}
+function readFile(e){
+  let f=e.target.files[0],cls=impClass?.value;if(!f)return;
+  if(!cls){msg('Önce sınıf seçin');importStatus.textContent='Aktarım durdu: önce sınıf seçmelisin.';return;}
+  importStatus.textContent='Dosya okunuyor: '+f.name;
+  let reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      let rows=[];
+      if(f.name.toLowerCase().endsWith('.csv')){rows=String(ev.target.result||'').split(/\r?\n/).map(splitCsvLine);}
+      else{let wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});rows=XLSX.utils.sheet_to_array(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});}
+      let added=0,skipped=0,dup=0;
+      rows.forEach(r=>{
+        let st=extractStudent(r);if(!st){skipped++;return;}
+        st.name=st.name.replace(/\s+/g,' ').trim();st.no=String(st.no||'').trim();if(!st.name){skipped++;return;}
+        let exists=data.students.some(s=>s.className===cls&&((st.no&&s.no===st.no)||s.name.toLocaleLowerCase('tr-TR')===st.name.toLocaleLowerCase('tr-TR')));
+        if(exists){dup++;return;}
+        data.students.push({id:uid(),className:cls,name:st.name,no:st.no,score:0,history:[],color:0});added++;
+      });
+      e.target.value='';save();
+      let info=`${added} öğrenci eklendi. ${dup} tekrar, ${skipped} satır atlandı.`;
+      importStatus.textContent=info;msg(info);
+      tab('students',document.querySelectorAll('.tabs button')[3]);
+    }catch(err){console.error(err);msg('Dosya okunamadı');importStatus.textContent='Dosya okunamadı: '+(err.message||err);}
+  };
+  reader.onerror=()=>{msg('Dosya seçildi ama okunamadı');importStatus.textContent='Dosya seçildi ama okunamadı.';};
+  f.name.toLowerCase().endsWith('.csv')?reader.readAsText(f,'UTF-8'):reader.readAsArrayBuffer(f);
+}
+
+// ─── BACKUP / RESTORE ─────────────────────────────────────────────────────────
+function exportData(){
+  let a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+  a.download='chemclass-v18-yedek-'+todayStr()+'.json';a.click();
+}
+function importData(e){
+  let f=e.target.files[0];if(!f)return;
+  let r=new FileReader();
+  r.onload=ev=>{try{data=JSON.parse(ev.target.result);if(!data.customBtns)data.customBtns=[];if(!data.attendance)data.attendance={};save();msg('Yedek yüklendi ✓');}catch{msg('Yedek dosyası okunamadı');}};
+  r.readAsText(f);
+}
+
+// ─── BOARD SHARE / VIEW ───────────────────────────────────────────────────────
+function makeBoardSnapshot(cls){
+  let students=getByClass(cls).map(s=>({id:s.id,name:s.name,no:s.no||'',className:s.className,score:s.score||0,color:s.color||0})).sort((a,b)=>(b.score||0)-(a.score||0));
+  let recentNames=picked.slice(-8).map(id=>data.students.find(s=>s.id===id)).filter(s=>s&&(!cls||s.className===cls)).map(s=>s.name).reverse();
+  let lastPickStudent=lastPick?data.students.find(s=>s.id===lastPick):null;
+  let timerEnd=timerRun?new Date(Date.now()+timerLeft*1000).toISOString():null;
+  return{
+    className:cls||'Tüm Öğrenciler',
+    students,
+    recent:recentNames,
+    view:boardCurrentView,
+    lastPick:lastPickStudent?{id:lastPickStudent.id,name:lastPickStudent.name,no:lastPickStudent.no||'',score:lastPickStudent.score||0,color:lastPickStudent.color||0}:null,
+    pickTime:window._lastPickTime||null,
+    groups:groups.map(g=>({name:g.name,score:g.score,members:g.m.map(s=>s.name)})),
+    timerEnd:timerEnd,
+    timerPaused:!timerRun,
+    timerRemaining:timerLeft,
+    timerTotal:timerTotal,
+    updatedAt:new Date().toISOString()
+  };
+}
+function randomBoardCode(){return String(Math.floor(100000+Math.random()*900000))}
+async function createBoardCode(){
+  if(!sbUser)await getSession();
+  if(!sb||!sbUser)return msg('Tahta kodu için önce buluta giriş yapın');
+  let cls=shareClass?.value;if(!cls)return msg('Tahta için sınıf seçin');
+  activeBoardCode=randomBoardCode();activeBoardClass=cls;
+  let hours=parseInt(shareHours?.value)||8;
+  let row={code:activeBoardCode,user_id:sbUser.id,class_name:cls,app_data:makeBoardSnapshot(cls),active:true,expires_at:new Date(Date.now()+hours*3600000).toISOString(),updated_at:new Date().toISOString()};
+  let{error}=await sb.from('chemclass_board_sessions').upsert(row,{onConflict:'code'});
+  if(error)return msg('Tahta kodu oluşturulamadı: '+error.message);
+  boardCodeText.textContent=activeBoardCode;
+  boardCodeInfo.textContent=cls+' sınıfı için '+hours+' saat geçerli.';
+  let url=location.origin+'/tahta.html?code='+activeBoardCode;
+  boardUrl.value=url;boardUrlBox.style.display='flex';msg('Tahta kodu oluşturuldu ✓');
+}
+async function refreshBoardSession(){
+  if(!activeBoardCode)return;
+  if(!sbUser)await getSession();if(!sb||!sbUser)return;
+  let cls=activeBoardClass||shareClass?.value||'';
+  await sb.from('chemclass_board_sessions').update({class_name:cls,app_data:makeBoardSnapshot(cls),updated_at:new Date().toISOString()}).eq('code',activeBoardCode).eq('user_id',sbUser.id);
+}
+async function manualRefreshBoard(){
+  if(!activeBoardCode)return msg('Önce tahta kodu oluşturun');
+  await refreshBoardSession();msg('Tahta güncellendi ✓');
+}
+function scheduleBoardUpdate(){
+  if(!activeBoardCode||!sbUser||!sb)return;
+  clearTimeout(window.boardUpdateTimer);
+  window.boardUpdateTimer=setTimeout(refreshBoardSession,1200);
+}
+function setBoardView(v){boardCurrentView=v;scheduleBoardUpdate();}
+async function closeBoardSession(){
+  if(!activeBoardCode)return msg('Açık tahta kodu yok');
+  if(!sbUser)await getSession();if(!sb||!sbUser)return;
+  await sb.from('chemclass_board_sessions').update({active:false,updated_at:new Date().toISOString()}).eq('code',activeBoardCode).eq('user_id',sbUser.id);
+  activeBoardCode='';boardCodeText.textContent='Henüz yok';boardCodeInfo.textContent='Tahta bağlantısı kapatıldı.';boardUrlBox.style.display='none';
+  msg('Tahta bağlantısı kapatıldı');
+}
+function copyBoardUrl(){boardUrl.select();document.execCommand('copy');msg('Tahta linki kopyalandı');}
+function enterBoardCode(){let c=(boardEnterCode.value||'').trim();if(!/^\d{6}$/.test(c))return msg('6 haneli kod girin');window.open('/tahta.html?code='+c,'_blank');}
+function boardOnlyUI(){document.querySelector('.top').style.display='none';document.querySelector('.tabs').style.display='none';document.querySelectorAll('section').forEach(s=>s.classList.add('hide'));document.getElementById('boardView').classList.remove('hide');}
+
+function setBoardRate(ms,btn){
+  boardRate=ms;
+  document.querySelectorAll('.rate-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  if(boardPoll){
+    clearInterval(boardPoll);
+    let code=new URLSearchParams(location.search).get('board');
+    if(code)boardPoll=setInterval(()=>loadBoardByCode(code),ms);
+  }
+}
+async function loadBoardByCode(code){
+  initSupabase();if(!sb)return;
+  let{data:row,error}=await sb.from('chemclass_board_sessions').select('code,class_name,app_data,updated_at,active,expires_at').eq('code',code).eq('active',true).maybeSingle();
+  if(error){bvList.textContent='Tahta bilgisi okunamadı: '+error.message;return;}
+  if(!row||(row.expires_at&&new Date(row.expires_at)<new Date())){bvList.textContent='Kod bulunamadı veya süresi doldu.';return;}
+  boardViewData=row.app_data||{};renderBoardView(code,row);
+}
+function renderBoardView(code,row){
+  let d=boardViewData||{},ss=(d.students||[]).slice().sort((a,b)=>(b.score||0)-(a.score||0));
+  bvClass.textContent='🖥️ '+(d.className||row.class_name||'Tahta Modu');bvCode.textContent=code;bvCount.textContent=ss.length;bvTotal.textContent=ss.reduce((a,s)=>a+(s.score||0),0);bvUpdated.textContent='Güncel: '+new Date(row.updated_at||Date.now()).toLocaleTimeString('tr-TR');
+  let mx=Math.max(1,...ss.map(s=>Math.abs(s.score||0)));
+  bvList.innerHTML=ss.map((s,i)=>`<div class="student"><b style="width:42px;flex-shrink:0">#${i+1}</b><div class="av" style="${avSt(s)}">${esc((s.name||'?')[0])}</div><div class="grow"><b style="font-size:20px">${esc(s.name)}</b><div class="bar"><i style="width:${Math.max(4,Math.abs(s.score||0)/mx*100)}%"></i></div></div><div class="score ${(s.score||0)<0?'neg':'pos'}" style="font-size:28px">${s.score>0?'+':''}${s.score||0}</div></div>`).join('')||'<div class="muted">Öğrenci yok.</div>';
+  bvRecent.innerHTML=(d.recent||[]).map(n=>`<span class="pill" style="font-size:16px;margin:4px">${esc(n)}</span>`).join('')||'Henüz yok.';
+}
+function checkBoardUrl(){
+  let code=new URLSearchParams(location.search).get('board');
+  if(code){boardOnlyUI();loadBoardByCode(code);clearInterval(boardPoll);boardPoll=setInterval(()=>loadBoardByCode(code),boardRate);}
+}
+
+// ─── CLOUD ────────────────────────────────────────────────────────────────────
+function loadCloudSettings(){try{let c=JSON.parse(localStorage.getItem(CLOUDKEY)||'{}');if(sbUrl)sbUrl.value=c.url||sbUrl.value||'';if(sbKey)sbKey.value=c.key||sbKey.value||'';initSupabase();}catch(e){}}
+function saveCloudSettings(){localStorage.setItem(CLOUDKEY,JSON.stringify({url:sbUrl?.value?.trim(),key:sbKey?.value?.trim()}));initSupabase();msg('Bulut ayarları kaydedildi');}
+function initSupabase(){let c={url:sbUrl?.value?.trim(),key:sbKey?.value?.trim()};if(!c.url||!c.key||!window.supabase){sb=null;return false;}try{sb=window.supabase.createClient(c.url,c.key);return true;}catch(e){sb=null;msg('Supabase bağlantısı kurulamadı');return false;}}
+async function signUp(){if(!initSupabase())return msg('Önce Supabase ayarlarını girin');let email=loginEmail?.value?.trim(),password=loginPass?.value;if(!email||!password)return msg('E-posta ve şifre girin');let{data:res,error}=await sb.auth.signUp({email,password});if(error)return msg(error.message);sbUser=res.user||null;renderCloud();msg('Hesap oluşturuldu. E-posta onayı gerekebilir.');}
+async function signIn(){if(!initSupabase())return msg('Önce Supabase ayarlarını girin');let email=loginEmail?.value?.trim(),password=loginPass?.value;if(!email||!password)return msg('E-posta ve şifre girin');let{data:res,error}=await sb.auth.signInWithPassword({email,password});if(error)return msg(error.message);sbUser=res.user;renderCloud();await loadFromCloud();setupTeacherRealtime();msg('Giriş yapıldı ✓');}
+async function signOut(){
+  try{if(sb)await sb.auth.signOut();}catch(e){}
+  sbUser=null;
+  ['chemclass_v18_data','chemclass_v17_data','chemclass_v16_data','chemclass_v15_data','chemclass_v14_data','chemclass_v13_data'].forEach(k=>localStorage.removeItem(k));
+  sessionStorage.clear();data={classes:[],students:[],attendance:{},customBtns:[],classCodes:{}};
+  msg('Çıkış yapıldı. Veriler temizleniyor...');setTimeout(()=>location.reload(),600);
+}
+async function getSession(){if(!sb)return null;let{data:res}=await sb.auth.getSession();sbUser=res.session?.user||null;return sbUser;}
+
+// ─── ÖDEVLER / DUYURULAR / GÖREVLER (öğrenci modülü) ─────────────────────────
+let teacherAssignments=[];
+const ASG_TYPE_LABEL={odev:'📘 Ödev',duyuru:'📢 Duyuru',gorev:'✅ Görev'};
+const ASG_TYPE_CLASS={odev:'type-odev',duyuru:'type-duyuru',gorev:'type-gorev'};
+
+function enterAssignmentsTab(){
+  if(!sbUser){msg('Ödevler için önce bulut hesabına giriş yapmalısınız');return;}
+  if(asgFilterClass){let old=asgFilterClass.value;asgFilterClass.innerHTML='<option value="">Tüm Sınıflar</option>'+data.classes.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');if(data.classes.includes(old))asgFilterClass.value=old;}
+  loadTeacherAssignments();
+}
+
+function openAssignModal(){
+  if(!sbUser)return msg('Önce bulut hesabına giriş yapmalısınız');
+  if(!data.classes.length)return msg('Önce en az bir sınıf oluşturun');
+  asgFormClass.innerHTML=data.classes.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  asgFormType.value='odev';asgFormTitle.value='';asgFormBody.value='';asgFormDue.value='';asgFormFile.value='';
+  openModal('assignModal');
+}
+
+async function saveAssignment(){
+  const class_name=asgFormClass.value,type=asgFormType.value,title=asgFormTitle.value.trim(),body=asgFormBody.value.trim(),due_date=asgFormDue.value||null;
+  if(!class_name)return msg('Sınıf seçin');
+  if(!title)return msg('Başlık girin');
+
+  let fileInfo=null;
+  const file=asgFormFile.files[0];
+  if(file){fileInfo=await uploadClassFile(file);if(fileInfo===false)return;}
+
+  const{error}=await sb.from('chemclass_assignments').insert({
+    teacher_id:sbUser.id,class_name,type,title,body,due_date,
+    file_url:fileInfo?.url||null,file_name:fileInfo?.name||null,file_path:fileInfo?.path||null
+  });
+  if(error)return msg('Gönderilemedi: '+error.message);
+  closeModal('assignModal');
+  msg('Öğrencilere gönderildi ✓');
+  loadTeacherAssignments();
+}
+
+async function loadTeacherAssignments(){
+  if(!sbUser)return;
+  const{data:rows,error}=await sb.from('chemclass_assignments').select('*').eq('teacher_id',sbUser.id).order('created_at',{ascending:false}).limit(150);
+  if(error)return;
+  teacherAssignments=rows||[];
+  renderTeacherAssignments();
+}
+
+function renderTeacherAssignments(){
+  const el=document.getElementById('assignTeacherList');if(!el)return;
+  const cls=asgFilterClass?.value;
+  let rows=teacherAssignments;
+  if(cls)rows=rows.filter(a=>a.class_name===cls);
+  el.innerHTML=rows.map(a=>{
+    const due=a.due_date?`<span class="muted">⏰ Son: ${esc(new Date(a.due_date).toLocaleDateString('tr-TR'))}</span>`:'';
+    const file=a.file_url?`<a class="s small" href="${esc(a.file_url)}" target="_blank" rel="noopener">📎 ${esc(a.file_name||'Dosya')}</a>`:'';
+    return `<div class="assign-card">
+      <span class="type-badge ${ASG_TYPE_CLASS[a.type]||''}">${ASG_TYPE_LABEL[a.type]||esc(a.type)}</span>
+      <span class="muted"> • ${esc(a.class_name)}</span>
+      <div class="ttl">${esc(a.title)}</div>
+      ${a.body?`<div class="desc">${esc(a.body)}</div>`:''}
+      <div class="row">${due}${file}<span class="muted" style="margin-left:auto">${new Date(a.created_at).toLocaleString('tr-TR')}</span>
+        <button class="r small" onclick="deleteAssignment('${a.id}')">Sil</button>
+      </div>
+    </div>`;
+  }).join('')||'<div class="muted" style="text-align:center;padding:24px">Henüz gönderdiğiniz bir ödev/duyuru/görev yok.</div>';
+}
+
+async function deleteAssignment(id){
+  if(!confirm('Bu kayıt silinsin mi?'))return;
+  const a=teacherAssignments.find(x=>x.id===id);
+  const{error}=await sb.from('chemclass_assignments').delete().eq('id',id).eq('teacher_id',sbUser.id);
+  if(error)return msg('Silinemedi: '+error.message);
+  if(a?.file_path){try{await sb.storage.from('chemclass-files').remove([a.file_path]);}catch(e){}}
+  msg('Silindi');
+  loadTeacherAssignments();
+}
+
+// Dosyayı Storage'a yükler; kotayı doldurmamak için yalnızca son 3 dosya saklanır,
+// daha eskileri yükleme sonrası otomatik olarak silinir.
+async function uploadClassFile(file){
+  if(!sbUser)return null;
+  const ext=(file.name.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'')||'bin';
+  const path=`${sbUser.id}/${uid()}.${ext}`;
+  const{error}=await sb.storage.from('chemclass-files').upload(path,file,{contentType:file.type||'application/octet-stream'});
+  if(error){msg('Dosya yüklenemedi: '+error.message);return false;}
+  await cleanupOldFiles();
+  const{data:pub}=sb.storage.from('chemclass-files').getPublicUrl(path);
+  return{url:pub.publicUrl,path,name:file.name};
+}
+
+async function cleanupOldFiles(){
+  if(!sbUser)return;
+  try{
+    const{data:list}=await sb.storage.from('chemclass-files').list(sbUser.id,{sortBy:{column:'created_at',order:'desc'}});
+    if(!list||list.length<=3)return;
+    const old=list.slice(3).map(f=>`${sbUser.id}/${f.name}`);
+    if(old.length)await sb.storage.from('chemclass-files').remove(old);
+  }catch(e){}
+}
+
+// ─── MESAJLAR (öğretmen ↔ öğrenci) ───────────────────────────────────────────
+let teacherMessages=[],teacherMsgChannel=null;
+
+function enterMessagesTab(){
+  if(!sbUser){msg('Mesajlaşma için önce bulut hesabına giriş yapmalısınız');return;}
+  if(msgClass)msgClass.innerHTML=data.classes.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  renderMsgScope();
+  loadTeacherMessages();
+}
+
+function renderMsgScope(){
+  if(!msgScope)return;
+  const scope=msgScope.value;
+  msgClass.style.display=(scope==='all')?'none':'';
+  msgStudent.style.display=(scope==='student')?'':'none';
+  if(scope==='student')renderMsgStudents();
+}
+
+function renderMsgStudents(){
+  const cls=msgClass.value;
+  const list=data.students.filter(s=>!cls||s.className===cls).sort((a,b)=>a.name.localeCompare(b.name,'tr-TR'));
+  msgStudent.innerHTML=list.map(s=>`<option value="${s.id}">${esc(s.name)} (No:${esc(s.no||'-')})</option>`).join('')||'<option value="">Bu sınıfta öğrenci yok</option>';
+}
+
+async function sendTeacherMessage(){
+  if(!sbUser)return msg('Önce bulut hesabına giriş yapmalısınız');
+  const scope=msgScope.value,body=msgBody.value.trim();
+  if(!body)return msg('Mesaj yazın');
+  let student_id=null,class_name=null,label='';
+  if(scope==='student'){
+    const s=data.students.find(x=>x.id===msgStudent.value);
+    if(!s)return msg('Öğrenci seçin');
+    student_id=s.id;class_name=s.className;label=s.name;
+  }else if(scope==='class'){
+    class_name=msgClass.value;
+    if(!class_name)return msg('Sınıf seçin');
+    label=class_name+' sınıfının tamamı (toplu)';
+  }else{
+    label='Tüm öğrencileriniz (toplu)';
+  }
+  const{error}=await sb.from('chemclass_messages').insert({teacher_id:sbUser.id,student_id,class_name,sender:'teacher',sender_name:'Öğretmen',body});
+  if(error)return msg('Gönderilemedi: '+error.message);
+  msgBody.value='';
+  msg('Gönderildi → '+label);
+  loadTeacherMessages();
+}
+
+async function loadTeacherMessages(){
+  if(!sbUser)return;
+  const{data:rows,error}=await sb.from('chemclass_messages').select('*').eq('teacher_id',sbUser.id).order('created_at',{ascending:false}).limit(300);
+  if(error)return;
+  teacherMessages=rows||[];
+  renderMsgHistory();
+}
+
+function renderMsgHistory(){
+  const el=document.getElementById('msgHistoryList');if(!el)return;
+  const q=(msgSearch?.value||'').trim().toLocaleLowerCase('tr-TR');
+  const stuName=id=>data.students.find(s=>s.id===id)?.name;
+  let rows=teacherMessages.map(m=>{
+    const out=m.sender==='teacher';
+    const who=out?(m.student_id?(stuName(m.student_id)||'Öğrenci'):('📢 '+(m.class_name||'Herkes'))):(m.sender_name||stuName(m.student_id)||'Öğrenci');
+    return{...m,_who:who,_out:out};
+  });
+  if(q)rows=rows.filter(m=>m._who.toLocaleLowerCase('tr-TR').includes(q)||(m.body||'').toLocaleLowerCase('tr-TR').includes(q));
+  el.innerHTML=rows.map(m=>{
+    const clickable=!!m.student_id;
+    return `
+    <div class="msg-row${clickable?' clickable':''}"${clickable?` onclick="openConversation('${esc(m.student_id)}')"`:''}>
+      <div class="dir ${m._out?'out':'in'}">${m._out?'➡️':'⬅️'}</div>
+      <div class="grow">
+        <b>${m._out?'Siz → ':''}${esc(m._who)}${!m._out?' → Siz':''}</b>
+        <div class="muted">${esc(m.body)}</div>
+        <div class="muted" style="margin-top:2px">${new Date(m.created_at).toLocaleString('tr-TR')}${clickable?' • Konuşmayı aç ↗':''}</div>
+      </div>
+    </div>`;
+  }).join('')||'<div class="muted" style="text-align:center;padding:24px">Henüz mesaj yok.</div>';
+}
+
+let convStudentId=null;
+function openConversation(studentId){
+  const s=data.students.find(x=>x.id===studentId);
+  if(!s)return msg('Öğrenci bulunamadı (silinmiş olabilir)');
+  convStudentId=studentId;
+  convTitle.textContent='💬 '+s.name+' ('+s.className+')';
+  renderConversation();
+  openModal('convModal');
+  setTimeout(()=>{const el=document.getElementById('convMessages');if(el)el.scrollTop=el.scrollHeight;},50);
+}
+function renderConversation(){
+  const el=document.getElementById('convMessages');if(!el||!convStudentId)return;
+  const thread=teacherMessages.filter(m=>m.student_id===convStudentId).slice().sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+  el.innerHTML=thread.map(m=>{
+    const out=m.sender==='teacher';
+    return `<div class="bubble ${out?'out':'in'}">${esc(m.body)}<div class="t">${new Date(m.created_at).toLocaleString('tr-TR')}</div></div>`;
+  }).join('')||'<div class="muted" style="text-align:center;padding:24px">Henüz mesaj yok.</div>';
+}
+async function sendConversationReply(){
+  if(!sbUser)return msg('Önce bulut hesabına giriş yapmalısınız');
+  const s=data.students.find(x=>x.id===convStudentId);
+  if(!s)return msg('Öğrenci bulunamadı');
+  const body=convBody.value.trim();
+  if(!body)return msg('Mesaj yazın');
+  const{error}=await sb.from('chemclass_messages').insert({teacher_id:sbUser.id,student_id:s.id,class_name:s.className,sender:'teacher',sender_name:'Öğretmen',body});
+  if(error)return msg('Gönderilemedi: '+error.message);
+  convBody.value='';
+  await loadTeacherMessages();
+  renderConversation();
+  const el=document.getElementById('convMessages');if(el)el.scrollTop=el.scrollHeight;
+}
+
+// Öğrenciler yeni mesaj gönderdiğinde öğretmeni anında haberdar et
+function setupTeacherRealtime(){
+  if(!sb||!sbUser)return;
+  if(teacherMsgChannel){try{sb.removeChannel(teacherMsgChannel);}catch(e){}}
+  teacherMsgChannel=sb.channel('chemclass-teacher-'+sbUser.id)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'chemclass_messages',filter:`teacher_id=eq.${sbUser.id}`},payload=>{
+      const m=payload.new;
+      if(m.sender!=='student')return;
+      msg('💬 '+(m.sender_name||'Bir öğrenci')+': '+m.body,3000);
+      if(document.querySelector('section:not(.hide)')?.id==='messages')loadTeacherMessages().then(()=>{
+        if(document.getElementById('convModal')?.classList.contains('open')&&m.student_id===convStudentId){
+          renderConversation();
+          const el=document.getElementById('convMessages');if(el)el.scrollTop=el.scrollHeight;
+        }
+      });
+    })
+    .subscribe();
+}
+function renderCloud(){
+  if(!document.getElementById('cloudStatus'))return;
+  const pending=localStorage.getItem('cc_pending')==='1';
+  const isOnline=navigator.onLine;
+  if(!isOnline)cloudStatus.textContent='📴 Çevrimdışı';
+  else if(sbUser&&pending)cloudStatus.textContent='🔄 Sync bekliyor';
+  else if(sbUser)cloudStatus.textContent='☁️ Bulut aktif';
+  else cloudStatus.textContent='Giriş yok';
+  if(document.getElementById('cloudInfo'))cloudInfo.textContent=sbUser?('Giriş yapıldı: '+(sbUser.email||'')):'Giriş yapılmadı. Veriler sadece giriş yaptıktan sonra buluttan yüklenir.';
+}
+function scheduleCloudSave(){
+  if(!sbUser||!sb){localStorage.setItem('cc_pending','1');return;}
+  clearTimeout(syncTimer);syncTimer=setTimeout(saveToCloudNow,900);
+}
+async function saveToCloudNow(){
+  if(!navigator.onLine){localStorage.setItem('cc_pending','1');renderCloud();return;}
+  if(!sbUser)await getSession();
+  if(!sb||!sbUser){localStorage.setItem('cc_pending','1');renderCloud();return;}
+  const payload={user_id:sbUser.id,app_data:data,updated_at:new Date().toISOString()};
+  const{error}=await sb.from('chemclass_data').upsert(payload,{onConflict:'user_id'});
+  if(error){localStorage.setItem('cc_pending','1');renderCloud();return msg('Bulut kayıt hatası: '+error.message);}
+  localStorage.removeItem('cc_pending');renderCloud();msg('Buluta kaydedildi ✓');
+}
+async function loadFromCloud(){
+  if(!sbUser)await getSession();
+  if(!sb||!sbUser)return msg('Buluttan yüklemek için giriş yapın');
+  const{data:row,error}=await sb.from('chemclass_data').select('app_data,updated_at').eq('user_id',sbUser.id).maybeSingle();
+  if(error)return msg('Bulut okuma hatası: '+error.message);
+  if(row&&row.app_data){
+    const cloudTime=new Date(row.updated_at).getTime();
+    const localTime=data._modified||0;
+    if(localTime>cloudTime){
+      await saveToCloudNow();
+      msg('Yerel veri buluta aktarıldı ✓');
+    }else{
+      data=row.app_data;
+      if(!data.customBtns)data.customBtns=[];
+      if(!data.attendance)data.attendance={};
+      data._modified=cloudTime;
+      localStorage.setItem(KEY,JSON.stringify(data));
+      renderAll();msg('Buluttan yüklendi ✓');
+    }
+  }else{
+    await saveToCloudNow();msg('Bulutta kayıt yoktu, mevcut veri kaydedildi');
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function loadLocal(){
+  let raw=localStorage.getItem(KEY)||localStorage.getItem('chemclass_v17_data')||'{}';
+  try{let d=JSON.parse(raw);data.classes=d.classes||[];data.students=d.students||[];data.attendance=d.attendance||{};data.customBtns=d.customBtns||[];data._modified=d._modified||0;}catch(e){}
+}
+
+// ─── ÖĞRETMENIM PUAN SYNC ─────────────────────────────────────────────────────
+const OF_URL='https://yqyrhuednyhirgcghexe.supabase.co';
+const OF_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxeXJodWVkbnloaXJnY2doZXhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzQ5MTgsImV4cCI6MjA5NTM1MDkxOH0.bPaF2xWNL4k4eZhhQpzYpaCojqSVIYe4sqM-atpoDJM';
+let sbOf=null;
+function initTeacherSync(){
+  if(!window.supabase)return;
+  try{sbOf=window.supabase.createClient(OF_URL,OF_KEY);}catch(e){sbOf=null;}
+}
+async function syncScoreToTeacher(studentNo,delta,note){
+  if(!sbOf||!studentNo)return;
+  try{
+    const{data:st}=await sbOf.from('teacher_students').select('id').eq('student_number',String(studentNo)).maybeSingle();
+    if(!st)return;
+    const sid=st.id;
+    const{data:ex}=await sbOf.from('student_scores').select('id,score').eq('student_id',sid).maybeSingle();
+    if(ex){
+      await sbOf.from('student_scores').update({score:(ex.score||0)+delta,updated_at:new Date().toISOString()}).eq('id',ex.id);
+    }else{
+      await sbOf.from('student_scores').insert({student_id:sid,score:delta});
+    }
+    await sbOf.from('score_history').insert({student_id:sid,delta,note:note||''});
+  }catch(e){}
+}
+
+loadLocal();loadTheme();loadSnd();loadCloudSettings();
+try{if(attDate)attDate.value=todayStr();}catch(e){}
+renderAll();drawTimer();checkBoardUrl();
+getSession().then(async()=>{renderCloud();if(sbUser){await loadFromCloud();setupTeacherRealtime();}});
+initTeacherSync();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}
+window.addEventListener('online',async()=>{
+  renderCloud();
+  if(localStorage.getItem('cc_pending')==='1'&&sbUser&&sb){await saveToCloudNow();}
+});
+window.addEventListener('offline',()=>{renderCloud();});
+</script>
+</body>
+</html>

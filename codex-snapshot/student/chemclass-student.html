@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ChemClass Öğrenci</title>
+<link rel="manifest" href="manifest-chemclass-student.json">
+<meta name="theme-color" content="#00d4aa">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ChemClass Öğrenci">
+<link rel="apple-touch-icon" href="icon-chemclass-180.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#0a0e1a;--s1:#111827;--s2:#1a2235;--bd:#1e2d45;
+  --gr:#00d4aa;--or:#ff6b35;--re:#ff4444;--go:#ffd700;--bl:#5b8def;
+  --t1:#e8f4f8;--t2:#8ba3b8;
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--t1);font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 60% 20%,rgba(0,212,170,.13) 0%,transparent 60%),var(--bg)}
+.login-logo{font-size:38px;font-weight:950;letter-spacing:3px;color:var(--gr);margin-bottom:4px}.login-logo span{color:var(--or)}
+.login-sub{color:var(--t2);font-size:13px;margin-bottom:32px;text-align:center}
+.login-card{background:var(--s1);border:1px solid var(--bd);border-radius:22px;padding:24px;width:100%;max-width:380px}
+.login-card h2{margin:0 0 18px;font-size:18px;color:var(--t1)}
+.inp{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;color:var(--t1);font:inherit;font-size:15px;margin:6px 0;outline:none;transition:border .2s}
+.inp:focus{border-color:var(--gr)}
+.inp::placeholder{color:var(--t2)}
+.btn{width:100%;border:0;border-radius:12px;padding:13px;font:inherit;font-size:15px;font-weight:800;cursor:pointer;transition:opacity .15s,transform .1s;margin-top:10px}
+.btn:active{transform:scale(.97);opacity:.85}
+.b{background:var(--gr);color:#071018}
+.s{background:var(--s2);color:var(--t1);border:1px solid var(--bd)}
+.r{background:rgba(255,68,68,.15);color:var(--re);border:1px solid rgba(255,68,68,.3)}
+
+/* CONFIRM */
+.confirm-card{background:var(--s1);border:1px solid var(--bd);border-radius:22px;padding:24px;width:100%;max-width:380px;text-align:center}
+.big-avatar{width:72px;height:72px;border-radius:20px;background:rgba(0,212,170,.15);color:var(--gr);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;margin:0 auto 14px}
+.confirm-name{font-size:22px;font-weight:800;color:var(--t1)}
+.confirm-meta{color:var(--t2);font-size:13px;margin:4px 0 20px}
+
+/* APP */
+.app-wrap{display:flex;flex-direction:column;min-height:100vh}
+.app-header{background:rgba(10,14,26,.97);border-bottom:1px solid var(--bd);padding:calc(var(--safe-top) + 10px) 16px 10px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:10}
+.app-logo{font-size:18px;font-weight:950;letter-spacing:2px;color:var(--gr)}.app-logo span{color:var(--or)}
+.app-user{flex:1;text-align:right;min-width:0}
+.app-user b{display:block;font-size:14px;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app-user small{color:var(--t2);font-size:11px}
+.app-content{flex:1;padding:14px 14px 90px}
+.icon-btn{background:var(--s2);border:1px solid var(--bd);border-radius:10px;width:36px;height:36px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;color:var(--t1);transition:transform .1s}
+.icon-btn:active{transform:scale(.92)}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(17,24,39,.97);border-top:1px solid var(--bd);display:flex;padding:8px 0 calc(env(safe-area-inset-bottom,0px) + 8px);z-index:10}
+.nav-btn{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:0;color:var(--t2);font-size:10px;font-weight:600;cursor:pointer;padding:4px;transition:color .15s}
+.nav-btn.on{color:var(--gr)}
+.nav-btn .ico{font-size:22px;line-height:1}
+.nav-dot{position:absolute;top:1px;right:calc(50% - 23px);width:9px;height:9px;border-radius:50%;background:var(--re);border:2px solid var(--s1)}
+
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:14px;margin:10px 0}
+.card h3{margin:0 0 12px;font-size:15px;color:var(--t2);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+/* SCORE */
+.score-hero{background:linear-gradient(135deg,rgba(0,212,170,.18),rgba(255,107,53,.10));border:1px solid var(--bd);border-radius:20px;padding:20px;text-align:center;margin:10px 0;position:relative;overflow:hidden}
+.score-hero:before{content:"";position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:rgba(0,212,170,.12);filter:blur(2px)}
+.score-big{font-size:64px;font-weight:950;color:var(--gr);line-height:1}
+.score-big.neg{color:var(--re)}
+.score-label{color:var(--t2);font-size:13px;margin-top:4px}
+.rank-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,215,0,.12);border:1px solid rgba(255,215,0,.3);border-radius:999px;padding:5px 12px;color:var(--go);font-weight:800;font-size:13px;margin-top:10px}
+
+.stat-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.stat-box{background:var(--s2);border:1px solid var(--bd);border-radius:14px;padding:14px;text-align:center}
+.stat-box b{display:block;font-size:24px;color:var(--gr);font-weight:900}
+.stat-box span{color:var(--t2);font-size:11px}
+
+/* LEADERBOARD */
+.lb-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:12px;margin:6px 0;transition:border .2s}
+.lb-item.me{border-color:var(--gr);background:rgba(0,212,170,.07)}
+.lb-rank{width:32px;text-align:center;font-weight:900;font-size:15px;color:var(--t2)}
+.lb-rank.top{color:var(--go)}
+.lb-av{width:36px;height:36px;border-radius:10px;background:rgba(0,212,170,.14);color:var(--gr);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0}
+.lb-av.me-av{background:rgba(0,212,170,.25);border:1px solid var(--gr)}
+.lb-name{flex:1;font-size:14px;font-weight:600}
+.lb-name small{display:block;color:var(--t2);font-size:11px}
+.lb-score{font-weight:900;font-size:18px}
+.lb-score.pos{color:var(--gr)}
+.lb-score.neg{color:var(--re)}
+.bar{height:5px;background:var(--bd);border-radius:999px;overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;background:var(--gr);border-radius:999px}
+
+/* HISTORY */
+.hist-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd)}
+.hist-item:last-child{border-bottom:0}
+.hist-dot{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.hist-dot.pos{background:rgba(0,212,170,.14)}
+.hist-dot.neg{background:rgba(255,68,68,.14)}
+.hist-info{flex:1}
+.hist-info b{font-size:13px}
+.hist-info small{color:var(--t2);font-size:11px;display:block}
+.hist-val{font-weight:900;font-size:15px}
+.hist-val.pos{color:var(--gr)}
+.hist-val.neg{color:var(--re)}
+
+/* ASSIGNMENTS */
+.assign-item{background:var(--s2);border:1px solid var(--bd);border-radius:14px;padding:13px;margin:8px 0}
+.assign-type{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;margin-bottom:8px}
+.type-odev{background:rgba(0,212,170,.14);color:var(--gr);border:1px solid rgba(0,212,170,.3)}
+.type-duyuru{background:rgba(255,107,53,.14);color:var(--or);border:1px solid rgba(255,107,53,.3)}
+.type-gorev{background:rgba(91,141,239,.14);color:var(--bl);border:1px solid rgba(91,141,239,.3)}
+.assign-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.assign-desc{color:var(--t2);font-size:13px;margin-bottom:8px;line-height:1.5;white-space:pre-wrap}
+.assign-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.due-badge{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t2)}
+.due-badge.soon{color:var(--or)}
+.due-badge.past{color:var(--re)}
+.file-btn{display:inline-flex;align-items:center;gap:5px;background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.25);border-radius:8px;padding:5px 10px;color:var(--gr);font-size:12px;font-weight:600;text-decoration:none;cursor:pointer}
+
+/* MESSAGES */
+.msg-list{display:flex;flex-direction:column;gap:8px;max-height:54vh;overflow-y:auto;padding:6px 2px;margin-bottom:10px}
+.msg-bubble{max-width:80%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.45;word-break:break-word}
+.msg-bubble.me{align-self:flex-end;background:var(--gr);color:#071018;border-bottom-right-radius:4px}
+.msg-bubble.them{align-self:flex-start;background:var(--s2);border:1px solid var(--bd);border-bottom-left-radius:4px}
+.msg-bubble small{display:block;margin-top:4px;font-size:10px;opacity:.6}
+.msg-bcast{display:inline-block;margin-top:4px;font-size:10px;opacity:.75}
+.msg-input-row{display:flex;gap:8px;align-items:flex-end}
+.msg-input{flex:1;background:var(--s2);border:1px solid var(--bd);border-radius:14px;padding:11px 14px;color:var(--t1);font:inherit;font-size:14px;outline:none;resize:none;max-height:120px;line-height:1.4}
+.msg-input:focus{border-color:var(--gr)}
+.msg-send{background:var(--gr);color:#071018;border:0;border-radius:14px;width:46px;height:46px;font-weight:800;font-size:17px;cursor:pointer;flex-shrink:0}
+.msg-send:active{transform:scale(.93)}
+
+/* NOTIF BANNER */
+.notif-banner{background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);border-radius:14px;padding:12px 14px;margin:0 0 4px;display:flex;align-items:center;gap:10px;font-size:12.5px}
+.notif-banner span{flex:1;line-height:1.4;color:var(--t1)}
+.notif-banner .nb-btn{background:var(--gr);color:#071018;border:0;border-radius:10px;padding:7px 12px;font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.notif-banner .nb-x{background:transparent;color:var(--t2);border:0;font-size:18px;cursor:pointer;padding:2px 4px;flex-shrink:0;line-height:1}
+
+/* EMPTY */
+.empty{text-align:center;padding:40px 20px;color:var(--t2)}
+.empty .ico{font-size:40px;margin-bottom:10px}
+
+/* TOAST */
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:10px 16px;font-size:13px;white-space:nowrap;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;max-width:90vw;overflow:hidden;text-overflow:ellipsis}
+.toast.on{opacity:1}
+
+/* SECTION HIDE */
+.hide{display:none!important}
+
+/* LOADING */
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:160px;gap:12px;color:var(--t2)}
+.spinner{width:36px;height:36px;border:3px solid var(--bd);border-top-color:var(--gr);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* FADE IN */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .35s ease forwards}
+@keyframes popIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-wrap">
+    <div class="login-logo">CHEM<span>CLASS</span></div>
+    <div class="login-sub">Öğrenci Girişi</div>
+    <div class="login-card">
+      <h2>🔐 Giriş Yap</h2>
+      <input id="inpClassCode" class="inp" placeholder="Sınıf Kodu (öğretmeninizden alın)" autocomplete="off" autocapitalize="characters">
+      <input id="inpSchoolNo" class="inp" placeholder="Okul Numaranız" type="number" inputmode="numeric">
+      <button class="btn b" onclick="doLogin()">Devam Et →</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM SCREEN -->
+<div id="confirmScreen" class="hide">
+  <div class="login-wrap">
+    <div class="login-logo">CHEM<span>CLASS</span></div>
+    <div class="login-sub">Bu sen misin?</div>
+    <div class="confirm-card">
+      <div class="big-avatar" id="confirmAvatar">?</div>
+      <div class="confirm-name" id="confirmName">—</div>
+      <div class="confirm-meta" id="confirmMeta">—</div>
+      <button class="btn b" onclick="doConfirm()">✅ Evet, benim!</button>
+      <button class="btn s" style="margin-top:8px" onclick="goBackLogin()">← Geri Dön</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="appScreen" class="hide">
+  <div class="app-header">
+    <div class="app-logo">CHEM<span>CLASS</span></div>
+    <div class="app-user">
+      <b id="headerName">—</b>
+      <small id="headerClass">—</small>
+    </div>
+    <button id="ttsToggle" class="icon-btn" onclick="toggleTts()" title="Sesli bildirimi aç/kapat">🔊</button>
+    <button class="icon-btn" style="background:rgba(255,68,68,.15);color:#ff4444;border-color:rgba(255,68,68,.3)" onclick="doLogout()" title="Çıkış">⎋</button>
+  </div>
+  <div class="app-content">
+
+    <div id="notifBanner" class="notif-banner hide">
+      <span>🔔 Yeni ödev, duyuru ve mesajlardan anında haberdar olmak için bildirimleri açın.</span>
+      <button class="nb-btn" onclick="enableNotifications()">Aç</button>
+      <button class="nb-x" onclick="dismissNotifBanner()">✕</button>
+    </div>
+
+    <!-- PUANIM -->
+    <div id="tabScore" class="fade-up">
+      <div class="score-hero">
+        <div class="score-big" id="myScoreBig">0</div>
+        <div class="score-label">Toplam Puanım</div>
+        <div class="rank-badge" id="myRankBadge">🏆 — / —</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-box"><b id="statPos">0</b><span>Kazanılan</span></div>
+        <div class="stat-box"><b id="statNeg" style="color:var(--re)">0</b><span>Düşülen</span></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-box"><b id="statAvg">0</b><span>Sınıf Ort.</span></div>
+        <div class="stat-box"><b id="statCount">0</b><span>Öğrenci</span></div>
+      </div>
+
+      <div class="card">
+        <h3>📊 Sınıf Sıralaması</h3>
+        <div id="leaderboard"><div class="loading"><div class="spinner"></div></div></div>
+      </div>
+
+      <div class="card">
+        <h3>📋 Puan Geçmişim</h3>
+        <div id="myHistory"><div class="loading"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+
+    <!-- ÖDEVLER -->
+    <div id="tabAssignments" class="hide">
+      <div class="card">
+        <h3>📚 Ödevler &amp; Duyurular</h3>
+        <div id="assignList"><div class="loading"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+
+    <!-- MESAJLAR -->
+    <div id="tabMessages" class="hide">
+      <div class="card">
+        <h3>💬 Öğretmenle Mesajlaş</h3>
+        <div id="msgList" class="msg-list"><div class="loading"><div class="spinner"></div></div></div>
+        <div class="msg-input-row">
+          <textarea id="msgInput" class="msg-input" rows="1" placeholder="Mesajınızı yazın…" oninput="autoGrow(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
+          <button class="msg-send" onclick="sendMessage()">➤</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn on" onclick="switchTab('score',this)"><span class="ico">🏆</span>Puanım<span id="dot-score" class="nav-dot hide"></span></button>
+    <button class="nav-btn" onclick="switchTab('assignments',this)"><span class="ico">📚</span>Ödevler<span id="dot-assignments" class="nav-dot hide"></span></button>
+    <button class="nav-btn" onclick="switchTab('messages',this)"><span class="ico">💬</span>Mesajlar<span id="dot-messages" class="nav-dot hide"></span></button>
+  </nav>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://krqyzhmioqtfihwrblmb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtycXl6aG1pb3F0Zmlod3JibG1iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNTQzOTQsImV4cCI6MjA5NTczMDM5NH0.qE5bmGq7DksTJ4WHklpS_cGPeghkQrk5ZwjR36dn0GI';
+const SESSION_KEY = 'chemclass_student_session';
+// Faz 2: Push bildirim altyapısı (VAPID anahtarı + Edge Function) kurulduğunda
+// buraya genel (public) VAPID anahtarı yazılacak — o ana kadar push araması
+// sessizce atlanır, uygulama içi bildirim + sesli okuma (TTS) zaten çalışır.
+const VAPID_PUBLIC_KEY = '';
+
+let sb = null;
+let session = null;        // { student_id, student_name, class_name, school_no, teacher_id }
+let foundStudent = null;   // login onay ekranı sırasında geçici
+let currentTab = 'score';
+let rtChannel = null;
+
+const TABS = ['score','assignments','messages'];
+const TYPE_LABEL = { odev:'📘 Ödev', duyuru:'📢 Duyuru', gorev:'✅ Görev' };
+const TYPE_CLASS = { odev:'type-odev', duyuru:'type-duyuru', gorev:'type-gorev' };
+
+function initSB() {
+  if (!sb) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+}
+
+function msg(t) {
+  const el = document.getElementById('toast');
+  el.textContent = t;
+  el.classList.add('on');
+  clearTimeout(msg._t);
+  msg._t = setTimeout(() => el.classList.remove('on'), 2600);
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function fmtTime(ts) {
+  try { return new Date(ts).toLocaleString('tr-TR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'}); }
+  catch(e) { return ''; }
+}
+
+// ─── INIT ───────────────────────────────────────────────
+function init() {
+  initSB();
+  registerSW();
+  const saved = localStorage.getItem(SESSION_KEY);
+  if (saved) {
+    try {
+      session = JSON.parse(saved);
+      showApp();
+      return;
+    } catch(e) {}
+  }
+  showLogin();
+}
+
+function registerSW() {
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+
+function showLogin() {
+  document.getElementById('loginScreen').classList.remove('hide');
+  document.getElementById('confirmScreen').classList.add('hide');
+  document.getElementById('appScreen').classList.add('hide');
+}
+
+function goBackLogin() {
+  foundStudent = null;
+  showLogin();
+}
+
+async function doLogin() {
+  const classCode = document.getElementById('inpClassCode').value.trim();
+  const schoolNo = document.getElementById('inpSchoolNo').value.trim();
+  if (!classCode) return msg('Sınıf kodunu girin');
+  if (!schoolNo) return msg('Okul numaranızı girin');
+
+  initSB();
+
+  // chemclass_data tablosundan tüm öğretmenlerin verisini çek (user_id = öğretmen kimliği)
+  const { data: rows, error } = await sb
+    .from('chemclass_data')
+    .select('user_id,app_data');
+
+  if (error) return msg('Bağlantı hatası: ' + error.message);
+  if (!rows || !rows.length) return msg('Veri bulunamadı.');
+
+  const codeUpper = classCode.toUpperCase();
+  let found = null, teacherId = null;
+  for (const row of rows) {
+    const students = row.app_data?.students || [];
+    const classCodes = row.app_data?.classCodes || {};
+    const student = students.find(s =>
+      classCodes[s.className] &&
+      classCodes[s.className].toUpperCase() === codeUpper &&
+      String(s.no) === String(schoolNo)
+    );
+    if (student) { found = student; teacherId = row.user_id; break; }
+  }
+
+  if (!found) return msg('Öğrenci bulunamadı. Sınıf kodu veya numara hatalı.');
+
+  foundStudent = {
+    id: found.id,
+    name: found.name,
+    no: found.no,
+    class_name: found.className,
+    score: found.score || 0,
+    history: found.history || [],
+    teacher_id: teacherId
+  };
+
+  document.getElementById('confirmAvatar').textContent = (foundStudent.name || '?')[0].toUpperCase();
+  document.getElementById('confirmName').textContent = foundStudent.name;
+  document.getElementById('confirmMeta').textContent = foundStudent.class_name + ' • No: ' + foundStudent.no;
+
+  document.getElementById('loginScreen').classList.add('hide');
+  document.getElementById('confirmScreen').classList.remove('hide');
+}
+
+async function doConfirm() {
+  if (!foundStudent) return showLogin();
+
+  session = {
+    student_id: foundStudent.id,
+    student_name: foundStudent.name,
+    class_name: foundStudent.class_name,
+    school_no: foundStudent.no,
+    teacher_id: foundStudent.teacher_id
+  };
+  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+
+  // Yoklama kaydı
+  await sb.from('chemclass_attendance').upsert({
+    student_id: session.student_id,
+    student_name: session.student_name,
+    class_name: session.class_name,
+    school_no: session.school_no,
+    date: new Date().toISOString().slice(0, 10)
+  }, { onConflict: 'student_id,date', ignoreDuplicates: true });
+
+  // Oturum kaydı (cihaz bazlı)
+  const deviceToken = getDeviceToken();
+  await sb.from('chemclass_student_sessions').upsert({
+    student_id: session.student_id,
+    student_name: session.student_name,
+    class_name: session.class_name,
+    school_no: session.school_no,
+    device_token: deviceToken,
+    last_seen: new Date().toISOString()
+  }, { onConflict: 'student_id,device_token' });
+
+  foundStudent = null;
+  showApp();
+}
+
+function getDeviceToken() {
+  let t = localStorage.getItem('cc_device_token');
+  if (!t) { t = Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('cc_device_token', t); }
+  return t;
+}
+
+function doLogout() {
+  if (rtChannel) { try { sb.removeChannel(rtChannel); } catch(e){} rtChannel = null; }
+  localStorage.removeItem(SESSION_KEY);
+  session = null;
+  showLogin();
+}
+
+function showApp() {
+  document.getElementById('loginScreen').classList.add('hide');
+  document.getElementById('confirmScreen').classList.add('hide');
+  document.getElementById('appScreen').classList.remove('hide');
+
+  document.getElementById('headerName').textContent = session.student_name;
+  document.getElementById('headerClass').textContent = session.class_name;
+
+  updateTtsBtn();
+  loadScore();
+  setupRealtime();
+  ensureNotifBanner();
+}
+
+// ─── TABS ────────────────────────────────────────────────
+function switchTab(name, btn) {
+  currentTab = name;
+  TABS.forEach(id => document.getElementById('tab' + cap(id)).classList.add('hide'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('on'));
+  const el = document.getElementById('tab' + cap(name));
+  if (el) { el.classList.remove('hide'); el.classList.remove('fade-up'); void el.offsetWidth; el.classList.add('fade-up'); }
+  btn.classList.add('on');
+  setUnread(name, false);
+
+  if (name === 'score') loadScore();
+  if (name === 'assignments') loadAssignments();
+  if (name === 'messages') loadMessages();
+}
+
+function setUnread(tab, on) {
+  const dot = document.getElementById('dot-' + tab);
+  if (dot) dot.classList.toggle('hide', !on);
+}
+
+// ─── PUANIM ──────────────────────────────────────────────
+async function loadScore() {
+  initSB();
+
+  const { data: rows, error } = await sb
+    .from('chemclass_data')
+    .select('app_data');
+
+  if (error) { msg('Puan yüklenemedi'); return; }
+
+  let allStudents = [];
+  let me = null;
+  for (const row of (rows || [])) {
+    const students = row.app_data?.students || [];
+    const classStudents = students.filter(s => s.className === session.class_name);
+    if (classStudents.length) {
+      allStudents = classStudents;
+      me = classStudents.find(s => s.id === session.student_id);
+      break;
+    }
+  }
+
+  allStudents.sort((a, b) => (b.score || 0) - (a.score || 0));
+
+  const myScore = me ? (me.score || 0) : 0;
+  const myRank = allStudents.findIndex(s => s.id === session.student_id) + 1;
+  const total = allStudents.length;
+  const avg = total ? Math.round(allStudents.reduce((a, s) => a + (s.score || 0), 0) / total) : 0;
+
+  const scoreBig = document.getElementById('myScoreBig');
+  scoreBig.textContent = (myScore > 0 ? '+' : '') + myScore;
+  scoreBig.className = 'score-big' + (myScore < 0 ? ' neg' : '');
+  document.getElementById('myRankBadge').textContent = `🏆 ${myRank}. sıra / ${total} öğrenci`;
+
+  const hist = me ? (me.history || []) : [];
+  const pos = hist.filter(h => h.d > 0).reduce((a, h) => a + h.d, 0);
+  const neg = hist.filter(h => h.d < 0).reduce((a, h) => a + h.d, 0);
+  document.getElementById('statPos').textContent = '+' + pos;
+  document.getElementById('statNeg').textContent = neg || 0;
+  document.getElementById('statAvg').textContent = avg > 0 ? '+' + avg : avg;
+  document.getElementById('statCount').textContent = total;
+
+  const mx = Math.max(1, ...allStudents.map(s => Math.abs(s.score || 0)));
+  document.getElementById('leaderboard').innerHTML = allStudents.map((s, i) => {
+    const isMe = s.id === session.student_id;
+    const sc = s.score || 0;
+    const pct = Math.max(4, Math.abs(sc) / mx * 100);
+    return `<div class="lb-item${isMe ? ' me' : ''}" style="animation:popIn .3s ease ${i * 0.04}s both">
+      <div class="lb-rank${i < 3 ? ' top' : ''}">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i+1)}</div>
+      <div class="lb-av${isMe ? ' me-av' : ''}">${esc((s.name||'?')[0])}</div>
+      <div style="flex:1">
+        <div class="lb-name">${esc(s.name)}${isMe ? ' <small style="color:var(--gr)">◀ Sen</small>' : ''}</div>
+        <div class="bar"><i style="width:${pct}%"></i></div>
+      </div>
+      <div class="lb-score ${sc < 0 ? 'neg' : 'pos'}">${sc > 0 ? '+' : ''}${sc}</div>
+    </div>`;
+  }).join('') || '<div class="empty"><div class="ico">📊</div>Henüz puan yok.</div>';
+
+  document.getElementById('myHistory').innerHTML = hist.length ? hist.slice(0, 20).map(h => {
+    const isPos = h.d > 0;
+    return `<div class="hist-item">
+      <div class="hist-dot ${isPos ? 'pos' : 'neg'}">${isPos ? '⭐' : '⚠️'}</div>
+      <div class="hist-info"><b>${esc(h.n || (isPos ? 'Puan eklendi' : 'Puan düşürüldü'))}</b><small>${esc(h.t || '')}</small></div>
+      <div class="hist-val ${isPos ? 'pos' : 'neg'}">${h.d > 0 ? '+' : ''}${h.d}</div>
+    </div>`;
+  }).join('') : '<div class="empty"><div class="ico">📋</div>Henüz puan geçmişi yok.</div>';
+}
+
+// ─── ÖDEVLER & DUYURULAR ─────────────────────────────────
+async function loadAssignments() {
+  initSB();
+  const { data, error } = await sb
+    .from('chemclass_assignments')
+    .select('*')
+    .eq('class_name', session.class_name)
+    .order('created_at', { ascending: false });
+
+  if (error) { msg('Ödevler yüklenemedi'); return; }
+  renderAssignments(data || []);
+}
+
+function renderAssignments(list) {
+  const el = document.getElementById('assignList');
+  if (!list.length) { el.innerHTML = '<div class="empty"><div class="ico">📚</div>Henüz ödev veya duyuru yok.</div>'; return; }
+
+  const now = Date.now();
+  el.innerHTML = list.map(a => {
+    let dueHtml = '';
+    if (a.due_date) {
+      const due = new Date(a.due_date + 'T23:59:59');
+      const days = Math.ceil((due - now) / 86400000);
+      const cls = days < 0 ? 'past' : (days <= 2 ? 'soon' : '');
+      const txt = days < 0 ? 'Süresi geçti' : (days === 0 ? 'Bugün son gün' : `${days} gün kaldı`);
+      dueHtml = `<span class="due-badge ${cls}">⏰ ${esc(due.toLocaleDateString('tr-TR'))} · ${txt}</span>`;
+    }
+    const fileHtml = a.file_url ? `<a class="file-btn" href="${esc(a.file_url)}" target="_blank" rel="noopener">📎 ${esc(a.file_name || 'Dosya')}</a>` : '';
+    return `<div class="assign-item">
+      <span class="assign-type ${TYPE_CLASS[a.type] || ''}">${TYPE_LABEL[a.type] || esc(a.type)}</span>
+      <div class="assign-title">${esc(a.title)}</div>
+      ${a.body ? `<div class="assign-desc">${esc(a.body)}</div>` : ''}
+      <div class="assign-meta">${dueHtml}${fileHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── MESAJLAR ────────────────────────────────────────────
+async function loadMessages() {
+  initSB();
+  const tid = session.teacher_id, sid = session.student_id, cls = session.class_name;
+  if (!tid) { document.getElementById('msgList').innerHTML = '<div class="empty"><div class="ico">💬</div>Mesajlaşma şu an kullanılamıyor.</div>'; return; }
+
+  const [{ data: direct }, { data: classBc }, { data: allBc }] = await Promise.all([
+    sb.from('chemclass_messages').select('*').eq('teacher_id', tid).eq('student_id', sid),
+    sb.from('chemclass_messages').select('*').eq('teacher_id', tid).is('student_id', null).eq('class_name', cls),
+    sb.from('chemclass_messages').select('*').eq('teacher_id', tid).is('student_id', null).is('class_name', null)
+  ]);
+
+  const seen = new Set();
+  const msgs = [...(direct||[]), ...(classBc||[]), ...(allBc||[])]
+    .filter(m => { if (seen.has(m.id)) return false; seen.add(m.id); return true; })
+    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+  renderMessages(msgs);
+  markMessagesRead(msgs);
+}
+
+function renderMessages(msgs) {
+  const el = document.getElementById('msgList');
+  if (!msgs.length) { el.innerHTML = '<div class="empty"><div class="ico">💬</div>Henüz mesaj yok. Öğretmeninize ilk mesajı siz gönderebilirsiniz.</div>'; return; }
+
+  el.innerHTML = msgs.map(m => {
+    const mine = m.sender === 'student';
+    const bcast = (!mine && !m.student_id) ? '<span class="msg-bcast">📢 Toplu mesaj</span>' : '';
+    return `<div class="msg-bubble ${mine ? 'me' : 'them'}">${esc(m.body)}${bcast}<small>${fmtTime(m.created_at)}</small></div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function autoGrow(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(120, el.scrollHeight) + 'px';
+}
+
+async function sendMessage() {
+  const inp = document.getElementById('msgInput');
+  const body = inp.value.trim();
+  if (!body) return;
+  if (!session.teacher_id) return msg('Mesajlaşma şu an kullanılamıyor');
+
+  inp.value = ''; autoGrow(inp);
+  const { error } = await sb.from('chemclass_messages').insert({
+    teacher_id: session.teacher_id,
+    student_id: session.student_id,
+    class_name: session.class_name,
+    sender: 'student',
+    sender_name: session.student_name,
+    body
+  });
+  if (error) { msg('Gönderilemedi: ' + error.message); return; }
+  loadMessages();
+}
+
+async function markMessagesRead(msgs) {
+  const unread = msgs.filter(m => m.sender === 'teacher' && !m.read_at).map(m => m.id);
+  if (!unread.length) return;
+  try { await sb.from('chemclass_messages').update({ read_at: new Date().toISOString() }).in('id', unread); } catch(e) {}
+}
+
+// ─── CANLI BİLDİRİMLER (Supabase Realtime) ───────────────
+function setupRealtime() {
+  if (!session?.teacher_id) return;
+  if (rtChannel) { try { sb.removeChannel(rtChannel); } catch(e){} }
+
+  rtChannel = sb.channel('chemclass-student-' + session.student_id)
+    .on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'chemclass_messages', filter: `teacher_id=eq.${session.teacher_id}` },
+      payload => {
+        const m = payload.new;
+        if (m.sender !== 'teacher') return;
+        const forMe = m.student_id === session.student_id ||
+                      (!m.student_id && (!m.class_name || m.class_name === session.class_name));
+        if (!forMe) return;
+        notifyUser('💬 Yeni mesaj', m.body);
+        if (currentTab === 'messages') loadMessages(); else setUnread('messages', true);
+      })
+    .on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'chemclass_assignments', filter: `class_name=eq.${session.class_name}` },
+      payload => {
+        const a = payload.new;
+        const tl = { odev: 'Yeni ödev', duyuru: 'Yeni duyuru', gorev: 'Yeni görev' }[a.type] || 'Yeni içerik';
+        notifyUser('📚 ' + tl, a.title);
+        if (currentTab === 'assignments') loadAssignments(); else setUnread('assignments', true);
+      })
+    .subscribe();
+}
+
+// ─── BİLDİRİMLER (push + sesli okuma) ────────────────────
+function ensureNotifBanner() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default' && !localStorage.getItem('cc_notif_dismissed')) {
+    document.getElementById('notifBanner').classList.remove('hide');
+  }
+}
+
+function dismissNotifBanner() {
+  localStorage.setItem('cc_notif_dismissed', '1');
+  document.getElementById('notifBanner').classList.add('hide');
+}
+
+async function enableNotifications() {
+  if (!('Notification' in window)) { msg('Tarayıcınız bildirimleri desteklemiyor'); return; }
+  const perm = await Notification.requestPermission();
+  document.getElementById('notifBanner').classList.add('hide');
+  if (perm === 'granted') { msg('Bildirimler açıldı ✓'); subscribePush(); }
+  else msg('Bildirim izni verilmedi');
+}
+
+function notifyUser(title, body) {
+  // 1) Sistem/tarayıcı bildirimi (uygulama arka plandayken de görünür)
+  if ('Notification' in window && Notification.permission === 'granted') {
+    try {
+      if (navigator.serviceWorker?.getRegistration) {
+        navigator.serviceWorker.getRegistration().then(reg => {
+          if (reg) reg.showNotification(title, { body, icon: '/icon-chemclass-192.png', badge: '/icon-chemclass-192.png', tag: 'cc-' + Date.now() });
+          else new Notification(title, { body, icon: '/icon-chemclass-192.png' });
+        }).catch(() => { try { new Notification(title, { body, icon: '/icon-chemclass-192.png' }); } catch(e){} });
+      } else {
+        new Notification(title, { body, icon: '/icon-chemclass-192.png' });
+      }
+    } catch(e) {}
+  }
+  // 2) Sesli okuma (TTS)
+  speak(title + '. ' + body);
+  // 3) Uygulama içi toast (her durumda)
+  msg('🔔 ' + title);
+}
+
+function isTtsOn() { return localStorage.getItem('cc_tts_off') !== '1'; }
+
+function toggleTts() {
+  const wasOn = isTtsOn();
+  localStorage.setItem('cc_tts_off', wasOn ? '1' : '0');
+  updateTtsBtn();
+  msg(wasOn ? '🔇 Sesli bildirim kapatıldı' : '🔊 Sesli bildirim açıldı');
+  if (wasOn) try { speechSynthesis.cancel(); } catch(e) {}
+}
+
+function updateTtsBtn() {
+  const b = document.getElementById('ttsToggle');
+  if (b) b.textContent = isTtsOn() ? '🔊' : '🔇';
+}
+
+function speak(text) {
+  if (!('speechSynthesis' in window) || !isTtsOn()) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'tr-TR';
+    u.rate = 1;
+    speechSynthesis.speak(u);
+  } catch(e) {}
+}
+
+// ─── PUSH ABONELİĞİ (Faz 2'de VAPID anahtarı eklenince aktifleşir) ─────────
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(base64);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+async function subscribePush() {
+  if (!VAPID_PUBLIC_KEY) return;
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) });
+    }
+    const j = sub.toJSON();
+    await sb.from('chemclass_push_subscriptions').upsert({
+      student_id: session.student_id,
+      teacher_id: session.teacher_id,
+      class_name: session.class_name,
+      endpoint: j.endpoint,
+      p256dh: j.keys.p256dh,
+      auth_key: j.keys.auth
+    }, { onConflict: 'endpoint' });
+  } catch(e) { console.warn('Push aboneliği kurulamadı', e); }
+}
+
+// ─── SAYFA GÖRÜNÜRLÜĞÜ: tekrar açılınca verileri tazele ──
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && session) {
+    if (currentTab === 'score') loadScore();
+    if (currentTab === 'assignments') loadAssignments();
+    if (currentTab === 'messages') loadMessages();
+  }
+});
+
+init();
+</script>
+</body>
+</html>
