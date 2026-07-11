@@ -1,0 +1,1905 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alkanların ve Alkil Gruplarının Adlandırılması – Taslak (Sayfa 45-49)</title>
+<style>
+  :root{
+    --red:#b3261e;
+    --ink:#1c1c1c;
+    --line:#cfd2d6;
+    --soft:#f7f4ee;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family:'Segoe UI', Calibri, Arial, Helvetica, sans-serif;
+    color:var(--ink);
+    font-size:11pt;
+    line-height:1.5;
+    background:#dcdcdc;
+    counter-reset:pagenum 44;
+  }
+  @page{ size:A4; margin:0; }
+
+  .page{
+    counter-increment:pagenum;
+    width:210mm;
+    min-height:297mm;
+    padding:15mm 17mm;
+    margin:8mm auto;
+    background:#fff;
+    box-shadow:0 0 8px rgba(0,0,0,.15);
+    page-break-after:always;
+    display:flex;
+    flex-direction:column;
+  }
+  .page:last-child{ page-break-after:auto; }
+  @media print{
+    body{ background:#fff; }
+    .page{ margin:0; box-shadow:none; }
+  }
+
+  /* ---------- header / footer ---------- */
+  .kicker{
+    font-size:9pt;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:#8a8a8a;
+    margin-bottom:1mm;
+  }
+  h1.page-title{
+    font-size:18pt;
+    color:var(--red);
+    margin:0 0 5mm 0;
+    padding-bottom:2mm;
+    border-bottom:2px solid var(--red);
+  }
+  h2.section-title{
+    font-size:13pt;
+    margin:0 0 3mm 0;
+    color:var(--ink);
+  }
+  .page-foot{
+    margin-top:auto;
+    padding-top:4mm;
+    border-top:1px solid var(--line);
+    display:flex;
+    justify-content:space-between;
+    font-size:8.5pt;
+    color:#9a9a9a;
+  }
+  .page-foot::after{ content:"Taslak — Sayfa " counter(pagenum); }
+
+  /* ---------- bullet notes ---------- */
+  ul.notes{
+    list-style:none;
+    margin:0 0 2mm 0;
+    padding:0;
+  }
+  ul.notes li{
+    position:relative;
+    padding-left:6mm;
+    margin-bottom:1.8mm;
+    text-align:justify;
+  }
+  ul.notes li::before{
+    content:"✱";
+    position:absolute;
+    left:0;
+    top:0.05em;
+    color:var(--red);
+    font-size:.95em;
+  }
+  ul.notes.compact li{ margin-bottom:2mm; }
+  .hl{ color:var(--red); font-weight:700; }
+
+  /* ---------- standalone "✱ ..." line (no following <li>) ---------- */
+  .note-line{
+    position:relative;
+    padding-left:6mm;
+    margin:3mm 0 2mm 0;
+    font-weight:700;
+  }
+  .note-line::before{
+    content:"✱";
+    position:absolute;
+    left:0;
+    top:0.05em;
+    color:var(--red);
+    font-size:.95em;
+  }
+
+  /* ---------- answer box (worked example result) ---------- */
+  .answer-box{
+    display:inline-block;
+    margin-top:2mm;
+    padding:1.5mm 4mm;
+    border:1.5px solid #1e7e34;
+    background:#eaf6ec;
+    color:#1e7e34;
+    font-weight:700;
+    border-radius:5px;
+  }
+
+  /* ---------- sigma/pi orbital örtüşme diyagramları (bond-example) ---------- */
+  .bond-example{ display:flex; align-items:center; gap:6mm; flex:1; margin-top:2mm; }
+  .bond-example .ex-label{ font-weight:700; color:var(--red); white-space:nowrap; }
+  .bond-example svg{ width:100%; height:auto; }
+  .iupac-chain .result{ font-weight:700; font-size:13pt; white-space:nowrap; }
+
+  /* ---------- "Not:" kuralları (sayfa 46) ---------- */
+  .note-block{ margin-bottom:22mm; }
+  .note-block:last-child{ margin-bottom:0; }
+  .note-text{
+    margin:0;
+    text-align:justify;
+  }
+  .note-text .note-label{
+    color:var(--red);
+    font-weight:700;
+    font-style:italic;
+  }
+  .note-structure{ display:flex; justify-content:center; margin:10mm 0 6mm 0; }
+  .note3-row{ display:flex; justify-content:center; align-items:flex-start; gap:20mm; margin:12mm 0 8mm 0; }
+
+  /* ---------- ortalanmış diyagram sarmalayıcı (margin yok) ---------- */
+  .diagram-wrap{ display:flex; justify-content:center; }
+
+  /* ---------- n-/izo-/neo-pentan, alkil yapı satırları ---------- */
+  .struct-row{ display:flex; justify-content:space-around; align-items:flex-end; margin:7mm 0 9mm 0; }
+  .struct-col{ display:flex; flex-direction:column; align-items:center; }
+  .struct-label{ color:var(--red); font-style:italic; font-size:10pt; margin-top:1mm; }
+
+  /* ---------- sınıflandırma etiketleri (primer/sekonder/tersiyer) ---------- */
+  .tagc{ color:var(--red); font-weight:700; font-size:0.68em; line-height:1.3; text-align:center; white-space:nowrap; }
+  .tagc.inline{ margin-left:1.5mm; }
+
+  /* ---------- Primer/Sekonder/Tersiyer Alkil ağacı (sayfa 48) ---------- */
+  .alkil-tree{ display:flex; justify-content:space-around; align-items:flex-start; margin:6mm 0 8mm 0; }
+  .tree-col{ display:flex; flex-direction:column; align-items:center; text-align:center; }
+  .tree-label{ color:var(--red); font-weight:700; font-style:italic; font-size:11pt; }
+  .bline-v{ width:0; height:5mm; border-left:1.5px solid var(--ink); }
+  .tree-sub{ font-size:10pt; line-height:1.35; margin-top:1mm; }
+  .fan-items{ display:flex; gap:9mm; padding-top:3mm; border-top:1.5px solid var(--ink); }
+  .fan-item{ font-size:10pt; }
+
+  /* ---------- bütil grupları ızgarası (sayfa 49) ---------- */
+  .alkil-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18mm 12mm; margin:4mm 0; justify-items:center; }
+
+  /* ---------- IUPAC zinciri (sayfa 45/46/47 ile aynı sistem) ---------- */
+  .answer-strip{ font-size:9pt; font-style:italic; color:var(--red); text-align:center; margin:0 0 3mm 0; }
+  .iupac-chain{ display:flex; align-items:center; justify-content:center; gap:1mm; font-size:12.5pt; font-weight:700; flex-wrap:nowrap; margin:2mm 0; }
+  .iupac-chain.big{ font-size:14pt; }
+  .iupac-chain.has-up{ margin-top:7mm; }
+  .iupac-chain.has-down{ margin-bottom:7mm; }
+  .iupac-chain .atom{ position:relative; padding:1.5mm 1mm; text-align:center; }
+  .iupac-chain .bond{ font-weight:400; padding:0 0.5mm; }
+  .iupac-chain .branch{ position:absolute; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; font-size:0.85em; white-space:nowrap; }
+  .iupac-chain .branch.up{ bottom:100%; }
+  .iupac-chain .branch.down{ top:100%; }
+  .iupac-chain .branch .bline{ width:0; height:3mm; border-left:1.5px solid var(--ink); }
+  .iupac-chain .branch .lbl-row{ display:flex; align-items:center; gap:1mm; }
+  .iupac-chain .branch .arrow{ color:var(--red); font-size:0.8em; font-weight:700; }
+  .iupac-chain .branch .chain-num{ color:var(--red); font-weight:700; font-size:0.78em; }
+  .iupac-chain .num{ position:absolute; left:50%; transform:translateX(-50%); top:100%; margin-top:1mm; font-size:9pt; font-weight:700; color:var(--red); }
+  .iupac-chain .num.top{ top:auto; bottom:100%; margin-bottom:1mm; }
+
+  .ex-grid{ display:grid; grid-template-columns:1fr 1fr; gap:2.5mm 8mm; margin-top:0; }
+  .ex-item{ border:1px solid var(--line); border-radius:2px; padding:3mm 2mm; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .ex-item .ex-num{ align-self:flex-start; font-weight:700; color:var(--red); margin-bottom:1mm; }
+  .ex-item .iupac-chain.has-up{ margin-top:4mm; }
+  .ex-item .iupac-chain.has-down{ margin-bottom:4mm; }
+
+  /* ---------- toplu cevap kutusu ---------- */
+  .answers-note{
+    border:1.5px solid #1e7e34;
+    background:#eaf6ec;
+    color:#1e7e34;
+    font-weight:700;
+    border-radius:5px;
+    padding:2mm 4mm;
+    font-size:10pt;
+    line-height:1.7;
+    text-align:center;
+  }
+  .answers-note span{ display:inline-block; margin:0 2.5mm; white-space:nowrap; }
+
+  /* ---------- I/II/III adlandırma seçenekleri (sayfa 52) ---------- */
+  .roman-options{ display:flex; justify-content:center; gap:10mm; margin:2mm 0; font-size:11pt; }
+  .roman-options strong{ color:var(--red); }
+
+  /* ---------- Sikloalkan halka diyagramları ---------- */
+  .cyclo-row{ display:flex; justify-content:center; gap:8mm; margin:3mm 0; flex-wrap:wrap; align-items:flex-end; }
+  .cyclo-item{ display:flex; flex-direction:column; align-items:center; text-align:center; }
+  .cyclo-name{ color:var(--red); font-weight:700; font-size:10pt; margin-top:1.5mm; }
+
+  /* ---------- renkli "mol-card" şablonu (turuncu) ---------- */
+  :root{
+    --orange:#c2660b;
+    --orange-soft:#fdf1e0;
+    --orange-line:#ecc792;
+  }
+  .mol-grid{ display:grid; gap:4mm 6mm; margin:0 0 4mm 0; }
+  .mol-card{
+    border-radius:3mm;
+    padding:2.5mm 3mm 2.5mm 3mm;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .mol-card.c-orange{ background:var(--orange-soft); border:1px solid var(--orange-line); }
+  .mol-card .qbadge{
+    align-self:flex-start;
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:6mm; height:6mm; padding:0 1mm; border-radius:50%;
+    font-weight:700; font-size:9.5pt; color:#fff; margin-bottom:1.5mm;
+  }
+  .mol-card.c-orange .qbadge{ background:var(--orange); }
+  .mol-card .ans-line{ border-bottom:1.5px solid #fff; width:90%; margin-top:2mm; }
+  .mol-card svg{ display:block; }
+
+  /* ---------- I/II/III yargı satırları (renkli şerit) ---------- */
+  .judge-list{ display:flex; flex-direction:column; gap:1.8mm; }
+  .judge-item{ display:flex; align-items:baseline; gap:2.5mm; padding:1.3mm 3.5mm; border-radius:2mm; font-size:10.5pt; }
+  .judge-item.c-orange{ background:var(--orange-soft); }
+  .judge-item b{ color:var(--orange); }
+
+  /* ---------- teori notu (turuncu şerit kutu) ---------- */
+  .theory-box{
+    margin:2.5mm 0; padding:2.5mm 4mm;
+    background:var(--orange-soft); border-left:3px solid var(--orange);
+    border-radius:0 2mm 2mm 0; font-weight:700;
+  }
+  .ex-tag{ color:var(--orange); font-style:italic; font-weight:700; font-size:10pt; margin:0 0 1mm 0; }
+
+  /* ---------- çiz-doldur kutusu (boş cevap alanı) ---------- */
+  .fill-box{
+    border:1.5px dashed var(--orange-line); border-radius:2mm;
+    background:var(--orange-soft);
+  }
+</style>
+</head>
+<body>
+
+<!-- ======================= SAYFA 45 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Alkanların Adlandırılması</h1>
+
+  <h2 class="section-title">1. Sistematik Adlandırma (IUPAC Sistemi)</h2>
+  <div class="bond-example" style="margin-top:1mm">
+    <div class="iupac-chain big has-up has-down">
+      <div class="atom">CH<sub>2</sub>
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span><span class="chain-num">7</span></div></div>
+        <span class="num top">6</span>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub><span class="num">5</span></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>C<sub>2</sub>H<sub>5</sub></span><span class="arrow">→ etil</span></div></div>
+        <span class="num top">4</span>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span><span class="arrow">→ metil</span></div><div class="bline"></div></div>
+        <span class="num">3</span>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub><span class="num">2</span></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub><span class="num">1</span></div>
+    </div>
+    <div class="result">4-etil-3-metil heptan</div>
+  </div>
+
+  <ul class="notes" style="margin-top:1mm">
+    <li>En uzun karbon zinciri seçilir.</li>
+    <li>Karbon zincirine bağlı gruplar belirlenir. (Dallanmalar)</li>
+    <li>Dallanmanın en yakın olduğu taraftan başlanarak karbon zinciri numaralandırılır.</li>
+    <li>Birden fazla dal varsa alfabetik sıralamada ismi önce gelen önce okunur.</li>
+  </ul>
+
+  <h2 class="section-title" style="margin:1mm 0 1.5mm 0">Alıştırmalar</h2>
+  <div class="ex-grid">
+    <div class="ex-item">
+      <div class="ex-num">1.</div>
+      <div class="iupac-chain has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>C<sub>2</sub>H<sub>5</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">4.</div>
+      <div class="iupac-chain has-up has-down">
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>2</sub>–CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">2.</div>
+      <div class="iupac-chain has-up has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">C
+          <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>C<sub>2</sub>H<sub>5</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">5.</div>
+      <div class="iupac-chain has-up has-down">
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch up"><div class="lbl-row"><span>C<sub>2</sub>H<sub>5</sub></span></div><div class="bline"></div></div>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>C<sub>2</sub>H<sub>5</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch up"><div class="lbl-row"><span>C<sub>2</sub>H<sub>5</sub></span></div><div class="bline"></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">3.</div>
+      <div class="iupac-chain has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>C<sub>2</sub>H<sub>5</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">Br</div>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">6.</div>
+      <div class="iupac-chain has-up has-down">
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH(CH<sub>3</sub>)–CH–CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH</div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-title" style="margin:1.5mm 0">Cevaplar</h2>
+  <div class="answers-note">
+    <span><strong>1.</strong> 2,3-dimetil pentan</span>
+    <span><strong>2.</strong> 2,2,3-trimetil pentan</span>
+    <span><strong>3.</strong> 3-bromo-2-metil pentan</span>
+    <span><strong>4.</strong> 3-etil hekzan</span>
+    <span><strong>5.</strong> 4-etil-3-metil heptan</span>
+    <span><strong>6.</strong> 2,4,6-trimetil-5-etil oktan</span>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 46 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Alkanların Adlandırılması</h1>
+
+  <h2 class="section-title">2. Numaralandırmada Eşitlik Durumları</h2>
+
+  <div class="note-block">
+    <p class="note-text"><span class="note-label">Not:</span> Eğer uzun zincirde, zincirin her iki ucunda da eşit uzaklıkta dallanma varsa, grupların bağlı olduğu karbon numaraları toplamı en küçük olacak şekilde (yığılma) numaralandırma yapılır.</p>
+    <div class="note-structure">
+      <div class="iupac-chain big has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note-block">
+    <p class="note-text"><span class="note-label">Not:</span> Eğer farklı alkil kökleri veya fonksiyonel gruplar karbon zincirinin her iki ucuna da eşit uzaklıkta ise, alfabetik sırada önce gelen grup küçük sayılı karbona gelecek şekilde numaralandırma yapılır.</p>
+    <div class="note-structure">
+      <div class="iupac-chain big has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>Br</span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note-block">
+    <p class="note-text"><span class="note-label">Not:</span> Eğer yapıda eşit uzunlukta birden fazla zincir varsa, üzerinde dallanmanın fazla olduğu zincir esas alınır.</p>
+    <div class="note3-row">
+      <div class="iupac-chain big has-down" style="gap:6mm">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH(CH<sub>3</sub>)<sub>2</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>2</sub>–CH<sub>3</sub></span></div></div>
+        </div>
+      </div>
+      <div class="iupac-chain big has-up has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch up"><div class="lbl-row"><span>CH(CH<sub>3</sub>)<sub>2</sub></span></div><div class="bline"></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>2</sub>–CH(CH<sub>3</sub>)<sub>2</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 47 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Alkanların Adlandırılması</h1>
+
+  <h2 class="section-title">3. Özel Adlandırma (n-, izo-, neo-)</h2>
+  <ul class="notes">
+    <li>Ana zincirde herhangi bir dallanma yoksa ana zincirin adının başına <span class="hl">n-</span> getirilir. Bu alkanlara <span class="hl">normal alkan</span> denir.</li>
+    <li>Ana zincirin 2. karbonuna 1 tane metil (–CH<sub>3</sub>) grubu bağlı olan alkanlar <span class="hl">izo-</span> eki getirilerek adlandırılır.</li>
+    <li>Ana zincirin 2. karbonuna 2 tane metil (–CH<sub>3</sub>) grubu bağlı olan alkanlar <span class="hl">neo-</span> eki getirilerek adlandırılır.</li>
+  </ul>
+
+  <div class="struct-row">
+    <div class="struct-col">
+      <div class="iupac-chain">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+      <div class="struct-label">n-pentan</div>
+    </div>
+
+    <div class="struct-col">
+      <div class="iupac-chain has-up has-down">
+        <div class="atom">CH<sub>3</sub><span class="num top">1</span></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<span class="num top">2</span>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub><span class="num top">3</span></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub><span class="num top">4</span></div>
+      </div>
+      <div class="struct-label">izo-pentan</div>
+    </div>
+
+    <div class="struct-col">
+      <div class="iupac-chain has-up">
+        <div class="atom">CH<sub>3</sub><span class="num top">1</span></div>
+        <div class="bond">–</div>
+        <div class="atom">C(CH<sub>3</sub>)<sub>2</sub><span class="num top">2</span></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub><span class="num top">3</span></div>
+      </div>
+      <div class="struct-label">neo-pentan</div>
+    </div>
+  </div>
+
+  <h2 class="section-title">4. Primer, Sekonder, Tersiyer Karbon Atomu</h2>
+  <ul class="notes">
+    <li>Karbon atomuna sadece başka bir tane karbon atomu bağlıysa bu karbon atomuna <span class="hl">primer (birincil) karbon atomu</span> denir.</li>
+    <li>Karbon atomuna iki tane başka karbon atomu bağlı ise bu karbon atomuna <span class="hl">sekonder (ikincil) karbon atomu</span> denir.</li>
+    <li>Karbon atomuna üç tane başka karbon atomu bağlı ise bu karbon atomuna <span class="hl">tersiyer (üçüncül) karbon atomu</span> denir.</li>
+    <li>Bir alkanın hidrojen atomları, bağlı oldukları karbon atomları esas alınarak sınıflandırılır.</li>
+  </ul>
+
+  <div class="diagram-wrap">
+    <div class="iupac-chain big has-up has-down" style="margin-top:9mm; margin-bottom:18mm">
+      <div class="atom">CH<sub>3</sub>
+        <div class="branch down"><div class="bline"></div><div class="tagc">primer C<br>atomu</div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch up">
+          <div class="lbl-row"><span>CH<sub>3</sub></span><span class="tagc inline">primer C<br>primer H<br>atomu</span></div>
+          <div class="bline"></div>
+        </div>
+        <div class="branch down"><div class="bline"></div><div class="tagc">tersiyer C<br>tersiyer H<br>atomu</div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub>
+        <div class="branch down"><div class="bline"></div><div class="tagc">sekonder C<br>sekonder H<br>atomu</div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub>
+        <div class="branch down"><div class="bline"></div><div class="tagc">primer C<br>primer H<br>atomu</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 48 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Dallanmış Alkil Gruplarının Adlandırılması</h1>
+
+  <ul class="notes">
+    <li>Karbon sayısı 3 ve daha fazla olan alkanlardan hidrojen eksilmesi birden fazla şekilde gerçekleşebilir. Ayrılan hidrojenin türüne göre alkil grupları <span class="hl">primer, sekonder ve tersiyer</span> olarak sınıflandırılır.</li>
+    <li>Primer karbon atomundan hidrojen eksilirse <span class="hl">primer alkil</span>, sekonder karbon atomundan hidrojen eksilirse <span class="hl">sekonder alkil</span>, tersiyer karbon atomundan hidrojen eksilirse <span class="hl">tersiyer alkil</span> oluşur.</li>
+  </ul>
+
+  <div class="alkil-tree">
+    <div class="tree-col">
+      <div class="tree-label">Primer Alkil</div>
+      <div class="bline-v"></div>
+      <div class="fan-items">
+        <div class="fan-item">n-</div>
+        <div class="fan-item">izo-</div>
+        <div class="fan-item">neo-</div>
+      </div>
+    </div>
+    <div class="tree-col">
+      <div class="tree-label">Sekonder Alkil</div>
+      <div class="bline-v"></div>
+      <div class="tree-sub">sekonder<br>veya<br>sec-</div>
+    </div>
+    <div class="tree-col">
+      <div class="tree-label">Tersiyer Alkil</div>
+      <div class="bline-v"></div>
+      <div class="tree-sub">tersiyer<br>veya<br>ter-</div>
+    </div>
+  </div>
+
+  <div class="note-line">C<sub>3</sub>H<sub>8</sub> (propan) bileşiğinden türeyen alkil grupları</div>
+  <div class="struct-row">
+    <div class="struct-col">
+      <div class="iupac-chain big">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+      </div>
+      <div class="struct-label">n-propil</div>
+    </div>
+    <div class="struct-col">
+      <div class="iupac-chain big has-up">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch up"><div class="lbl-row"><span>–</span></div><div class="bline"></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+      <div class="struct-label">izopropil (sekonder propil)</div>
+    </div>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 49 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Dallanmış Alkil Gruplarının Adlandırılması</h1>
+
+  <div class="note-line">C<sub>4</sub>H<sub>10</sub> bileşiğinden türeyen alkil grupları</div>
+
+  <div class="alkil-grid">
+    <div class="struct-col">
+      <div class="iupac-chain big has-up">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub>
+          <div class="branch up"><div class="tagc">primer C atomu</div><div class="bline"></div></div>
+        </div>
+        <div class="bond">–</div>
+      </div>
+      <div class="struct-label">n-bütil</div>
+    </div>
+
+    <div class="struct-col">
+      <div class="iupac-chain big has-up">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch up"><div class="tagc">sekonder C atomu</div><div class="bline"></div><div class="lbl-row"><span>–</span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+      <div class="struct-label">sec-bütil</div>
+    </div>
+
+    <div class="struct-col">
+      <div class="iupac-chain big has-up has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub>
+          <div class="branch up"><div class="tagc">primer C atomu</div><div class="bline"></div></div>
+        </div>
+        <div class="bond">–</div>
+      </div>
+      <div class="struct-label">izo-bütil</div>
+    </div>
+
+    <div class="struct-col">
+      <div class="iupac-chain big has-up has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">C
+          <div class="branch up"><div class="tagc">tersiyer C atomu</div><div class="bline"></div><div class="lbl-row"><span>–</span></div></div>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+      <div class="struct-label">ter-bütil</div>
+    </div>
+  </div>
+
+  <div class="note-line">C<sub>5</sub>H<sub>12</sub> bileşiğinden türeyen alkil grupları</div>
+  <div class="alkil-grid">
+    <div class="struct-col">
+      <div class="iupac-chain big has-up">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub>
+          <div class="branch up"><div class="tagc">primer C atomu</div><div class="bline"></div></div>
+        </div>
+        <div class="bond">–</div>
+      </div>
+      <div class="struct-label">n-pentil</div>
+    </div>
+
+    <div class="struct-col">
+      <div class="iupac-chain big has-up">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch up"><div class="tagc">sekonder C atomu</div><div class="bline"></div><div class="lbl-row"><span>–</span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+      <div class="struct-label">sec-pentil</div>
+    </div>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 50 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Dallanmış Alkil Gruplarının Adlandırılması</h1>
+
+  <div class="alkil-grid">
+    <div class="struct-col">
+      <div class="iupac-chain big has-up has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub>
+          <div class="branch up"><div class="tagc">primer C atomu</div><div class="bline"></div></div>
+        </div>
+        <div class="bond">–</div>
+      </div>
+      <div class="struct-label">izo-pentil</div>
+    </div>
+
+    <div class="struct-col">
+      <div class="iupac-chain big has-up has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">C
+          <div class="branch up"><div class="tagc">tersiyer C atomu</div><div class="bline"></div><div class="lbl-row"><span>–</span></div></div>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+      <div class="struct-label">ter-pentil</div>
+    </div>
+
+    <div class="struct-col" style="grid-column:1 / span 2">
+      <div class="iupac-chain big has-up">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">C(CH<sub>3</sub>)<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub>
+          <div class="branch up"><div class="tagc">primer C atomu</div><div class="bline"></div></div>
+        </div>
+        <div class="bond">–</div>
+      </div>
+      <div class="struct-label">neo-pentil</div>
+    </div>
+  </div>
+
+  <h2 class="section-title" style="margin:2mm 0 1mm 0">Alıştırmalar</h2>
+  <p style="margin:0 0 1mm 0; font-style:italic;">Aşağıda verilen alkil gruplarının yanlarına isimlerini yazınız.</p>
+  <div class="ex-grid">
+    <div class="ex-item">
+      <div class="ex-num">1.a)</div>
+      <div class="iupac-chain has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">2.a)</div>
+      <div class="iupac-chain has-up has-down">
+        <div class="atom">CH
+          <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">1.b)</div>
+      <div class="iupac-chain has-up has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">C
+          <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">2.b)</div>
+      <div class="iupac-chain has-up">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+        </div>
+        <div class="bond">–</div>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">1.c)</div>
+      <div class="iupac-chain has-up has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">C
+          <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">2.c)</div>
+      <div class="iupac-chain has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>–</span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-title" style="margin:1.5mm 0">Cevaplar</h2>
+  <div class="answers-note">
+    <span><strong>1.a)</strong> izopentil</span>
+    <span><strong>1.b)</strong> neo-heksil</span>
+    <span><strong>1.c)</strong> ter-bütil</span>
+    <span><strong>2.a)</strong> izopentil</span>
+    <span><strong>2.b)</strong> izopropil</span>
+    <span><strong>2.c)</strong> sec-pentil</span>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 51 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Dallanmış Alkil Gruplarının Adlandırılması</h1>
+
+  <h2 class="section-title" style="margin:0 0 1.5mm 0">Alıştırmalar</h2>
+
+  <p style="margin:0 0 1.5mm 0;"><strong>1.</strong> Aşağıdakilerden hangisi ter-pentil klorür bileşiğidir?</p>
+  <div class="ex-grid">
+    <div class="ex-item">
+      <div class="ex-num">a)</div>
+      <div class="iupac-chain has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>Cl</span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">b)</div>
+      <div class="iupac-chain has-up has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">C
+          <div class="branch up"><div class="lbl-row"><span>Cl</span></div><div class="bline"></div></div>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">c)</div>
+      <div class="iupac-chain has-up has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">C
+          <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">Cl</div>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">d)</div>
+      <div class="iupac-chain has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>Cl</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="ex-item" style="grid-column:1 / span 2">
+      <div class="ex-num">e)</div>
+      <div class="iupac-chain">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">Cl</div>
+      </div>
+    </div>
+  </div>
+
+  <p style="margin:3mm 0 1.5mm 0;"><strong>2.</strong> Aşağıda verilenlerden hangilerinin isimleri doğru verilmiştir?</p>
+  <div class="ex-grid">
+    <div class="ex-item">
+      <div class="ex-num">I.</div>
+      <div class="iupac-chain has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>Br</span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+      <div class="struct-label" style="margin-top:1mm">sec-bütil bromür</div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">II.</div>
+      <div class="iupac-chain has-up has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">C
+          <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">Cl</div>
+      </div>
+      <div class="struct-label" style="margin-top:1mm">neo-bütil klorür</div>
+    </div>
+    <div class="ex-item" style="grid-column:1 / span 2">
+      <div class="ex-num">III.</div>
+      <div class="iupac-chain has-up has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">C
+          <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">Br</div>
+      </div>
+      <div class="struct-label" style="margin-top:1mm">ter-bütil bromür</div>
+    </div>
+  </div>
+
+  <p style="margin:5mm 0 1.5mm 0;"><strong>3.</strong> Bir karbon atomuna iki tane etil, bir tane metil ve bir tane ter-bütil bağlanması ile oluşan bileşiğin IUPAC sistemine göre adı ne olur?</p>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 52 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Dallanmış Alkil Gruplarının Adlandırılması</h1>
+
+  <p style="margin:2mm 0 1.5mm 0;"><strong>4.</strong> Aşağıdaki bileşik için hangi adlandırmalar yapılabilir?</p>
+  <div class="diagram-wrap">
+    <div class="iupac-chain big has-up has-down">
+      <div class="atom">CH<sub>3</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">C
+        <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub></div>
+    </div>
+  </div>
+  <div class="roman-options">
+    <span><strong>I.</strong> 2,2-dimetil propan</span>
+    <span><strong>II.</strong> neo-pentan</span>
+    <span><strong>III.</strong> tetra metil metan</span>
+  </div>
+
+  <p style="margin:10mm 0 1.5mm 0;"><strong>5.</strong> Aşağıdaki bileşik için hangi adlandırmalar yapılabilir?</p>
+  <div class="diagram-wrap">
+    <div class="iupac-chain big has-down">
+      <div class="atom">CH<sub>3</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>2</sub>–CH<sub>3</sub></span></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub></div>
+    </div>
+  </div>
+  <div class="roman-options">
+    <span><strong>I.</strong> 3-etil pentan</span>
+    <span><strong>II.</strong> neo-heptan</span>
+    <span><strong>III.</strong> tri-etil metan</span>
+  </div>
+
+  <h2 class="section-title" style="margin:8mm 0 1.5mm 0">Cevaplar</h2>
+  <div class="answers-note">
+    <span><strong>1.</strong> b</span>
+    <span><strong>2.</strong> Yalnız I</span>
+    <span><strong>3.</strong> 2,2,3-trimetil-3-etil pentan</span>
+    <span><strong>4.</strong> I, II ve III</span>
+    <span><strong>5.</strong> I ve III</span>
+  </div>
+
+  <p style="margin:8mm 0 1.5mm 0;"><strong>6.</strong> Aşağıdaki bileşik için hangi adlandırmalar doğrudur?</p>
+  <div class="diagram-wrap">
+    <div class="iupac-chain big has-up">
+      <div class="atom">CH<sub>3</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch up"><div class="lbl-row"><span>CH<sub>2</sub>–CH<sub>3</sub></span></div><div class="bline"></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub></div>
+    </div>
+  </div>
+  <div class="roman-options">
+    <span><strong>I.</strong> 2-etil propan</span>
+    <span><strong>II.</strong> izo pentan</span>
+    <span><strong>III.</strong> trimetil metan</span>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 53 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Dallanmış Alkil Gruplarının Adlandırılması</h1>
+
+  <p style="margin:0 0 1.5mm 0;"><strong>7.</strong> Aşağıda verilen bileşiklerin IUPAC sistemine göre isimlerini yazınız.</p>
+  <div class="ex-grid">
+    <div class="ex-item">
+      <div class="ex-num">a)</div>
+      <div class="iupac-chain has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>3</sub></div>
+      </div>
+      <div style="border-bottom:1px solid var(--line);width:50mm;margin:3mm auto 0"></div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">b)</div>
+      <div class="iupac-chain has-up has-down">
+        <div class="atom">CH<sub>3</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH<sub>2</sub></div>
+        <div class="bond">–</div>
+        <div class="atom">CH
+          <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+          <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        </div>
+      </div>
+      <div style="border-bottom:1px solid var(--line);width:50mm;margin:3mm auto 0"></div>
+    </div>
+  </div>
+
+  <p style="margin:4mm 0 1.5mm 0;"><strong>8.</strong> Aşağıda verilen bileşiklerin IUPAC sistemine göre adlarını yazınız.</p>
+  <div class="diagram-wrap" style="margin:0 0 1mm 0">
+    <div class="iupac-chain has-down">
+      <div class="atom">CH<sub>2</sub>
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>NO<sub>2</sub></span></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub>
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>NO<sub>2</sub></span></div></div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:4mm;margin:0 0 4mm 12mm">
+    <span style="font-weight:700;color:var(--red)">a)</span>
+    <div style="border-bottom:1px solid var(--line);flex:1;max-width:100mm"></div>
+  </div>
+
+  <div class="diagram-wrap" style="margin:0 0 1mm 0">
+    <div class="iupac-chain has-up has-down">
+      <div class="atom">CH<sub>3</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch up"><div class="lbl-row"><span>Cl</span></div><div class="bline"></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH(CH<sub>3</sub>)<sub>2</sub></span></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:4mm;margin:0 0 4mm 12mm">
+    <span style="font-weight:700;color:var(--red)">b)</span>
+    <div style="border-bottom:1px solid var(--line);flex:1;max-width:100mm"></div>
+  </div>
+
+  <div class="diagram-wrap" style="margin:0 0 1mm 0">
+    <div class="iupac-chain has-up has-down">
+      <div class="atom">CH<sub>3</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch up"><div class="lbl-row"><span>Cl</span></div><div class="bline"></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">C
+        <div class="branch up"><div class="lbl-row"><span>Br</span></div><div class="bline"></div></div>
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>NO<sub>2</sub></span></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:4mm;margin:0 0 4mm 12mm">
+    <span style="font-weight:700;color:var(--red)">c)</span>
+    <div style="border-bottom:1px solid var(--line);flex:1;max-width:100mm"></div>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 54 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Dallanmış Alkil Gruplarının Adlandırılması</h1>
+
+  <p style="margin:0 0 1.5mm 0;"><strong>9.</strong> Aşağıdaki bileşiğin IUPAC sistemine göre adını yazınız.</p>
+  <div class="diagram-wrap" style="margin:0 0 1mm 0">
+    <div class="iupac-chain big has-up has-down">
+      <div class="atom">CH<sub>3</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch up"><div class="lbl-row"><span>CH<sub>3</sub></span></div><div class="bline"></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>C<sub>2</sub>H<sub>5</sub></span></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch up"><div class="lbl-row"><span>NO<sub>2</sub></span></div><div class="bline"></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub></div>
+    </div>
+  </div>
+  <div style="border-bottom:1px solid var(--line);width:90mm;margin:2mm auto 8mm"></div>
+
+  <p style="margin:2mm 0 1.5mm 0;"><strong>10.</strong> Aşağıdakilerden hangisinin kapalı formülü C<sub>5</sub>H<sub>12</sub> değildir?</p>
+  <div style="display:flex;flex-wrap:wrap;gap:2mm 10mm;margin:1mm 0 8mm 0;font-size:11pt">
+    <span><strong style="color:var(--red)">A)</strong> 2,2-dimetil propan</span>
+    <span><strong style="color:var(--red)">B)</strong> Neopentan</span>
+    <span><strong style="color:var(--red)">C)</strong> izo pentan</span>
+    <span><strong style="color:var(--red)">D)</strong> 2-metil bütan</span>
+    <span><strong style="color:var(--red)">E)</strong> Tetra etil metan</span>
+  </div>
+
+  <p style="margin:2mm 0 1.5mm 0;"><strong>11.</strong> Aşağıda isimleri verilen alkanların açık formüllerini yazınız.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2mm 10mm;font-size:11pt;margin:0 0 8mm 0">
+    <div>a) 2,2,4,4-tetra metil heptan</div>
+    <div>b) 4-etil-4-kloro-2,3-dimetil oktan</div>
+    <div>c) neo ekzan</div>
+    <div>d) 3-etil-4-izopropil heptan</div>
+    <div>e) ter-pentil bromür</div>
+    <div>f) izo heksil klorür</div>
+  </div>
+
+  <h2 class="section-title" style="margin:0 0 1.5mm 0">Cevaplar</h2>
+  <div class="answers-note" style="font-size:9.5pt">
+    <span><strong>6.</strong> Yalnız II</span>
+    <span><strong>7.</strong> a) 2-metil pentan &nbsp; b) 2-metil hekzan</span>
+    <span><strong>8a.</strong> 1,7-dinitro-3-metil heptan</span>
+    <span><strong>8b.</strong> 3-kloro-5-metil-4-izopropil heptan</span>
+    <span><strong>8c.</strong> 3-bromo-2-kloro-3-nitro oktan</span>
+    <span><strong>9.</strong> 3-etil-2-metil-4-nitro heptan</span>
+    <span><strong>10.</strong> E</span>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 55 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Sikloalkanlar (Halkalı Yapıdaki Alkanlar)</h1>
+
+  <div class="note-line">Genel formülleri C<sub>n</sub>H<sub>2n</sub>'dir.</div>
+  <div class="note-line">En küçük üyesi üç karbonludur.</div>
+  <div class="note-line" style="margin-top:3mm">Adlandırılma yapılırken, aynı karbon sayılı alkanın adına <strong>siklo-</strong> öneki getirilerek adlandırılır.</div>
+
+  <div class="cyclo-row" style="margin:3mm 0 1mm 0">
+    <!-- Siklopropan: eşkenar üçgen, her köşede CH2 etiketi -->
+    <div class="cyclo-item">
+      <svg width="40mm" height="37mm" viewBox="-8 -6 104 90" style="overflow:visible;display:block">
+        <polygon points="44,12 80,72 8,72" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="44" y="5" text-anchor="middle" font-size="12" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="9">2</tspan></text>
+        <text x="85" y="76" text-anchor="start" font-size="12" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="9">2</tspan></text>
+        <text x="3" y="76" text-anchor="end" font-size="12" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="9">2</tspan></text>
+      </svg>
+      <div class="cyclo-name">siklopropan</div>
+    </div>
+    <!-- Siklobütan: kare -->
+    <div class="cyclo-item">
+      <svg width="30mm" height="30mm" viewBox="0 0 70 70">
+        <polygon points="8,8 62,8 62,62 8,62" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+      </svg>
+      <div class="cyclo-name">siklobütan</div>
+    </div>
+    <!-- Siklopentan: beşgen -->
+    <div class="cyclo-item">
+      <svg width="34mm" height="32mm" viewBox="0 0 82 78">
+        <polygon points="41,8 73,31 61,68 21,68 9,31" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+      </svg>
+      <div class="cyclo-name">siklopentan</div>
+    </div>
+    <!-- Siklohekzan: altıgen -->
+    <div class="cyclo-item">
+      <svg width="34mm" height="32mm" viewBox="0 0 82 82">
+        <polygon points="41,8 73,26 73,59 41,77 9,59 9,26" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+      </svg>
+      <div class="cyclo-name">siklohekzan</div>
+    </div>
+  </div>
+
+  <div class="note-line" style="margin-top:3mm">Eğer karbon halkasına <strong>tek fonksiyonel grup</strong> bağlı ise grupların bağlı olduğu karbona numara vermek gerekmez.</div>
+
+  <div class="cyclo-row" style="gap:20mm;margin:3mm 0 3mm 0">
+    <!-- Metil siklopropan -->
+    <div class="cyclo-item">
+      <svg width="36mm" height="40mm" viewBox="-4 -10 96 100" style="overflow:visible;display:block">
+        <polygon points="44,28 79,85 9,85" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="44" y1="28" x2="44" y2="9" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="44" y="4" text-anchor="middle" font-size="12" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="9">3</tspan></text>
+      </svg>
+      <div class="cyclo-name">metil siklopropan</div>
+    </div>
+    <!-- Hidroksil siklobütan -->
+    <div class="cyclo-item">
+      <svg width="36mm" height="40mm" viewBox="-4 -10 88 100" style="overflow:visible;display:block">
+        <polygon points="10,28 66,28 66,82 10,82" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="66" y1="28" x2="66" y2="9" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="66" y="4" text-anchor="middle" font-size="12" font-weight="700" font-family="serif">OH</text>
+      </svg>
+      <div class="cyclo-name">hidroksil siklobütan</div>
+    </div>
+  </div>
+
+  <div class="note-line">Birden fazla fonksiyonel gruba bağlı ise bunlar <strong>en küçük numarayı</strong> alacak şekilde numaralandırılır.</div>
+
+  <div class="cyclo-row" style="gap:14mm;margin:4mm 0">
+    <!-- 1-bromo-2-etil siklobütan -->
+    <div class="cyclo-item">
+      <svg width="46mm" height="44mm" viewBox="-18 -18 116 108" style="overflow:visible;display:block">
+        <polygon points="10,10 62,10 62,62 10,62" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <!-- Br at C1 (top-right, 62,10) going UP -->
+        <line x1="62" y1="10" x2="62" y2="-8" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="62" y="-12" text-anchor="middle" font-size="12" font-weight="700" font-family="serif">Br</text>
+        <!-- C2H5 at C2 (bottom-right, 62,62) going RIGHT -->
+        <line x1="62" y1="62" x2="80" y2="62" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="83" y="66" text-anchor="start" font-size="12" font-weight="700" font-family="serif">C<tspan dy="3" font-size="9">2</tspan><tspan dy="-3" font-size="12">H<tspan dy="3" font-size="9">5</tspan></tspan></text>
+        <!-- Vertex numbers -->
+        <text x="65" y="9" text-anchor="start" font-size="10" font-style="italic" fill="#b3261e">1</text>
+        <text x="65" y="72" text-anchor="start" font-size="10" font-style="italic" fill="#b3261e">2</text>
+      </svg>
+      <div class="cyclo-name">1-bromo-2-etil siklobütan</div>
+    </div>
+    <!-- 1-kloro-1,2-dimetil siklohekzan -->
+    <div class="cyclo-item">
+      <svg width="52mm" height="48mm" viewBox="-18 -20 130 118" style="overflow:visible;display:block">
+        <polygon points="45,10 79,29 79,64 45,83 11,64 11,29" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <!-- C1 = top vertex (45,10): CH3 going UP, Cl going upper-right -->
+        <line x1="45" y1="10" x2="45" y2="-8" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="45" y="-12" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8">3</tspan></text>
+        <line x1="45" y1="10" x2="64" y2="-4" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="67" y="-7" text-anchor="start" font-size="11" font-weight="700" font-family="serif">Cl</text>
+        <!-- C2 = upper-right (79,29): CH3 going upper-right -->
+        <line x1="79" y1="29" x2="96" y2="17" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="99" y="14" text-anchor="start" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8">3</tspan></text>
+        <!-- Vertex numbers -->
+        <text x="47" y="24" text-anchor="start" font-size="10" font-style="italic" fill="#b3261e">1</text>
+        <text x="81" y="34" text-anchor="start" font-size="10" font-style="italic" fill="#b3261e">2</text>
+      </svg>
+      <div class="cyclo-name">1-kloro-1,2-dimetil siklohekzan</div>
+    </div>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 56 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Sikloalkanlar</h1>
+
+  <div class="note-line">Halk içinde alkan ve sikloalkan içeren bileşiklerde adlandırma yapılırken karbon sayısı fazla olan grup <strong>ana zincir</strong>, diğer bağlı gruplar ise dal kabul edilir.</div>
+
+  <div class="cyclo-row" style="gap:12mm;margin:2mm 0 2mm 0">
+    <!-- izopropil siklopentan -->
+    <div class="cyclo-item">
+      <svg width="38mm" height="38mm" viewBox="-14 -24 112 108" style="overflow:visible;display:block">
+        <polygon points="42,12 72,33 61,68 23,68 12,33" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="42" y1="12" x2="42" y2="-4" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="42" y1="-4" x2="28" y2="-18" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="24" y="-20" text-anchor="end" font-size="11" font-weight="700">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+        <line x1="42" y1="-4" x2="56" y2="-18" stroke="#1c1c1c" stroke-width="2.5"/>
+        <text x="60" y="-20" text-anchor="start" font-size="11" font-weight="700">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+        <text x="44" y="-1" text-anchor="start" font-size="10">CH</text>
+      </svg>
+      <div class="cyclo-name">izopropil siklopentan</div>
+    </div>
+    <!-- 2-siklopropil bütan -->
+    <div class="cyclo-item">
+      <svg width="58mm" height="38mm" viewBox="-8 0 170 110" style="overflow:visible;display:block">
+        <!-- Chain: C1-C2-C3-C4 at y=42 -->
+        <text x="10" y="42" text-anchor="middle" font-size="12" font-weight="700">CH<tspan dy="3" font-size="9">3</tspan></text>
+        <line x1="22" y1="40" x2="35" y2="40" stroke="#1c1c1c" stroke-width="2"/>
+        <text x="45" y="42" text-anchor="middle" font-size="12" font-weight="700">CH</text>
+        <line x1="57" y1="40" x2="70" y2="40" stroke="#1c1c1c" stroke-width="2"/>
+        <text x="82" y="42" text-anchor="middle" font-size="12" font-weight="700">CH<tspan dy="3" font-size="9">2</tspan></text>
+        <line x1="95" y1="40" x2="108" y2="40" stroke="#1c1c1c" stroke-width="2"/>
+        <text x="120" y="42" text-anchor="middle" font-size="12" font-weight="700">CH<tspan dy="3" font-size="9">3</tspan></text>
+        <!-- Numbers above -->
+        <text x="10" y="27" text-anchor="middle" font-size="9" fill="#b3261e" font-style="italic">1</text>
+        <text x="45" y="27" text-anchor="middle" font-size="9" fill="#b3261e" font-style="italic">2</text>
+        <text x="82" y="27" text-anchor="middle" font-size="9" fill="#b3261e" font-style="italic">3</text>
+        <text x="120" y="27" text-anchor="middle" font-size="9" fill="#b3261e" font-style="italic">4</text>
+        <!-- Bond from C2 down to cyclopropane -->
+        <line x1="45" y1="46" x2="45" y2="60" stroke="#1c1c1c" stroke-width="2"/>
+        <!-- Cyclopropane triangle below -->
+        <polygon points="45,60 73,100 17,100" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+      </svg>
+      <div class="cyclo-name">2-siklopropil bütan</div>
+    </div>
+  </div>
+
+  <div class="note-line">Sadece farklı karbon sayılı sikloalkanlar içeren bileşiklerde adlandırma yapılırken karbon sayısı fazla olan <strong>siklohalkası ana isimcik</strong> kabul edilir.</div>
+
+  <div class="cyclo-row" style="margin:2mm 0 2mm 0">
+    <!-- siklopropil siklobütan -->
+    <div class="cyclo-item">
+      <svg width="46mm" height="30mm" viewBox="0 0 140 90" style="display:block">
+        <!-- Cyclobutane (square) -->
+        <polygon points="10,12 60,12 60,62 10,62" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <!-- Bond connecting them -->
+        <line x1="60" y1="37" x2="78" y2="37" stroke="#1c1c1c" stroke-width="2.5"/>
+        <!-- Cyclopropane (triangle) -->
+        <polygon points="100,10 130,65 70,65" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+      </svg>
+      <div class="cyclo-name">siklopropil siklobütan</div>
+    </div>
+  </div>
+
+  <h2 class="section-title" style="margin:0 0 1mm 0">Alıştırmalar</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1mm 8mm">
+    <!-- Soru 1 -->
+    <div>
+      <p style="margin:0 0 1mm 0;font-weight:700;font-size:10.5pt">1. Aşağıda verilen bileşikleri adlandırınız.</p>
+      <!-- Ex 1a: Cyclohexane with C2H5 and 2× CH3 -->
+      <div class="cyclo-item" style="align-items:flex-start;margin-bottom:1mm">
+        <svg width="40mm" height="40mm" viewBox="-18 -10 118 112" style="overflow:visible;display:block">
+          <!-- Hexagon: V0=top, going clockwise C1=upper-right(C2H5), C3=lower-right(CH3), C5=lower-left(CH3) -->
+          <polygon points="42,8 74,26 74,58 42,76 10,58 10,26" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+          <!-- C2H5 at C1=upper-right (74,26) -->
+          <line x1="74" y1="26" x2="90" y2="17" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="93" y="15" text-anchor="start" font-size="11" font-weight="700">C<tspan dy="3" font-size="8.5">2</tspan><tspan dy="-3">H<tspan dy="3" font-size="8.5">5</tspan></tspan></text>
+          <!-- CH3 at C3=lower-right (74,58) -->
+          <line x1="74" y1="58" x2="90" y2="67" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="93" y="70" text-anchor="start" font-size="11" font-weight="700">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+          <!-- CH3 at C5=lower-left (10,58) -->
+          <line x1="10" y1="58" x2="-6" y2="67" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="-9" y="70" text-anchor="end" font-size="11" font-weight="700">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+        </svg>
+        <div style="border-bottom:1px solid var(--line);width:55mm;margin:1mm 0 0 0"></div>
+      </div>
+      <!-- Ex 1b: Cyclohexane with 2× Br and CH3 -->
+      <div class="cyclo-item" style="align-items:flex-start">
+        <svg width="40mm" height="44mm" viewBox="-18 -10 118 120" style="overflow:visible;display:block">
+          <polygon points="42,8 74,26 74,58 42,76 10,58 10,26" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+          <!-- Br at C1=upper-right (74,26) -->
+          <line x1="74" y1="26" x2="90" y2="17" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="93" y="15" text-anchor="start" font-size="11" font-weight="700">Br</text>
+          <!-- Br at C3=lower-right (74,58) -->
+          <line x1="74" y1="58" x2="90" y2="67" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="93" y="70" text-anchor="start" font-size="11" font-weight="700">Br</text>
+          <!-- CH3 at C5=lower-left (10,58) -->
+          <line x1="10" y1="58" x2="-6" y2="67" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="-9" y="70" text-anchor="end" font-size="11" font-weight="700">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+        </svg>
+        <div style="border-bottom:1px solid var(--line);width:55mm;margin:1mm 0 0 0"></div>
+      </div>
+    </div>
+    <!-- Soru 2 -->
+    <div>
+      <p style="margin:0 0 1mm 0;font-weight:700;font-size:10.5pt">2. Aşağıda verilen bileşikleri adlandırınız.</p>
+      <!-- Ex 2a: Cyclobutane + cyclopropane (same as theory example) -->
+      <div class="cyclo-item" style="align-items:flex-start;margin-bottom:1mm">
+        <svg width="40mm" height="30mm" viewBox="0 0 120 80" style="display:block">
+          <polygon points="8,10 56,10 56,58 8,58" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+          <line x1="56" y1="34" x2="72" y2="34" stroke="#1c1c1c" stroke-width="2.5"/>
+          <polygon points="94,10 120,55 68,55" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        </svg>
+        <div style="border-bottom:1px solid var(--line);width:55mm;margin:1mm 0 0 0"></div>
+      </div>
+      <!-- Ex 2b: CH3-CH(CH3)-CH2-CH(cyclopropyl)-CH3 -->
+      <div class="cyclo-item" style="align-items:flex-start">
+        <svg width="55mm" height="42mm" viewBox="-8 -6 158 116" style="overflow:visible;display:block">
+          <!-- Chain: C1(10,35) - C2(42,35) - C3(74,35) - C4(106,35) - C5(130,35) -->
+          <text x="10" y="38" text-anchor="middle" font-size="11" font-weight="700">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+          <line x1="22" y1="36" x2="30" y2="36" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="42" y="38" text-anchor="middle" font-size="11" font-weight="700">CH</text>
+          <line x1="54" y1="36" x2="62" y2="36" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="74" y="38" text-anchor="middle" font-size="11" font-weight="700">CH<tspan dy="3" font-size="8.5">2</tspan></text>
+          <line x1="86" y1="36" x2="94" y2="36" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="106" y="38" text-anchor="middle" font-size="11" font-weight="700">CH</text>
+          <line x1="118" y1="36" x2="126" y2="36" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="135" y="38" text-anchor="middle" font-size="11" font-weight="700">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+          <!-- CH3 branch down from C2 -->
+          <line x1="42" y1="42" x2="42" y2="55" stroke="#1c1c1c" stroke-width="2"/>
+          <text x="42" y="64" text-anchor="middle" font-size="11" font-weight="700">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+          <!-- Cyclopropane below C4 -->
+          <line x1="106" y1="42" x2="106" y2="55" stroke="#1c1c1c" stroke-width="2"/>
+          <polygon points="106,55 126,95 86,95" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        </svg>
+        <div style="border-bottom:1px solid var(--line);width:55mm;margin:1mm 0 0 0"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 57 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Sikloalkanlar</h1>
+
+  <h2 class="section-title" style="margin:0 0 1.5mm 0">Alıştırmalar</h2>
+  <p style="margin:0 0 2mm 0;"><strong>3.</strong> Aşağıda verilen bileşikleri adlandırınız.</p>
+
+  <div class="mol-grid" style="grid-template-columns:1fr 1fr;gap:2.5mm 5mm;margin:0 0 2.5mm 0">
+    <!-- 3a: cyclopentane + Br (top) + isopropyl (vertex1) -->
+    <div class="mol-card c-orange">
+      <div class="qbadge">a</div>
+      <svg width="38mm" height="32mm" viewBox="-4.43 -22 124.79 105.89" style="overflow:visible">
+        <polygon points="42,10 72.43,32.11 60.81,67.89 23.19,67.89 11.57,32.11" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="42" y1="10" x2="42" y2="-6" stroke="#1c1c1c" stroke-width="2"/>
+        <text x="42" y="-11" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">Br</text>
+        <line x1="72.43" y1="32.11" x2="88.6" y2="26.86" stroke="#1c1c1c" stroke-width="2"/>
+        <line x1="88.6" y1="26.86" x2="99.71" y2="15.35" stroke="#1c1c1c" stroke-width="2"/>
+        <line x1="88.6" y1="26.86" x2="104.36" y2="29.64" stroke="#1c1c1c" stroke-width="2"/>
+      </svg>
+      <div class="ans-line"></div>
+    </div>
+    <!-- 3b: cyclobutane (diamond) + Br (left) + isopropyl (top) -->
+    <div class="mol-card c-orange">
+      <div class="qbadge">b</div>
+      <svg width="32mm" height="37mm" viewBox="-18 -33.13 104 119.13" style="overflow:visible">
+        <polygon points="42,14 70,42 42,70 14,42" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="14" y1="42" x2="-2" y2="42" stroke="#1c1c1c" stroke-width="2"/>
+        <text x="-5" y="46" text-anchor="end" font-size="11" font-weight="700" font-family="serif">Br</text>
+        <line x1="42" y1="14" x2="42" y2="-3" stroke="#1c1c1c" stroke-width="2"/>
+        <line x1="42" y1="-3" x2="34.49" y2="-17.13" stroke="#1c1c1c" stroke-width="2"/>
+        <line x1="42" y1="-3" x2="49.51" y2="-17.13" stroke="#1c1c1c" stroke-width="2"/>
+      </svg>
+      <div class="ans-line"></div>
+    </div>
+    <!-- 3c: cyclohexane + sec-bütil (–CH(CH3)–CH2–CH3) -->
+    <div class="mol-card c-orange">
+      <div class="qbadge">c</div>
+      <svg width="38mm" height="34mm" viewBox="-3.44 -20.43 125.89 112.43" style="overflow:visible">
+        <polygon points="42,8 71.44,25 71.44,59 42,76 12.56,59 12.56,25" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="71.44" y1="25" x2="80.45" y2="10.58" stroke="#1c1c1c" stroke-width="2"/>
+        <line x1="80.45" y1="10.58" x2="88.45" y2="24.44" stroke="#1c1c1c" stroke-width="2"/>
+        <line x1="80.45" y1="10.58" x2="97.44" y2="9.99" stroke="#1c1c1c" stroke-width="2"/>
+        <line x1="97.44" y1="9.99" x2="106.45" y2="-4.43" stroke="#1c1c1c" stroke-width="2"/>
+      </svg>
+      <div class="ans-line"></div>
+    </div>
+    <!-- 3d: cyclohexane + izobütil (–CH2–CH(CH3)–CH3) -->
+    <div class="mol-card c-orange">
+      <div class="qbadge">d</div>
+      <svg width="38mm" height="32mm" viewBox="-3.44 -19.58 132.87 111.58" style="overflow:visible">
+        <polygon points="42,8 71.44,25 71.44,59 42,76 12.56,59 12.56,25" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="71.44" y1="25" x2="80.45" y2="10.58" stroke="#1c1c1c" stroke-width="2"/>
+        <line x1="80.45" y1="10.58" x2="97.44" y2="9.99" stroke="#1c1c1c" stroke-width="2"/>
+        <line x1="97.44" y1="9.99" x2="105.92" y2="-3.58" stroke="#1c1c1c" stroke-width="2"/>
+        <line x1="97.44" y1="9.99" x2="113.43" y2="9.43" stroke="#1c1c1c" stroke-width="2"/>
+      </svg>
+      <div class="ans-line"></div>
+    </div>
+  </div>
+
+  <!-- İskelet-Kizgi Formülü section -->
+  <div class="theory-box">İskelet veya kizgi formülünde C ve H atomları belirtilmez. Her bir köşe bir karbon atomunu simgeler.</div>
+
+  <!-- Example 1: propane structural → skeletal -->
+  <div class="ex-tag">Örnek 1</div>
+  <div style="display:flex;align-items:center;gap:5mm;margin:0 0 2mm 0">
+    <div class="iupac-chain">
+      <div class="atom">CH<sub>3</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub></div>
+    </div>
+    <span style="font-size:16pt;line-height:1;color:var(--orange)">→</span>
+    <svg width="24mm" height="16mm" viewBox="-4 -4 54 32" style="display:block">
+      <line x1="0" y1="24" x2="24" y2="6" stroke="#1c1c1c" stroke-width="2.5"/>
+      <line x1="24" y1="6" x2="48" y2="24" stroke="#1c1c1c" stroke-width="2.5"/>
+    </svg>
+  </div>
+
+  <!-- Example 2: 6-carbon chain structural → skeletal -->
+  <div class="ex-tag">Örnek 2</div>
+  <div style="display:flex;align-items:center;gap:6mm;margin:0 0 1mm 0">
+    <div class="iupac-chain big has-up has-down">
+      <div class="atom">CH<sub>3</sub><span class="num">1</span></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+        <span class="num top">2</span>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch up"><div class="lbl-row"><span>C<sub>2</sub>H<sub>5</sub></span></div><div class="bline"></div></div>
+        <span class="num">3</span>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub><span class="num">4</span></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>Cl</span></div></div>
+        <span class="num top">5</span>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub><span class="num">6</span></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:6mm;margin:1mm 0 0 0">
+    <span style="font-size:16pt;line-height:1;color:var(--orange)">→</span>
+    <!-- 6-carbon zigzag, math-derived: CH3 down@C2, C2H5 up@C3 (2 bonds), Cl down@C5 -->
+    <svg width="52mm" height="33mm" viewBox="-16 -6.56 125.3 80.56" style="overflow:visible;display:block">
+      <line x1="0" y1="40" x2="18.66" y2="28.34" stroke="#1c1c1c" stroke-width="2.5"/>
+      <line x1="18.66" y1="28.34" x2="37.32" y2="40" stroke="#1c1c1c" stroke-width="2.5"/>
+      <line x1="37.32" y1="40" x2="55.98" y2="28.34" stroke="#1c1c1c" stroke-width="2.5"/>
+      <line x1="55.98" y1="28.34" x2="74.64" y2="40" stroke="#1c1c1c" stroke-width="2.5"/>
+      <line x1="74.64" y1="40" x2="93.3" y2="28.34" stroke="#1c1c1c" stroke-width="2.5"/>
+      <text x="0" y="54" text-anchor="middle" font-size="9" fill="#b3261e" font-style="italic">1</text>
+      <text x="18.66" y="18" text-anchor="middle" font-size="9" fill="#b3261e" font-style="italic">2</text>
+      <text x="37.32" y="54" text-anchor="middle" font-size="9" fill="#b3261e" font-style="italic">3</text>
+      <text x="55.98" y="18" text-anchor="middle" font-size="9" fill="#b3261e" font-style="italic">4</text>
+      <text x="74.64" y="26" text-anchor="middle" font-size="9" fill="#b3261e" font-style="italic">5</text>
+      <text x="93.3" y="18" text-anchor="middle" font-size="9" fill="#b3261e" font-style="italic">6</text>
+      <!-- CH3 down @C2 -->
+      <line x1="18.66" y1="28.34" x2="18.66" y2="44.34" stroke="#1c1c1c" stroke-width="2"/>
+      <text x="18.66" y="55.34" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+      <!-- C2H5 up @C3 (2 bonds) -->
+      <line x1="37.32" y1="40" x2="29.87" y2="24.72" stroke="#1c1c1c" stroke-width="2"/>
+      <line x1="29.87" y1="24.72" x2="37.32" y2="9.44" stroke="#1c1c1c" stroke-width="2"/>
+      <text x="37.32" y="4.44" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">CH<tspan dy="3" font-size="8.5">3</tspan></text>
+      <!-- Cl down @C5 -->
+      <line x1="74.64" y1="40" x2="74.64" y2="58" stroke="#1c1c1c" stroke-width="2"/>
+      <text x="74.64" y="69" text-anchor="middle" font-size="11" font-weight="700" font-family="serif">Cl</text>
+    </svg>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 58 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">İskelet-Kizgi Formülü · Karışık Alıştırmalar</h1>
+
+  <h2 class="section-title" style="margin:0 0 1.5mm 0">Alıştırmalar</h2>
+  <p style="margin:0 0 2mm 0;font-size:10.5pt"><strong>1.</strong> Aşağıda iskelet formülleri verilen bileşikleri adlandırınız.</p>
+
+  <div class="mol-grid" style="grid-template-columns:1fr 1fr 1fr">
+    <!-- 1a: 2,6-dimetilheptan: 7C zigzag, CH3 at C2 and C6 -->
+    <div class="mol-card c-orange">
+      <div class="qbadge">a</div>
+      <svg width="64mm" height="25mm" viewBox="-14 -8.66 139.96 54.66" style="overflow:visible">
+        <line x1="0" y1="32" x2="18.66" y2="20.34" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="18.66" y1="20.34" x2="37.32" y2="32" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="37.32" y1="32" x2="55.98" y2="20.34" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="55.98" y1="20.34" x2="74.64" y2="32" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="74.64" y1="32" x2="93.3" y2="20.34" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="93.3" y1="20.34" x2="111.96" y2="32" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="18.66" y1="20.34" x2="18.66" y2="5.34" stroke="#1c1c1c" stroke-width="2"/>
+        <line x1="93.3" y1="20.34" x2="93.3" y2="5.34" stroke="#1c1c1c" stroke-width="2"/>
+      </svg>
+      <div class="ans-line"></div>
+    </div>
+    <!-- 1b: 1,2,3-trimetilsiklobütan: diamond ring, CH3 at C1(sol),C2(üst),C3(sağ) -->
+    <div class="mol-card c-orange">
+      <div class="qbadge">b</div>
+      <svg width="38mm" height="35mm" viewBox="-15 -15 114 99" style="overflow:visible">
+        <polygon points="42,14 70,42 42,70 14,42" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="14" y1="42" x2="-1" y2="42" stroke="#1c1c1c" stroke-width="2"/>
+        <line x1="42" y1="14" x2="42" y2="-1" stroke="#1c1c1c" stroke-width="2"/>
+        <line x1="70" y1="42" x2="85" y2="42" stroke="#1c1c1c" stroke-width="2"/>
+      </svg>
+      <div class="ans-line"></div>
+    </div>
+    <!-- 1c: 2,3-dimetilhekzan: 6C zigzag, CH3 up@C2, CH3 down@C3 -->
+    <div class="mol-card c-orange">
+      <div class="qbadge">c</div>
+      <svg width="56mm" height="33mm" viewBox="-14 -9.66 121.3 71.66" style="overflow:visible">
+        <line x1="0" y1="32" x2="18.66" y2="20.34" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="18.66" y1="20.34" x2="37.32" y2="32" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="37.32" y1="32" x2="55.98" y2="20.34" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="55.98" y1="20.34" x2="74.64" y2="32" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="74.64" y1="32" x2="93.3" y2="20.34" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="18.66" y1="20.34" x2="18.66" y2="4.34" stroke="#1c1c1c" stroke-width="2"/>
+        <line x1="37.32" y1="32" x2="37.32" y2="48" stroke="#1c1c1c" stroke-width="2"/>
+      </svg>
+      <div class="ans-line"></div>
+    </div>
+  </div>
+
+  <!-- Karışık Alıştırmalar -->
+  <h2 class="section-title" style="margin:1mm 0 1.5mm 0">Karışık Alıştırmalar</h2>
+
+  <!-- Q1: draw skeletal formula -->
+  <p style="margin:0 0 1mm 0;"><strong>1.</strong> CH(CH<sub>3</sub>)<sub>2</sub>–C(CH<sub>3</sub>)<sub>2</sub>–CH(C<sub>2</sub>H<sub>5</sub>)–CH<sub>2</sub>–CH<sub>3</sub> bileşiğinin iskelet formülü ne olur?</p>
+  <div class="fill-box" style="width:110mm;height:17mm;margin:0 0 4mm 0"></div>
+
+  <!-- Q2: draw skeletal formula -->
+  <p style="margin:0 0 1mm 0;"><strong>2.</strong> 2-metil-4-izopropil heptan bileşiğinin iskelet formülü ne olur?</p>
+  <div class="fill-box" style="width:110mm;height:17mm;margin:0 0 4mm 0"></div>
+
+  <!-- Q3: skeletal formula given (fixed gem-dimethyl fork), which names are valid? -->
+  <p style="margin:0 0 1.5mm 0;"><strong>3.</strong> İskelet formülü yanda verilen bileşik ile ilgili;</p>
+  <div style="display:flex;align-items:center;gap:6mm;margin:0 0 1.5mm 0">
+    <div class="mol-card c-orange" style="padding:3mm 4mm">
+      <svg width="30mm" height="20mm" viewBox="-14 -10.46 78.88 52.46" style="overflow:visible;display:block">
+        <line x1="0" y1="28" x2="16.96" y2="17.4" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="16.96" y1="17.4" x2="33.92" y2="28" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="33.92" y1="28" x2="50.88" y2="17.4" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="16.96" y1="17.4" x2="8.96" y2="3.54" stroke="#1c1c1c" stroke-width="2"/>
+        <line x1="16.96" y1="17.4" x2="24.96" y2="3.54" stroke="#1c1c1c" stroke-width="2"/>
+      </svg>
+    </div>
+    <div class="judge-list" style="flex:1">
+      <div class="judge-item c-orange"><b>I.</b> 2,2-dimetil bütan</div>
+      <div class="judge-item"><b>II.</b> neobütan</div>
+      <div class="judge-item c-orange"><b>III.</b> etil trimetil metan</div>
+    </div>
+  </div>
+  <p style="margin:0 0 1mm 0;font-size:10pt">adlandırmalarından hangileri kullanılabilir?</p>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+<!-- ======================= SAYFA 59 ======================= -->
+<section class="page">
+  <div class="kicker">Organik Kimya · Hidrokarbonlar</div>
+  <h1 class="page-title">Karışık Alıştırmalar</h1>
+
+  <!-- Q4: which are NOT IUPAC correct -->
+  <p style="margin:0 0 1.5mm 0;"><strong>4.</strong> Aşağıda verilen bileşik adlandırmalarından hangileri IUPAC sistemine uygun <em>değildir?</em></p>
+  <div class="judge-list" style="margin:0 0 4mm 0">
+    <div class="judge-item c-orange"><b>I.</b> 2-etil-4-metil heptan</div>
+    <div class="judge-item"><b>II.</b> 4-kloro-2-metil pentan</div>
+    <div class="judge-item c-orange"><b>III.</b> 2-siklopentil bütan</div>
+  </div>
+
+  <!-- Q5: ethylcyclobutane statements (ring fixed to diamond orientation, bond attached at the real vertex) -->
+  <p style="margin:0 0 1.5mm 0;"><strong>5.</strong> Yanda verilen bileşik ile ilgili;</p>
+  <div style="display:flex;align-items:center;gap:6mm;margin:0 0 1.5mm 0">
+    <div class="mol-card c-orange" style="padding:3mm 4mm">
+      <svg width="42mm" height="23mm" viewBox="-44.02 9 119.02 66" style="overflow:visible;display:block">
+        <polygon points="42,18 66,42 42,66 18,42" fill="none" stroke="#1c1c1c" stroke-width="2.5"/>
+        <line x1="18" y1="42" x2="2.99" y2="49.98" stroke="#1c1c1c" stroke-width="2"/>
+        <line x1="2.99" y1="49.98" x2="-12.02" y2="42" stroke="#1c1c1c" stroke-width="2"/>
+      </svg>
+    </div>
+    <div class="judge-list" style="flex:1">
+      <div class="judge-item"><b>I.</b> Adı etil siklobütan dır.</div>
+      <div class="judge-item c-orange"><b>II.</b> Yapısında sp<sup>2</sup> ve sp<sup>3</sup> hibritleşmesi yapmış C atomları bulunur.</div>
+      <div class="judge-item"><b>III.</b> Genel formülü C<sub>n</sub>H<sub>2n+2</sub> dir.</div>
+    </div>
+  </div>
+  <p style="margin:0 0 4mm 0;font-size:10pt">yargılarından hangileri doğrudur?</p>
+
+  <!-- Q6: R1 R2 groups for 3,3,5-trimethylheptane -->
+  <p style="margin:0 0 1.5mm 0;"><strong>6.</strong> IUPAC'a göre 3,3,5-trimetil heptan olarak adlandırılan bileşik için aşağıdaki formülde R<sub>1</sub> ve R<sub>2</sub> grupları ne olmalıdır?</p>
+  <div style="display:flex;align-items:flex-start;gap:10mm;margin:0 0 4mm 0">
+    <div class="iupac-chain has-up has-down" style="margin-top:4mm">
+      <div class="atom">CH<sub>3</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">C
+        <div class="branch up"><div class="lbl-row"><span>R<sub>1</sub></span></div><div class="bline"></div></div>
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>R<sub>2</sub></span></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH
+        <div class="branch down"><div class="bline"></div><div class="lbl-row"><span>CH<sub>3</sub></span></div></div>
+      </div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>2</sub></div>
+      <div class="bond">–</div>
+      <div class="atom">CH<sub>3</sub></div>
+    </div>
+    <table style="font-size:10.5pt;border-collapse:collapse;margin-top:2mm">
+      <tr><th style="padding:0.8mm 3mm;text-align:center;color:var(--orange)"></th><th style="padding:0.8mm 3mm;text-align:center;color:var(--orange)">R<sub>1</sub></th><th style="padding:0.8mm 3mm;text-align:center;color:var(--orange)">R<sub>2</sub></th></tr>
+      <tr style="background:var(--orange-soft)"><td style="padding:0.8mm 2mm;border-radius:2mm 0 0 2mm"><strong>A)</strong></td><td style="padding:0.8mm 3mm">CH<sub>3</sub></td><td style="padding:0.8mm 3mm;border-radius:0 2mm 2mm 0">CH<sub>3</sub></td></tr>
+      <tr><td style="padding:0.8mm 2mm"><strong>B)</strong></td><td style="padding:0.8mm 3mm">C<sub>2</sub>H<sub>5</sub></td><td style="padding:0.8mm 3mm">C<sub>2</sub>H<sub>5</sub></td></tr>
+      <tr style="background:var(--orange-soft)"><td style="padding:0.8mm 2mm;border-radius:2mm 0 0 2mm"><strong>C)</strong></td><td style="padding:0.8mm 3mm">CH<sub>3</sub></td><td style="padding:0.8mm 3mm;border-radius:0 2mm 2mm 0">C<sub>2</sub>H<sub>5</sub></td></tr>
+      <tr><td style="padding:0.8mm 2mm"><strong>D)</strong></td><td style="padding:0.8mm 3mm">CH<sub>3</sub></td><td style="padding:0.8mm 3mm">C<sub>3</sub>H<sub>7</sub></td></tr>
+    </table>
+  </div>
+
+  <h2 class="section-title" style="margin:3mm 0 1.5mm 0">Cevaplar</h2>
+  <div class="answers-note">
+    <span><strong>1a.</strong> 2,6-dimetilheptan</span>
+    <span><strong>1b.</strong> 1,2,3-trimetilsiklobütan</span>
+    <span><strong>1c.</strong> 2,3-dimetilhekzan</span>
+    <span><strong>3.</strong> I ve III</span>
+    <span><strong>4.</strong> I, II ve III</span>
+    <span><strong>5.</strong> Yalnız I</span>
+    <span><strong>6.</strong> C</span>
+  </div>
+
+  <div class="page-foot"><span>Organik Kimya</span></div>
+</section>
+
+</body>
+</html>
